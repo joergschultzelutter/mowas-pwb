@@ -24,9 +24,46 @@ from pprint import pformat
 from datetime import datetime
 import argparse
 import requests
+import sys
+import signal
+
+# Set up the global logger variable
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
+def signal_term_handler(signal_number, frame):
+    """
+    Signal handler for SIGTERM signals. Ensures that the program
+    gets terminated in a safe way, thus allowing all databases etc
+    to be written to disc.
+
+    Parameters
+    ==========
+    signal_number:
+        The signal number
+    frame:
+        Signal frame
+
+    Returns
+    =======
+    """
+
+    logger.info(msg="Received SIGTERM; forcing clean program exit")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
-    pass
+
+    # Register the SIGTERM handler; this will allow a safe shutdown of the program
+    logger.info(msg="Registering SIGTERM handler for safe shutdown...")
+    signal.signal(signal.SIGTERM, signal_term_handler)
+
+    try:
+        pass
+    except (KeyboardInterrupt, SystemExit):
+        logger.info(
+            msg="KeyboardInterrupt or SystemExit in progress; shutting down ..."
+        )

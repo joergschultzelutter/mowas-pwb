@@ -71,6 +71,14 @@ if __name__ == "__main__":
     "EARTHQUAKE": "/bbk.bgr/erdbeben.json",
     "DANGER_ANNOUNCEMENTS": "/bbk.mowas/gefahrendurchsagen.json",
 }
+    mowas_severity = ["Minor","Moderate","Severe","Extreme"]
+    mowas_msgtype = ["Alert","Cancel"]
+    mowas_status = ["Actual"]
+    mowas_scope = ["Public"]
+    mowas_certainty = ["Observed","Unknown"]
+    mowas_urgency = ["Immediate","Unknown"]
+    mowas_responsetype = ["Prepare","Monitor"]
+
     for mowas_category in mowas_dictionary:
         success, json_data = get_mowas_data(base_url="https://warnung.bund.de",url_path=mowas_dictionary[mowas_category])
         logger.info(msg=f"Success for mowas_category {mowas_category}: {success}")
