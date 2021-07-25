@@ -1,0 +1,6 @@
+https://warnung.bund.de/bbk.mowas/gefahrendurchsagen.json
+https://warnung.bund.de/bbk.dwd/unwetter.json
+https://warnung.bund.de/bbk.lhp/hochwassermeldungen.json
+https://warnung.bund.de/bbk.dwd/waldbrand.json
+https://warnung.bund.de/bbk.bgr/erdbeben.json
+https://warnung.bund.de/bbk.wsv/hochwasser.json
