@@ -84,4 +84,4 @@ if __name__ == "__main__":
         logger.info(msg=f"Success for mowas_category {mowas_category}: {success}")
         if success:
             for element in json_data:
-                pass
+                logger.info(element["msgType"])
