@@ -84,4 +84,33 @@ if __name__ == "__main__":
         logger.info(msg=f"Success for mowas_category {mowas_category}: {success}")
         if success:
             for element in json_data:
-                logger.info(element["msgType"])
+                mowas_identifier = element["identifier"]
+                mowas_status = element["status"]
+                if len(element["info"]) > 0:
+                    mowas_msgtype=element["msgType"]
+                    mowas_severity=element["info"][0]["severity"]
+                    mowas_headline=element["info"][0]["headline"]
+                    if "description" in element["info"][0]:
+                        mowas_description=element["info"][0]["description"]
+                    else:
+                        mowas_description=""
+                    if "instruction" in element["info"][0]:
+                        mowas_instruction=element["info"][0]["instruction"]
+                    else:
+                        mowas_instruction=""
+
+                    logger.info(msg=f"Identifier {mowas_identifier}, Status={mowas_status}, MsgType={mowas_msgtype}, Severity={mowas_severity}, Headline={mowas_headline}")
+                    areas = element["info"][0]["area"]
+                    for area in areas:
+                        polygon = area["polygon"]
+                        a = [point.split(',') for point in polygon[0].split(" ")]
+                        b = np.array(a, dtype=np.float64)
+
+                        # Create Point objects
+                        p1 = Point(8.9183, 51.8127)
+                        p2 = Point(24.976567, 60.1612500)
+                        poly = Polygon(b)
+                        # print (poly)
+
+                        # print(p1.within(poly))
+                        #print(p1.intersects(poly))
