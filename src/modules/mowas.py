@@ -17,10 +17,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-import re
 import json
 import logging
-from pprint import pformat
 import requests
 import numpy as np
 from shapely.geometry import Point, Polygon
@@ -34,6 +32,21 @@ logger = logging.getLogger(__name__)
 
 
 def download_mowas_data(base_url: str, url_path: str):
+    """
+    Function which (tries to) download content from the MOWAS servers
+    Parameters
+    ==========
+    base_url : 'str'
+        Server base URL (usually fixed, e.g. https://warnung.bund.de)
+    url_path : 'str'
+        Server URL path (dependent on the MOWAS category that we intend to download)
+    Returns
+    =======
+    success : 'bool'
+        True if operation was successful
+    json_response: 'dict'
+        Dictionary which contains the corresponding JSON object 
+    """
 
     with open("gefahr06.txt", "r") as f:
         if f.mode == "r":
@@ -72,8 +85,31 @@ def download_mowas_data(base_url: str, url_path: str):
 
 
 def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor"):
+    """
+    Process our MOWAS data and return a dictionary with messages that are to be sent to the user
+    Parameters
+    ==========
+    coordinates : 'list'
+        List item, containing 0..n dictionaries with lat/lon coordinates that we are supposed to check
+    mowas_cache : 'ExpiringDict'
+        ExpiringDict which contains the "Alert" and "Update" messages from a previous run that were
+        sent to the user. "Cancel" messages are not included - they may only be sent out once.
+    minimal_mowas_severity : 'str'
+        Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
+        Program uses a ranking mechanism for its ">=" evaluation
+    Returns
+    =======
+    mowas_cache : 'ExpiringDict'
+        (Potentially) updated version of the mowas_cache input parameter
+    mowas_messages_to_send: 'dict'
+        Dictionary which contains the messages that we may need to send to the user
+    """
+
+    # Dictionary which may contain our outgoing messages (if present)
     mowas_messages_to_send = {}
 
+    # These are the official MOWAS URLs which our code will try to query
+    # Some of these URLs have no (longer?) any content
     mowas_dictionary = {
     "TEMPEST": "/bbk.dwd/unwetter.json",
     "FLOOD_OLD": "/bbk.wsv/hochwasser.json",
@@ -82,6 +118,11 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
     "EARTHQUAKE": "/bbk.bgr/erdbeben.json",
     "DANGER_ANNOUNCEMENTS": "/bbk.mowas/gefahrendurchsagen.json",
 }
+
+    # Definitions for all possible valid values that MOWAS may provide us with
+    # Important:
+    # 'typedef_mowas_security' requires value changes to be added in increasing
+    # severity levels - we use this list for quite a few queries
     typedef_mowas_severity = ["Minor","Moderate","Severe","Extreme"]
     typedef_mowas_msgtype = ["Alert","Cancel","Update"]
     typdef_mowas_status = ["Actual"]
@@ -90,11 +131,13 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
     typedef_mowas_urgency = ["Immediate","Unknown"]
     typedef_mowas_responsetype = ["Prepare","Monitor"]
 
+    # Check if we have received something whose value we already know
     assert minimal_mowas_severity in typedef_mowas_severity
 
+    # For each of our own categories, try to download the MOWAS data
     for mowas_category in mowas_dictionary:
         success, json_data = download_mowas_data(base_url="https://warnung.bund.de",url_path=mowas_dictionary[mowas_category])
-        logger.info(msg=f"Success for mowas_category {mowas_category}: {success}")
+        logger.debug(msg=f"Success for mowas_category {mowas_category}: {success}")
         if success:
             for element in json_data:
                 # general marker which tells us whether we should send this message
@@ -248,32 +291,40 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                             # Add to the expiring dict unless it is a "Cancel" msg
                             if mowas_msgtype != "Cancel":
                                 # Create the expiring dictionary's payload... 
-                                mowas_payload = {
+                                mowas_cache_payload = {
                                     "msgtype": mowas_msgtype,
                                     "sent": mowas_sent,
                                 }
                                 # ... and add the entry to the expiring dict
-                                mowas_cache[mowas_identifier] = mowas_payload
+                                mowas_cache[mowas_identifier] = mowas_cache_payload
 
-                                # Create the outgoing message's payload ...
-                                mowas_messages_to_sent_payload = {
-                                    "headline": mowas_headline,
-                                    "urgency": mowas_urgency,
-                                    "severity": mowas_severity,
-                                    "description": mowas_description,
-                                    "instruction": mowas_instruction,
-                                    "sent": mowas_sent,
-                                    "msgtype": mowas_msgtype,
-                                    "areas": areas_matching_latlon,
-                                }
-                                # ... and add it to our dictionary
-                                mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
+                            # Create the outgoing message's payload ...
+                            mowas_messages_to_sent_payload = {
+                                "headline": mowas_headline,
+                                "urgency": mowas_urgency,
+                                "severity": mowas_severity,
+                                "description": mowas_description,
+                                "instruction": mowas_instruction,
+                                "sent": mowas_sent,
+                                "msgtype": mowas_msgtype,
+                                "areas": areas_matching_latlon,
+                            }
+                            # ... and add it to our dictionary
+                            mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
 
     # Return the expiring cache and our messages to the user
     return mowas_cache, mowas_messages_to_send
 
 if __name__ == "__main__":
     mowas_message_cache = ExpiringDict(max_len = 1000, max_age_seconds=30*60) 
+
+    mowas_cache_payload = {
+        "msgtype": "Update",
+        "sent": "2020-08-28T11:00:08+02:00",
+    }
+
+    mowas_message_cache["DE-BY-A-W083-20200828-000"] = mowas_cache_payload
+
     my_coordinates = [
         {
             "latitude": 8.9183,
