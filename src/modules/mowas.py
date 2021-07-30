@@ -71,8 +71,8 @@ def download_mowas_data(base_url: str, url_path: str):
     return success, json_response
 
 
-def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict):
-    mowas_new_messages_to_send = {}
+def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor"):
+    mowas_messages_to_send = {}
 
     mowas_dictionary = {
     "TEMPEST": "/bbk.dwd/unwetter.json",
@@ -90,17 +90,22 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict):
     typedef_mowas_urgency = ["Immediate","Unknown"]
     typedef_mowas_responsetype = ["Prepare","Monitor"]
 
+    assert minimal_mowas_severity in typedef_mowas_severity
+
     for mowas_category in mowas_dictionary:
         success, json_data = download_mowas_data(base_url="https://warnung.bund.de",url_path=mowas_dictionary[mowas_category])
         logger.info(msg=f"Success for mowas_category {mowas_category}: {success}")
         if success:
             for element in json_data:
+                # general marker which tells us whether we should send this message
+                # if it meets all criteria
+                process_this_message = False
         
                 # Extract the message's identifier - this is our message's primary key
                 mowas_identifier = element["identifier"]
 
                 # get the message's msgtype. Can either be Alert, Update or Cancel
-                mowas_msgtype=element["msgType"]
+                mowas_msgtype = element["msgType"]
                 assert mowas_msgtype in typedef_mowas_msgtype
                
                 # Get the timestamp when this message was sent
@@ -108,11 +113,18 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict):
 
                 # Now let's check what we are supposed to do with this message
                 # If the message is of type "Cancel", remove it from our ExpiringDict
-                # and continue with the next potential message.
+                # (if present). The program guarantees that only the message types
+                # "Alert" and "Update" are present in our list
                 if mowas_msgtype == "Cancel":
+                    # Check if this message is present in our dict and remove it
                     if mowas_identifier in mowas_cache:
                         mowas_cache.pop(mowas_identifier)
-                    continue
+                        # We still want to send this "Cancel" message to the user
+                        # so let's ensure that we remember to do so. Still, the 
+                        # cancel message is only sent if the message's geocoordinates
+                        # match with what the user has provided us with 
+                        process_this_message = True
+
                 # If we deal with an "Update", there are a few situations that need
                 # to be taken upder advisement:
                 # 1) Key does not yet exist in our dictionary. ACTION: we will add it
@@ -123,7 +135,8 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict):
                 #    As the message's coordinate ranges may have changed, we will remove
                 #    the entry from our dictionary and re-add it
                 # 3) Key does exist within our dictionary AND msgtype is "Update". This
-                #    will trigger no action on our end
+                #    will trigger no action on our end UNLESS the old "Update" message's
+                #    time stamp differs with the one from the new message
                 elif mowas_msgtype == "Update":
                     # Do we have this entry in our expiring cache?
                     if mowas_identifier in mowas_cache:
@@ -134,43 +147,106 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict):
                         mowas_cache_msgtype = mowas_payload["msgtype"]
                         # Does its new status differ from the previous one? Then remove it 
                         # from our dictionary. This entry is either an Alert > Update or
-                        # Update > Alert
+                        # Update > Alert (the latter should never happen)
                         if mowas_cache_msgtype != mowas_msgtype:
                             mowas_cache.pop(mowas_identifier)
                         else:
+                            # message types are both "Update"
                             # Get the timestamp on when the data was sent
                             mowas_cache_sent = mowas_payload["sent"]
                             # See if the timestamps differ. Hint: this is a string comparison
                             # If both entries differ, then let's get rid of the previous entry 
                             if mowas_sent != mowas_cache_sent:
                                 mowas_cache.pop(mowas_identifier)
-        
-                mowas_status = element["status"]
-                if len(element["info"]) > 0:
-                    mowas_severity=element["info"][0]["severity"]
-                    mowas_headline=element["info"][0]["headline"]
-                    mowas_description = None
-                    if "description" in element["info"][0]:
-                        mowas_description=element["info"][0]["description"]
-                    mowas_instruction = None
-                    if "instruction" in element["info"][0]:
-                        mowas_instruction=element["info"][0]["instruction"]
-
-                    areas = element["info"][0]["area"]
-                    for area in areas:
-                        polygon = area["polygon"]
-                        splitted_array = [point.split(',') for point in polygon[0].split(" ")]
-                        numpy_array = np.array(a, dtype=np.float64)
-                        poly = Polygon(numpy_array)
-
-                        for coord in coordinates:
-                            latitude = coord["latitude"]
-                            longitude = coord["longitude"]
-                            p = Point(latitude,longitude)
-                            match = p.within(poly) | p.intersects(poly)
+                                # As the time stamps differ, remember that we may need to send
+                                # this message if it fits our criteria
+                                process_this_message = True
+                elif mowas_msgtype == "Alert":
+                    # Is this entry NOT in our expiring cache? Then let's process it
+                    # Assumptions:
+                    # 1) Message status cannot move back from "Update" to "Alert"
+                    # 2) Whenever an "Alert" gets updated, its msgtype changes to "Update"
+                    if mowas_identifier not in mowas_cache:
+                        process_this_message = True
 
 
-    return mowas_cache, mowas_new_messages_to_send
+                # Now that we have determined if we should process this message or not,
+                # let's have a look at the actual message itself - that is, if
+                # we are supposed to process it.
+                if process_this_message:
+                    mowas_status = element["status"]
+
+                    # All MOWAS messages only seen to have one (1) sub element only
+                    # but let's ensure that our present message actually has one.
+                    # Future program versions may also need to process elements 2..n
+                    # in case they are present.
+                    if len(element["info"]) > 0:
+
+                        # Get the Severity                        
+                        mowas_severity=element["info"][0]["severity"]
+
+                        # Crash for now if we encounter an unknown severity
+                        assert mowas_severity in typedef_mowas_severity
+
+                        # Loop to the next element in case our current message's
+                        # severity level is too low (based on the user's input parameters)
+                        if typedef_mowas_severity.index(mowas_severity) < typedef_mowas_severity.index(minimal_mowas_severity):
+                            continue
+
+                        # Now let's extract the remaining information before we take a look at the message's geometric structure
+                        mowas_headline=element["info"][0]["headline"]
+                        mowas_urgency=element["info"][0]["urgency"]
+                        mowas_severity=element["info"][0]["severity"]
+                        mowas_description = element["info"][0]["description"] if  "description" in element["info"][0] else None
+                        mowas_instruction =  mowas_instruction=element["info"][0]["instruction"] if "instruction" in element["info"][0] else None
+
+                        # Extract the list of areas from the element
+                        areas = element["info"][0]["area"]
+
+                        # If any of the given lat/lon coordinates from the user match with 
+                        # any of the given areas from this message, then we may want to send out
+                        # this message to the user
+                        area_matches_with_user_latlon = False
+                        for area in areas:
+                            polygon = area["polygon"]
+                            splitted_array = [point.split(',') for point in polygon[0].split(" ")]
+                            numpy_array = np.array(a, dtype=np.float64)
+                            poly = Polygon(numpy_array)
+
+                            for coord in coordinates:
+                                latitude = coord["latitude"]
+                                longitude = coord["longitude"]
+                                p = Point(latitude,longitude)
+                                area_matches_with_user_latlon = p.within(poly) | p.intersects(poly)
+
+                                # We have found something - yeah
+                                if area_matches_with_user_latlon:
+                                    # Add to the expiring dict unless it is a "Cancel" msg
+                                    if mowas_msgtype != "Cancel":
+                                        # Create the payload... 
+                                        mowas_payload = {
+                                            "msgtype": mowas_msgtype,
+                                            "sent": mowas_sent,
+                                        }
+                                        # ... and add the entry to the expiring dict
+                                        mowas_cache[mowas_identifier] = mowas_payload
+                                        mowas_messages_to_sent_payload = {
+                                            "headline": mowas_headline,
+                                            "urgency": mowas_urgency,
+                                            "severity": mowas_severity,
+                                            "description": mowas_description,
+                                            "instruction": mowas_instruction,
+                                            "sent": mowas_sent,
+                                            "msgtype": mowas_msgtype,
+                                        }
+                                        mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
+
+                                        # Finally, trigger several breaks
+                                        break   # user lat / lons
+                            if area_matches_with_user_latlon:
+                                break   # Area
+    # Return the expiring cache and our messages to the user
+    return mowas_cache, mowas_messages_to_send
 
 if __name__ == "__main__":
     mowas_message_cache = ExpiringDict(max_len = 1000, max_age_seconds=30*60) 
