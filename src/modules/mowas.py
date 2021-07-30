@@ -223,13 +223,15 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                                 if area_matches_with_user_latlon:
                                     # Add to the expiring dict unless it is a "Cancel" msg
                                     if mowas_msgtype != "Cancel":
-                                        # Create the payload... 
+                                        # Create the expiring dictionary's payload... 
                                         mowas_payload = {
                                             "msgtype": mowas_msgtype,
                                             "sent": mowas_sent,
                                         }
                                         # ... and add the entry to the expiring dict
                                         mowas_cache[mowas_identifier] = mowas_payload
+
+                                        # Create the outgoing message's payload ...
                                         mowas_messages_to_sent_payload = {
                                             "headline": mowas_headline,
                                             "urgency": mowas_urgency,
@@ -239,9 +241,10 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                                             "sent": mowas_sent,
                                             "msgtype": mowas_msgtype,
                                         }
+                                        # ... and add it to our dictionary
                                         mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
 
-                                        # Finally, trigger several breaks
+                                        # Finally, trigger several breaks so that we can escape from the For loops
                                         break   # user lat / lons
                             if area_matches_with_user_latlon:
                                 break   # Area
@@ -260,4 +263,4 @@ if __name__ == "__main__":
             "longitude": 60.1612500,
         }
     ]
-    pass
+    logger.info(process_mowas_data(coordinates=my_coordinates,mowas_cache=mowas_message_cache,minimal_mowas_severity="Minor"))
