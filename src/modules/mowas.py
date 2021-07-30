@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 def download_mowas_data(base_url: str, url_path: str):
 
-    with open("gefahrendurchsagen06.txt", "r") as f:
+    with open("gefahr06.txt", "r") as f:
         if f.mode == "r":
             json_response = json.load(f)
             return True, json_response
@@ -161,6 +161,12 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                                 # As the time stamps differ, remember that we may need to send
                                 # this message if it fits our criteria
                                 process_this_message = True
+                    else:
+                        # msgtype is "Update" but the message is not within our cache
+                        # Potential root causes:
+                        # 1) message was in the cache but has expired (and got removed)
+                        # 2) message was never in the case (e.g. due to a program restart)
+                        process_this_message = True
                 elif mowas_msgtype == "Alert":
                     # Is this entry NOT in our expiring cache? Then let's process it
                     # Assumptions:
@@ -194,11 +200,11 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                             continue
 
                         # Now let's extract the remaining information before we take a look at the message's geometric structure
-                        mowas_headline=element["info"][0]["headline"]
-                        mowas_urgency=element["info"][0]["urgency"]
-                        mowas_severity=element["info"][0]["severity"]
+                        mowas_headline = element["info"][0]["headline"]
+                        mowas_urgency = element["info"][0]["urgency"]
+                        mowas_severity = element["info"][0]["severity"]
                         mowas_description = element["info"][0]["description"] if  "description" in element["info"][0] else None
-                        mowas_instruction =  mowas_instruction=element["info"][0]["instruction"] if "instruction" in element["info"][0] else None
+                        mowas_instruction = mowas_instruction=element["info"][0]["instruction"] if "instruction" in element["info"][0] else None
 
                         # Extract the list of areas from the element
                         areas = element["info"][0]["area"]
@@ -207,47 +213,62 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
                         # any of the given areas from this message, then we may want to send out
                         # this message to the user
                         area_matches_with_user_latlon = False
+
+                        # If we find a match then this list will contain all areas for
+                        # which we found a match related to our lat/lon coordinates 
+                        areas_matching_latlon = []
+
                         for area in areas:
                             polygon = area["polygon"]
                             splitted_array = [point.split(',') for point in polygon[0].split(" ")]
-                            numpy_array = np.array(a, dtype=np.float64)
+                            numpy_array = np.array(splitted_array, dtype=np.float64)
                             poly = Polygon(numpy_array)
 
                             for coord in coordinates:
                                 latitude = coord["latitude"]
                                 longitude = coord["longitude"]
                                 p = Point(latitude,longitude)
-                                area_matches_with_user_latlon = p.within(poly) | p.intersects(poly)
 
-                                # We have found something - yeah
-                                if area_matches_with_user_latlon:
-                                    # Add to the expiring dict unless it is a "Cancel" msg
-                                    if mowas_msgtype != "Cancel":
-                                        # Create the expiring dictionary's payload... 
-                                        mowas_payload = {
-                                            "msgtype": mowas_msgtype,
-                                            "sent": mowas_sent,
-                                        }
-                                        # ... and add the entry to the expiring dict
-                                        mowas_cache[mowas_identifier] = mowas_payload
+                                # Check if we are either inside of the polygon or
+                                # touch its borders
+                                area_match = p.within(poly) or p.intersects(poly)
+                                
+                                # and set our global marker if we have found something
+                                area_matches_with_user_latlon = True if area_match else area_matches_with_user_latlon
+                                
+                                # if we have found something for the current area, then
+                                # let's remember the area for which we had a match
+                                if area_match:
+                                    area_desc = area["areaDesc"]
+                                    if area_desc not in areas_matching_latlon:
+                                        areas_matching_latlon.append(area_desc)                               
 
-                                        # Create the outgoing message's payload ...
-                                        mowas_messages_to_sent_payload = {
-                                            "headline": mowas_headline,
-                                            "urgency": mowas_urgency,
-                                            "severity": mowas_severity,
-                                            "description": mowas_description,
-                                            "instruction": mowas_instruction,
-                                            "sent": mowas_sent,
-                                            "msgtype": mowas_msgtype,
-                                        }
-                                        # ... and add it to our dictionary
-                                        mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
+                        # We went through all areas - now let's see of we found something
+                        if area_matches_with_user_latlon:
+                            # Add to the expiring dict unless it is a "Cancel" msg
+                            if mowas_msgtype != "Cancel":
+                                # Create the expiring dictionary's payload... 
+                                mowas_payload = {
+                                    "msgtype": mowas_msgtype,
+                                    "sent": mowas_sent,
+                                }
+                                # ... and add the entry to the expiring dict
+                                mowas_cache[mowas_identifier] = mowas_payload
 
-                                        # Finally, trigger several breaks so that we can escape from the For loops
-                                        break   # user lat / lons
-                            if area_matches_with_user_latlon:
-                                break   # Area
+                                # Create the outgoing message's payload ...
+                                mowas_messages_to_sent_payload = {
+                                    "headline": mowas_headline,
+                                    "urgency": mowas_urgency,
+                                    "severity": mowas_severity,
+                                    "description": mowas_description,
+                                    "instruction": mowas_instruction,
+                                    "sent": mowas_sent,
+                                    "msgtype": mowas_msgtype,
+                                    "areas": areas_matching_latlon,
+                                }
+                                # ... and add it to our dictionary
+                                mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
+
     # Return the expiring cache and our messages to the user
     return mowas_cache, mowas_messages_to_send
 
@@ -261,6 +282,10 @@ if __name__ == "__main__":
         {
             "latitude": 24.976567,
             "longitude": 60.1612500,
+        },
+        {
+            "latitude": 10.771,
+            "longitude": 48.4794,
         }
     ]
     logger.info(process_mowas_data(coordinates=my_coordinates,mowas_cache=mowas_message_cache,minimal_mowas_severity="Minor"))
