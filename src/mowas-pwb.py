@@ -1,6 +1,6 @@
 #!/opt/local/bin/python3
 #
-# DAPNET Personal Warning Beacon
+# MOWAS Personal Warning Beacon
 # Author: Joerg Schultze-Lutter, 2021
 #
 # This program is free software; you can redistribute it and/or modify
