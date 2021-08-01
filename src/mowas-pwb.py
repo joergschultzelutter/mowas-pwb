@@ -17,15 +17,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-import re
-import json
 import logging
-from pprint import pformat
-from datetime import datetime
 import argparse
-import requests
 import sys
 import signal
+from modules import mowas
 
 # Set up the global logger variable
 logging.basicConfig(
