@@ -48,13 +48,14 @@ def download_mowas_data(base_url: str, url_path: str):
         Dictionary which contains the corresponding JSON object 
     """
 
-    with open("gefahr06.txt", "r") as f:
+    """    with open("gefahr06.txt", "r") as f:
         if f.mode == "r":
             json_response = json.load(f)
             return True, json_response
 
     logger.info("Hier sollten wir nicht hinkommen")
     exit(0)
+    """
 
     url=f"{base_url}{url_path}"
     json_response=None

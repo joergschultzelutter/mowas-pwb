@@ -1,0 +1,15 @@
+[mowas_config]
+
+# API key for www.aprs.fi access
+# API key "NOT_CONFIGURED" disable aprs.fi access
+aprsdotfi_api_key = NOT_CONFIGURED
+
+# DAPNET access credentials
+# Callsign "NOT_CONFIGURED" disables DAPNET access
+dapnet_login_callsign = NOT_CONFIGURED
+dapnet_login_passcode = -1
+
+# Lat / Lon coordinates that we intend to monitor
+# Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
+# Example: 51.838879,8.32678 51.829722,9.448333
+mowas_watch_areas = 0.0,0.0

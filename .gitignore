@@ -131,3 +131,4 @@ dmypy.json
 venv
 .idea
 .DS_Store
+mowas-pwb.cfg
