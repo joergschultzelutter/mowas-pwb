@@ -1,5 +1,5 @@
 #
-# DAPNET Personal Warning Beacon
+# MOWAS Personal Warning Beacon
 # Module: Get MOWAS data, check for lat/lon applicability and return
 # Author: Joerg Schultze-Lutter, 2021
 #

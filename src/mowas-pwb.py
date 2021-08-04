@@ -22,8 +22,7 @@ import argparse
 import sys
 import signal
 from modules.mowas import process_mowas_data
-import numpy as np
-import configparser
+from modules.utils import get_program_config_from_file, signal_term_handler
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -31,58 +30,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def get_program_config_from_file(config_filename: str):
-    config = configparser.ConfigParser()
-    success = False
 
-    mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
-    mowas_dapnet_login_passcode = mowas_watch_areas_string = None
-    mowas_watch_areas = []
-
-    try:
-        config.read(config_filename)
-        mowas_aprsdotfi_api_key = config.get("mowas_config", "aprsdotfi_api_key")
-        mowas_dapnet_login_callsign = config.get("mowas_config", "dapnet_login_callsign")
-        mowas_dapnet_login_passcode = config.get("mowas_config", "dapnet_login_passcode")
-        mowas_watch_areas_string = config.get("mowas_config", "mowas_watch_areas")
-        success = True
-    except:
-        mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
-        mowas_dapnet_login_passcode = mowas_watch_areas_string = None
-        mowas_watch_areas = []
-        success = False
-
-    if success:
-        try:
-            a = [point.split(',') for point in mowas_watch_areas_string.split(" ")]
-            b = np.array(a,dtype=np.float64)
-            mowas_watch_areas = b.tolist()
-            success = True
-        except:
-            c = []
-            success = False
-
-    return success, mowas_aprsdotfi_api_key, mowas_dapnet_login_callsign, mowas_dapnet_login_passcode, mowas_watch_areas
-
-def signal_term_handler(signal_number, frame):
-    """
-    Signal handler for SIGTERM signals. Ensures that the program
-    gets terminated in a safe way, thus allowing all databases etc
-    to be written to disc.
-
-    Parameters
-    ==========
-    signal_number:
-        The signal number
-    frame:
-        Signal frame
-
-    Returns
-    =======
-    """
-
-    logger.info(msg="Received SIGTERM; forcing clean program exit")
-    sys.exit(0)
 
 
 if __name__ == "__main__":
@@ -176,9 +124,3 @@ if __name__ == "__main__":
         logger.info(
             msg="KeyboardInterrupt or SystemExit in progress; shutting down ..."
         )
-
-
-
-
-
-    pass
