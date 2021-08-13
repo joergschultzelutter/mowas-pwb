@@ -13,3 +13,9 @@ dapnet_login_passcode = -1
 # Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
 # Example: 51.838879,8.32678 51.829722,9.448333
 mowas_watch_areas = 0.0,0.0
+
+# Telegram API key - this is the bot that will send out the message
+telegram_token = abcdef
+
+# Telegram target IDs which will receive the messages. Separate with commas
+telegram_target_ids = 123456789,987654321
