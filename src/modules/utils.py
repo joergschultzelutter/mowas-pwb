@@ -38,6 +38,7 @@ def get_program_config_from_file(config_filename: str):
 
     mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
     mowas_dapnet_login_passcode = mowas_watch_areas_string = None
+    mowas_telegram_bot_token = None
     mowas_watch_areas = []
 
     try:
@@ -46,10 +47,12 @@ def get_program_config_from_file(config_filename: str):
         mowas_dapnet_login_callsign = config.get("mowas_config", "dapnet_login_callsign")
         mowas_dapnet_login_passcode = config.get("mowas_config", "dapnet_login_passcode")
         mowas_watch_areas_string = config.get("mowas_config", "mowas_watch_areas")
+        mowas_telegram_bot_token = config.get("mowas_config","telegram_bot_token")
         success = True
     except:
         mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
         mowas_dapnet_login_passcode = mowas_watch_areas_string = None
+        mowas_telegram_bot_token = None
         mowas_watch_areas = []
         success = False
 
@@ -61,9 +64,10 @@ def get_program_config_from_file(config_filename: str):
             success = True
         except:
             c = []
+            logger.info(msg="Error in configuration file; cannot create MOWAS watch areas list")
             success = False
 
-    return success, mowas_aprsdotfi_api_key, mowas_dapnet_login_callsign, mowas_dapnet_login_passcode, mowas_watch_areas
+    return success, mowas_aprsdotfi_api_key, mowas_dapnet_login_callsign, mowas_dapnet_login_passcode, mowas_watch_areas, mowas_telegram_bot_token
 
 
 def signal_term_handler(signal_number, frame):
