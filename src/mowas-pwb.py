@@ -26,6 +26,10 @@ from modules.utils import (
 	get_command_line_params,
 )
 from modules.aprsdotfi import get_position_on_aprsfi
+from modules.telegramdotcom import send_telegram_message
+from modules.dapnet import send_dapnet_message
+from expiringdict import ExpiringDict
+import time
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -47,6 +51,8 @@ if __name__ == "__main__":
 		mowas_disable_dapnet,
 		mowas_follow_the_ham,
 		mowas_generate_test_message,
+		mowas_warning_level,
+		mowas_time_to_live
 	) = get_command_line_params()
 
 	# User wants to disable both DAPNET and Telegram? 
@@ -99,6 +105,10 @@ if __name__ == "__main__":
 	# If the user wants us to track a ham radio user AND has configured
 	# the aprs.fi credentials, verify if we can access aprs.fi and if
 	# that user's call sign can be found via the API
+
+	success = False
+	latitude = longitude = 0.0
+
 	if mowas_aprsdotfi_enabled and mowas_follow_the_ham:
 		success, latitude, longitude = get_position_on_aprsfi(
 			aprsfi_callsign=mowas_follow_the_ham,
@@ -114,13 +124,38 @@ if __name__ == "__main__":
 	# We've checked all parameters - let's start with setting up our environment
 	#
 
+	# If we have just been asked to generate a test message then
+	# let's do so and exit the program afterwards
+	if mowas_generate_test_message:
+		message = "mowas-pwd is properly configured if you were able to receive this message"
+		if mowas_dapnet_enabled:
+			logger.info(msg = f"Sending mowas-wbw test message to DAPNET account {mowas_dapnet_destination_callsign}")
+			success = send_dapnet_message(to_callsign=mowas_dapnet_destination_callsign,message=message,message_status="Alert",dapnet_login_callsign=mowas_dapnet_login_callsign,dapnet_login_passcode=mowas_dapnet_login_passcode)
+			logger.info (msg=f"DAPNET message status: {success}")
+		if mowas_telegram_enabled:
+			logger.info(msg = f"Sending mowas-pwb test message to Telegram account {mowas_telegram_destination_id}")
+			success = send_telegram_message(bot_token=mowas_telegram_bot_token,user_id=mowas_telegram_destination_id,message=message)
+			logger.info (msg=f"Telefram message status: {success}")
+		exit(0)	
+
+	# If we reach this point, then we are supposed to do some real work
+
 	# Register the SIGTERM handler; this will allow a safe shutdown of the program
 	logger.info(msg="Registering SIGTERM handler for safe shutdown...")
 	signal.signal(signal.SIGTERM, signal_term_handler)
 
-	try:
-		pass
-	except (KeyboardInterrupt, SystemExit):
-		logger.info(
-			msg="KeyboardInterrupt or SystemExit in progress; shutting down ..."
-		)
+	mowas_message_cache = ExpiringDict(max_len = 1000, max_age_seconds=mowas_time_to_live) 
+
+	while True:
+		try:
+			mowas_message_cache, mowas_messages_to_send = process_mowas_data(coordinates=mowas_watch_areas,mowas_cache=mowas_message_cache, minimal_mowas_severity=mowas_warning_level)
+			if len(mowas_messages_to_send) > 0:
+				logger.debug(msg=f"{len(mowas_messages_to_send)} new messages found")
+
+			# Finally, go to sleep
+			time.sleep(mowas_run_interval * 60)
+		except (KeyboardInterrupt, SystemExit):
+			logger.info(
+				msg="KeyboardInterrupt or SystemExit in progress; shutting down ..."
+			)
+			break
