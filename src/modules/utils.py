@@ -25,6 +25,7 @@ import re
 import logging
 import sys
 import argparse
+import string
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -266,7 +267,7 @@ def convert_text_to_plain_ascii(message_string: str):
     return message_string
 
 
-def interval_check(interval_value):
+def run_interval_check(interval_value):
     interval_value = int(interval_value)
     if interval_value < 30:
         raise argparse.ArgumentTypeError("Minimum interval is 30 (minutes)")
@@ -315,8 +316,16 @@ def get_command_line_params():
         "--run-interval",
         dest="run_interval",
         default=30,
-        type=interval_check,
+        type=run_interval_check,
         help="Run interval in minutes. Minimal value = 30 (minutes)",
+    )
+
+    parser.add_argument(
+        "--ttl",
+        dest="time_to_live",
+        default=8*60,
+        type=int,
+        help="Message 'time to live' setting in minutes. Default value is 480m mins = 8h",
     )
 
     parser.add_argument(
@@ -343,6 +352,14 @@ def get_command_line_params():
         help="Adds a call sign's current coordinates to the MOWAS coordinates monitored by this program",
     )
 
+    parser.add_argument(
+        "--warning_level",
+        choices={"MINOR", "MODERATE","SEVERE","EXTREME"},
+        default="MINOR",
+        type=str.upper,
+        help="Minimal warning level for MOWAS messages",
+    )
+
     parser.set_defaults(add_example_data=False)
 
     args = parser.parse_args()
@@ -356,10 +373,16 @@ def get_command_line_params():
     mowas_disable_dapnet = args.disable_dapnet
     mowas_follow_the_ham = args.follow_the_ham
     mowas_generate_test_message = args.generate_test_message
+    mowas_warning_level = args.warning_level
+    mowas_time_to_live = args.time_to_live
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
         mowas_follow_the_ham = mowas_follow_the_ham.upper()
+
+    # Convert the MOWAS Warning Level to the MOWAS-Native format:
+    # First character = Uppercase, remainder is lowercase
+    mowas_warning_level = string.capwords(mowas_warning_level)
 
     return (
         mowas_configfile,
@@ -371,4 +394,6 @@ def get_command_line_params():
         mowas_disable_dapnet,
         mowas_follow_the_ham,
         mowas_generate_test_message,
+        mowas_warning_level,
+        mowas_time_to_live
     )

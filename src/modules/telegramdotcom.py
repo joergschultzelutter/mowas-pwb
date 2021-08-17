@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def send_message_to_telegram_user(bot_token: str, user_id: int, message: str):
+def send_telegram_message(bot_token: str, user_id: int, message: str):
 	mybot = telegram.Bot(token = bot_token)
 	mybot.sendMessage(chat_id=user_id, text=message)
 
