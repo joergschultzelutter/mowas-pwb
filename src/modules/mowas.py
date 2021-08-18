@@ -48,14 +48,14 @@ def download_mowas_data(base_url: str, url_path: str):
 		Dictionary which contains the corresponding JSON object 
 	"""
 
-	"""	   with open("gefahr06.txt", "r") as f:
+	with open("gefahr06.txt", "r") as f:
 		if f.mode == "r":
 			json_response = json.load(f)
 			return True, json_response
-
+	"""
 	logger.info("Hier sollten wir nicht hinkommen")
 	exit(0)
-	"""
+
 
 	url=f"{base_url}{url_path}"
 	json_response=None
@@ -83,7 +83,7 @@ def download_mowas_data(base_url: str, url_path: str):
 
 	success = True if json_response else False
 	return success, json_response
-
+	"""
 
 def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor"):
 	"""
@@ -261,6 +261,7 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
 						# If we find a match then this list will contain all areas for
 						# which we found a match related to our lat/lon coordinates 
 						areas_matching_latlon = []
+						geocodes_matching_latlon = {}
 
 						for area in areas:
 							polygon = area["polygon"]
@@ -284,8 +285,15 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
 								# let's remember the area for which we had a match
 								if area_match:
 									area_desc = area["areaDesc"]
+									if "geocode" in area:
+										geocodes = area["geocode"]
+										for geocode in geocodes:
+											geocode_name = geocode["valueName"]
+											geocode_value = geocode["value"]
+
 									if area_desc not in areas_matching_latlon:
-										areas_matching_latlon.append(area_desc)								  
+										areas_matching_latlon.append(area_desc)
+									geocodes_matching_latlon[geocode_value] = geocode_name								  
 
 						# We went through all areas - now let's see of we found something
 						if area_matches_with_user_latlon:
@@ -309,6 +317,7 @@ def process_mowas_data(coordinates: list, mowas_cache: ExpiringDict, minimal_mow
 								"sent": mowas_sent,
 								"msgtype": mowas_msgtype,
 								"areas": areas_matching_latlon,
+								"geocodes": geocodes_matching_latlon,
 							}
 							# ... and add it to our dictionary
 							mowas_messages_to_send[mowas_identifier] = mowas_messages_to_sent_payload
