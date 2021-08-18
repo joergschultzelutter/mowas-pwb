@@ -132,3 +132,4 @@ venv
 .idea
 .DS_Store
 mowas-pwb.cfg
+/src/modules/gefahr06.txt

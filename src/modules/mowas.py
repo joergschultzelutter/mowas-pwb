@@ -276,7 +276,7 @@ def process_mowas_data(
                         # If we find a match then this list will contain all areas for
                         # which we found a match related to our lat/lon coordinates
                         areas_matching_latlon = []
-                        geocodes_matching_latlon = {}
+                        geocodes_matching_latlon = []
 
                         for area in areas:
                             polygon = area["polygon"]
@@ -309,14 +309,12 @@ def process_mowas_data(
                                     if "geocode" in area:
                                         geocodes = area["geocode"]
                                         for geocode in geocodes:
-                                            geocode_name = geocode["valueName"]
                                             geocode_value = geocode["value"]
 
                                     if area_desc not in areas_matching_latlon:
                                         areas_matching_latlon.append(area_desc)
-                                    geocodes_matching_latlon[
-                                        geocode_value
-                                    ] = geocode_name
+                                    if geocode_value not in geocodes_matching_latlon:
+                                        geocodes_matching_latlon.append(geocode_value)
 
                         # We went through all areas - now let's see of we found something
                         if area_matches_with_user_latlon:
