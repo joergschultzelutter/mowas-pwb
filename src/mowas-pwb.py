@@ -151,6 +151,16 @@ if __name__ == "__main__":
 			mowas_message_cache, mowas_messages_to_send = process_mowas_data(coordinates=mowas_watch_areas,mowas_cache=mowas_message_cache, minimal_mowas_severity=mowas_warning_level)
 			if len(mowas_messages_to_send) > 0:
 				logger.debug(msg=f"{len(mowas_messages_to_send)} new messages found")
+				for mowas_message_id in mowas_messages_to_send:
+					headline = mowas_messages_to_send[mowas_message_id]["headline"]
+					urgency  = mowas_messages_to_send[mowas_message_id]["urgency"]
+					severity  = mowas_messages_to_send[mowas_message_id]["severity"]
+					description = mowas_messages_to_send[mowas_message_id]["description"]
+					instruction = mowas_messages_to_send[mowas_message_id]["instruction"]					
+					sent = mowas_messages_to_send[mowas_message_id]["sent"]
+					msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
+					areas = mowas_messages_to_send[mowas_message_id]["areas"]
+				
 
 			# Finally, go to sleep
 			time.sleep(mowas_run_interval * 60)
