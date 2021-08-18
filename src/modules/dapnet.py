@@ -25,98 +25,98 @@ from requests.auth import HTTPBasicAuth
 import time
 
 logging.basicConfig(
-	level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+    level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 def send_dapnet_message(
-	to_callsign: str,
-	message: str,
-	message_status: str,
-	dapnet_login_callsign: str,
-	dapnet_login_passcode: str,
-	dapnet_api_transmitter_group: str = "dl-all",
-	dapnet_api_server="http://www.hampager.de:8080/calls",
-	dapnet_high_priority_message: bool = False,
+    to_callsign: str,
+    message: str,
+    message_status: str,
+    dapnet_login_callsign: str,
+    dapnet_login_passcode: str,
+    dapnet_api_transmitter_group: str = "dl-all",
+    dapnet_api_server="http://www.hampager.de:8080/calls",
+    dapnet_high_priority_message: bool = False,
 ):
-	success = False
+    success = False
 
-	# Check if we have received a valid MOWAS status
-	message_status = message_status.upper()
-	assert message_status in ("ALERT", "UPDATE", "CANCEL")
+    # Check if we have received a valid MOWAS status
+    message_status = message_status.upper()
+    assert message_status in ("ALERT", "UPDATE", "CANCEL")
 
-	message_short_status = f"{message_status[0]}:"
+    message_short_status = f"{message_status[0]}:"
 
-	if dapnet_login_callsign.upper() == "N0CALL":
-		logger.info(
-			msg="mowas-pwb: DAPNET API credentials are not configured, cannot send msg"
-		)
-		success = False
-	else:
-		# Get rid of the SSID in the TO callsign (if accidentally present)
-		dapnet_to_callsign = to_callsign.split("-")[0].upper()
+    if dapnet_login_callsign.upper() == "N0CALL":
+        logger.info(
+            msg="mowas-pwb: DAPNET API credentials are not configured, cannot send msg"
+        )
+        success = False
+    else:
+        # Get rid of the SSID in the TO callsign (if accidentally present)
+        dapnet_to_callsign = to_callsign.split("-")[0].upper()
 
-		# Start with the message identifier: A/U/C: --> Alert/Update/Cancel
-		destination_list = make_pretty_dapnet_messages(
-			message_to_add=message_short_status, add_sep=False
-		)
-		destination_list = make_pretty_dapnet_messages(
-			message_to_add=message, destination_list=destination_list, add_sep=False
-		)
+        # Start with the message identifier: A/U/C: --> Alert/Update/Cancel
+        destination_list = make_pretty_dapnet_messages(
+            message_to_add=message_short_status, add_sep=False
+        )
+        destination_list = make_pretty_dapnet_messages(
+            message_to_add=message, destination_list=destination_list, add_sep=False
+        )
 
-		# Send the message(s)
-		for destination_message in destination_list:
+        # Send the message(s)
+        for destination_message in destination_list:
 
-			dapnet_payload = {
-				"text": f"{dapnet_from_callsign.upper()}: {message_txt}",
-				"callSignNames": [f"{dapnet_to_callsign}"],
-				"transmitterGroupNames": [f"{dapnet_api_transmitter_group}"],
-				"emergency": dapnet_high_priority_message,
-			}
-			dapnet_payload_json = json.dumps(dapnet_payload)
-			response = requests.post(
-				url=dapnet_api_server,
-				data=dapnet_payload_json,
-				auth=HTTPBasicAuth(
-					username=dapnet_login_callsign, password=dapnet_login_passcode
-				),
-			)  # Exception handling einbauen
-			if response.status_code != 201:
-				success = False
-				logger.info(
-					msg=f"DAPNET message dispatch to {dapnet_to_callsign} via '{dapnet_api_transmitter_group}' failed"
-				)
-				return success
-			logger.info(
-				msg=f"Successfully sent message {destination_list.index(destination_message)} of {len(destination_list)-1} to DAPNET"
-			)
-			if destination_list.index(destination_message) < len(destination_list) - 1:
-				time.sleep(10.0)
-		success = True
-		logger.info(
-			msg="All parts of the message were successfully transmitted to DAPNET"
-		)
+            dapnet_payload = {
+                "text": f"{dapnet_from_callsign.upper()}: {message_txt}",
+                "callSignNames": [f"{dapnet_to_callsign}"],
+                "transmitterGroupNames": [f"{dapnet_api_transmitter_group}"],
+                "emergency": dapnet_high_priority_message,
+            }
+            dapnet_payload_json = json.dumps(dapnet_payload)
+            response = requests.post(
+                url=dapnet_api_server,
+                data=dapnet_payload_json,
+                auth=HTTPBasicAuth(
+                    username=dapnet_login_callsign, password=dapnet_login_passcode
+                ),
+            )  # Exception handling einbauen
+            if response.status_code != 201:
+                success = False
+                logger.info(
+                    msg=f"DAPNET message dispatch to {dapnet_to_callsign} via '{dapnet_api_transmitter_group}' failed"
+                )
+                return success
+            logger.info(
+                msg=f"Successfully sent message {destination_list.index(destination_message)} of {len(destination_list)-1} to DAPNET"
+            )
+            if destination_list.index(destination_message) < len(destination_list) - 1:
+                time.sleep(10.0)
+        success = True
+        logger.info(
+            msg="All parts of the message were successfully transmitted to DAPNET"
+        )
 
-	return success
+    return success
 
 
 if __name__ == "__main__":
-	(
-		success,
-		mowas_aprsdotfi_api_key,
-		mowas_dapnet_login_callsign,
-		mowas_dapnet_login_passcode,
-		mowas_watch_areas,
-	) = get_program_config_from_file("mowas-pwb.cfg")
-	if success:
-		logger.info(
-			send_dapnet_message(
-				to_callsign="DF1JSL-8",
-				message="Die Besten der Besten der Besten, Sir",
-				message_status="Alert",
-				dapnet_login_callsign=mowas_dapnet_login_callsign,
-				dapnet_login_passcode=mowas_dapnet_login_passcode,
-				dapnet_high_priority_message=False,
-			)
-		)
+    (
+        success,
+        mowas_aprsdotfi_api_key,
+        mowas_dapnet_login_callsign,
+        mowas_dapnet_login_passcode,
+        mowas_watch_areas,
+    ) = get_program_config_from_file("mowas-pwb.cfg")
+    if success:
+        logger.info(
+            send_dapnet_message(
+                to_callsign="DF1JSL-8",
+                message="Die Besten der Besten der Besten, Sir",
+                message_status="Alert",
+                dapnet_login_callsign=mowas_dapnet_login_callsign,
+                dapnet_login_passcode=mowas_dapnet_login_passcode,
+                dapnet_high_priority_message=False,
+            )
+        )

@@ -23,13 +23,15 @@ import telegram
 
 
 logging.basicConfig(
-	level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+    level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+
 def send_telegram_message(bot_token: str, user_id: int, message: str):
-	mybot = telegram.Bot(token = bot_token)
-	mybot.sendMessage(chat_id=user_id, text=message)
+    mybot = telegram.Bot(token=bot_token)
+    mybot.sendMessage(chat_id=user_id, text=message)
+
 
 if __name__ == "__main__":
-	pass
+    pass

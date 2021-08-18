@@ -25,44 +25,84 @@ import logging
 
 # Set up the global logger variable
 logging.basicConfig(
-	level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+    level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-def read_warncell_info(url: str = "https://www.dwd.de/DE/leistungen/opendata/help/warnungen/cap_warncellids_csv.csv?__blob=publicationFile&v=3"):
-	request_headers = {"User-Agent": "Mozilla"}
 
-	# This is our target directory
-	warncell_data = {}
+def read_warncell_info(
+    url: str = "https://www.dwd.de/DE/leistungen/opendata/help/warnungen/cap_warncellids_csv.csv?__blob=publicationFile&v=3",
+):
+    """
+    Reads Warncell information from the Deutscher Wetterdienst website
+    and returns information as a dictionary
 
-	warncell_data_string = None
+    Parameters
+    ==========
+    url : 'str'
+            Deutscher Wetterdienst URL (usually fixed)
+    Returns
+    =======
+    success : 'bool'
+            True if operation was successful
+    warncell_data: 'dict'
+            Dictionary which contains the Warncell information
+    """
+    request_headers = {"User-Agent": "Mozilla"}
 
-	# Download the Warncell data from the web site and retain the string if successful
-	try:
-		resp = requests.get(url=url,headers=request_headers)
-	except:
-		resp = None
-	if resp:
-		if resp.status_code == 200:
-				warncell_data_string = resp.text
-	
-	# Do we have some data? Then let's try to process it
-	if warncell_data_string:
-		# We use custom field names as the original ones do contain Unicode
-		# characters which will make it difficult for us to access the fields
-		fieldnames=["warncellid","fullname","nuts_kennung","shortname","sign_kennung"]
+    # This is our target directory
+    warncell_data = {}
 
-		# Parse the content
-		csvReader = csv.DictReader(io.StringIO(warncell_data_string),dialect="excel", delimiter=";",fieldnames=fieldnames)
+    warncell_data_string = None
 
-		for elem in csvReader:
-			warncellid = elem["warncellid"]
-			full_name = elem["fullname"]
-			short_name = elem["shortname"]
-			val = {"full_name": full_name, "short_name": short_name}
-			warncell_data[warncellid] = val
+    # Download the Warncell data from the web site and retain the string if successful
+    try:
+        resp = requests.get(url=url, headers=request_headers)
+    except:
+        resp = None
+    if resp:
+        if resp.status_code == 200:
+            warncell_data_string = resp.text
 
-	return warncell_data	
+    # Do we have some data? Then let's try to process it
+    if warncell_data_string:
+        # We use custom field names as the original ones do contain Unicode
+        # characters which will make it difficult for us to access the fields
+        fieldnames = [
+            "warncellid",
+            "fullname",
+            "nuts_kennung",
+            "shortname",
+            "sign_kennung",
+        ]
+
+        # Parse the content
+        csvreader = csv.DictReader(
+            io.StringIO(warncell_data_string),
+            dialect="excel",
+            delimiter=";",
+            fieldnames=fieldnames,
+        )
+
+        # Convert the content to a proper dictionary that we can use
+        for elem in csvreader:
+            warncellid = elem["warncellid"]
+            full_name = elem["fullname"]
+            short_name = elem["shortname"]
+            val = {"full_name": full_name, "short_name": short_name}
+            warncell_data[warncellid] = val
+
+    # Delete the first key from the dict as it
+    # contains the header information from the file
+    if len(warncell_data) > 0:
+        hdr = list(warncell_data.keys())[0]
+        warncell_data.pop(hdr)
+
+    # Finally, check if we have received something and
+    # set our success/failure marker
+    success = True if len(warncell_data) > 0 else False
+    return success, warncell_data
+
 
 if __name__ == "__main__":
-	logger.info(read_warncell_info())
+    logger.info(read_warncell_info())

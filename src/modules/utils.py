@@ -323,7 +323,7 @@ def get_command_line_params():
     parser.add_argument(
         "--ttl",
         dest="time_to_live",
-        default=8*60,
+        default=8 * 60,
         type=int,
         help="Message 'time to live' setting in minutes. Default value is 480m mins = 8h",
     )
@@ -354,7 +354,7 @@ def get_command_line_params():
 
     parser.add_argument(
         "--warning_level",
-        choices={"MINOR", "MODERATE","SEVERE","EXTREME"},
+        choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="MINOR",
         type=str.upper,
         help="Minimal warning level for MOWAS messages",
@@ -395,5 +395,5 @@ def get_command_line_params():
         mowas_follow_the_ham,
         mowas_generate_test_message,
         mowas_warning_level,
-        mowas_time_to_live
+        mowas_time_to_live,
     )
