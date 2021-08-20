@@ -286,10 +286,14 @@ def process_mowas_data(
                             numpy_array = np.array(splitted_array, dtype=np.float64)
                             poly = Polygon(numpy_array)
 
+                            # Coord has the format latitude,longitude
                             for coord in coordinates:
-                                latitude = coord["latitude"]
-                                longitude = coord["longitude"]
-                                p = Point(latitude, longitude)
+                                latitude = coord[0]
+                                longitude = coord[1]
+
+                                # The MOWAS polygon uses the format longitude,latitude
+                                # so let's create our point this way
+                                p = Point(longitude, latitude)
 
                                 # Check if we are either inside of the polygon or
                                 # touch its borders
@@ -351,27 +355,25 @@ def process_mowas_data(
 
 if __name__ == "__main__":
     mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=30 * 60)
+    
 
     mowas_cache_payload = {
         "msgtype": "Update",
         "sent": "2020-08-28T11:00:08+02:00",
     }
 
-    mowas_message_cache["DE-BY-A-W083-20200828-000"] = mowas_cache_payload
+#    mowas_message_cache["DE-BY-A-W083-20200828-000"] = mowas_cache_payload
 
+    # Coordinates = latitude, longitude
     my_coordinates = [
-        {
-            "latitude": 8.9183,
-            "longitude": 51.8127,
-        },
-        {
-            "latitude": 24.976567,
-            "longitude": 60.1612500,
-        },
-        {
-            "latitude": 10.771,
-            "longitude": 48.4794,
-        },
+        [   
+            51.8127,
+            8.9183,
+        ],
+        [
+            48.4794,
+            10.771,
+        ],
     ]
     logger.info(
         process_mowas_data(
