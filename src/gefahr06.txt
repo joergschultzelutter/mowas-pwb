@@ -3,7 +3,7 @@
 	"sender": "DE-BY-A-W083",
 	"sent": "2020-08-28T11:00:08+02:00",
 	"status": "Actual",
-	"msgType": "Cancel",
+	"msgType": "Alert",
 	"scope": "Public",
 	"code": ["1.0", "nina"],
 	"references": "DE-BY-A-W083-20200317-000 DE-BY-A-W083-20191213-000 DE-BY-A-W083,DE-BY-A-W083-20200317-000 DE-BY-A-W083-20191213-000 DE-BY-A-W083-20190821-000,2019-08-21T00:00:00+00:00",
