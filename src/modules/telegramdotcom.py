@@ -28,10 +28,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def send_telegram_message(bot_token: str, user_id: int, message: str):
-    mybot = telegram.Bot(token=bot_token)
-    mybot.sendMessage(chat_id=user_id, text=message)
+def send_telegram_message(bot_token: str, user_id: int, message: str, simulate_send: bool = False):
+    """
+    Send content to the Telegram API
+    Parameters
+    ==========
+    bot_token : 'str'
+        ID of the bot that will send out the message
+    user_id : 'int'
+        Numeric Telegram user ID
+        Use Telegram's 'userinfobot' for the 
+        retrieval of your user ID
+    message: 'str'
+        Message that will be sent to the user
+    simulate_send: 'bool'
+        Set to true if you want to simulate sending
+        content to the Telegram API  
 
+    Returns
+    =======
+    """
+    if not simulate_send:
+        logger.info(msg="Sending Message to Telegram API")
+        mybot = telegram.Bot(token=bot_token)
+        mybot.sendMessage(chat_id=user_id, text=message)
+    else:
+        logger.info(msg=f"Simulating Telegram message 'Send'; message='{message}'")
 
 if __name__ == "__main__":
     pass
