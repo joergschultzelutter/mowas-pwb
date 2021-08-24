@@ -63,7 +63,7 @@ def send_dapnet_message(
         send message as high priority True/False
     simulate_send: 'bool'
         Set to true if you want to simulate sending
-        content to the DAPNET network  
+        content to the DAPNET network
 
     Returns
     =======
@@ -124,10 +124,15 @@ def send_dapnet_message(
                 logger.info(
                     msg=f"Successfully sent message {destination_list.index(destination_message)} of {len(destination_list)-1} to DAPNET"
                 )
-                if destination_list.index(destination_message) < len(destination_list) - 1:
+                if (
+                    destination_list.index(destination_message)
+                    < len(destination_list) - 1
+                ):
                     time.sleep(10.0)
             else:
-                logger.debug(msg=f"Simulating DAPNET 'Send'; message='{destination_message}'")
+                logger.debug(
+                    msg=f"Simulating DAPNET 'Send'; message='{destination_message}'"
+                )
         success = True
         logger.info(
             msg="All parts of the message were successfully transmitted to DAPNET"

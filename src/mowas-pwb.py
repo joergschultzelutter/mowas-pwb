@@ -54,7 +54,7 @@ if __name__ == "__main__":
 		mowas_generate_test_message,
 		mowas_warning_level,
 		mowas_time_to_live,
-		mowas_dapnet_high_prio
+		mowas_dapnet_high_prio_level
 	) = get_command_line_params()
 
 

@@ -361,13 +361,12 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--dapnet_high_prio",
+        "--dapnet_high_prio_level",
         choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="SEVERE",
         type=str.upper,
         help="Defines the minimal level at which DAPNET messages will be sent out with high priority (rather than using standard settings)",
     )
-
 
     parser.set_defaults(add_example_data=False)
 
@@ -384,16 +383,18 @@ def get_command_line_params():
     mowas_generate_test_message = args.generate_test_message
     mowas_warning_level = args.warning_level
     mowas_time_to_live = args.time_to_live
-    mowas_dapnet_high_prio = args.dapnet_high_prio
+    mowas_dapnet_high_prio_level = args.dapnet_high_prio_level
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
         mowas_follow_the_ham = mowas_follow_the_ham.upper()
+        # Get rid of the SSID in the TO callsign (if accidentally present)
+        mowas_follow_the_ham = mowas_follow_the_ham.split("-")[0].upper()
 
     # Convert the MOWAS Warning Level to the MOWAS-Native format:
     # First character = Uppercase, remainder is lowercase
     mowas_warning_level = string.capwords(mowas_warning_level)
-    mowas_dapnet_high_prio = string.capwords(mowas_dapnet_high_prio)
+    mowas_dapnet_high_prio_level = string.capwords(mowas_dapnet_high_prio_level)
 
     return (
         mowas_configfile,
@@ -407,5 +408,5 @@ def get_command_line_params():
         mowas_generate_test_message,
         mowas_warning_level,
         mowas_time_to_live,
-        mowas_dapnet_high_prio,
+        mowas_dapnet_high_prio_level,
     )

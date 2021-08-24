@@ -355,18 +355,17 @@ def process_mowas_data(
 
 if __name__ == "__main__":
     mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=30 * 60)
-    
 
     mowas_cache_payload = {
         "msgtype": "Update",
         "sent": "2020-08-28T11:00:08+02:00",
     }
 
-#    mowas_message_cache["DE-BY-A-W083-20200828-000"] = mowas_cache_payload
+    #    mowas_message_cache["DE-BY-A-W083-20200828-000"] = mowas_cache_payload
 
     # Coordinates = latitude, longitude
     my_coordinates = [
-        [   
+        [
             51.8127,
             8.9183,
         ],
