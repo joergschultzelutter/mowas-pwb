@@ -54,10 +54,19 @@ if __name__ == "__main__":
 		mowas_generate_test_message,
 		mowas_warning_level,
 		mowas_time_to_live,
+		mowas_dapnet_high_prio
 	) = get_command_line_params()
 
 
+
+
+
+
 	mowas_telegram_destination_id = 1234
+
+
+
+
 
 
 
@@ -124,7 +133,7 @@ if __name__ == "__main__":
 		)
 		if not success:
 			logger.info(
-				msg=f"Cannot find call sign {mowas_follow_the_ham} or aprs.fi access key is misconfigured; exiting ..."
+				msg=f"Cannot find call sign {mowas_follow_the_ham} or aprs.fi or its API access key is misconfigured; exiting ..."
 			)
 			exit(0)
 
