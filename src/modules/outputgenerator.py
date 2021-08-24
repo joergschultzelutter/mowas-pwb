@@ -26,14 +26,41 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def generate_dapnet_messages():
+def generate_dapnet_messages(mowas_messages_to_send: dict):
     output_list = []
-    return  output_list
+    for mowas_message_id in mowas_messages_to_send:
+        headline = mowas_messages_to_send[mowas_message_id]["headline"]
+        urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
+        severity = mowas_messages_to_send[mowas_message_id]["severity"]
+        description = mowas_messages_to_send[mowas_message_id][
+            "description"
+        ]
+        instruction = mowas_messages_to_send[mowas_message_id][
+            "instruction"
+        ]
+        sent = mowas_messages_to_send[mowas_message_id]["sent"]
+        msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
+        areas = mowas_messages_to_send[mowas_message_id]["areas"]
+
+    return output_list
 
 
-def generate_telegram_messages():
+def generate_telegram_messages(mowas_messages_to_send: dict):
     output_list = []
-    return  output_list
+    for mowas_message_id in mowas_messages_to_send:
+        headline = mowas_messages_to_send[mowas_message_id]["headline"]
+        urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
+        severity = mowas_messages_to_send[mowas_message_id]["severity"]
+        description = mowas_messages_to_send[mowas_message_id][
+            "description"
+        ]
+        instruction = mowas_messages_to_send[mowas_message_id][
+            "instruction"
+        ]
+        sent = mowas_messages_to_send[mowas_message_id]["sent"]
+        msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
+        areas = mowas_messages_to_send[mowas_message_id]["areas"]
+    return output_list
 
 
 if __name__ == "__main__":

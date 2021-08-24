@@ -26,6 +26,7 @@ from modules.utils import (
 	signal_term_handler,
 	get_command_line_params,
 )
+from modules.outputgenerator import generate_dapnet_messages, generate_telegram_messages
 from modules.aprsdotfi import get_position_on_aprsfi
 from modules.telegramdotcom import send_telegram_message
 from modules.dapnet import send_dapnet_message
@@ -214,23 +215,17 @@ if __name__ == "__main__":
 				coordinates=mowas_watch_areas,
 				mowas_cache=mowas_message_cache,
 				minimal_mowas_severity=mowas_warning_level,
+				mowas_dapnet_high_prio_level=mowas_dapnet_high_prio_level,
 			)
 			
 			if len(mowas_messages_to_send.keys()) > 0:
 				logger.info(msg=f"{len(mowas_messages_to_send)} new message(s) found")
-				for mowas_message_id in mowas_messages_to_send:
-					headline = mowas_messages_to_send[mowas_message_id]["headline"]
-					urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
-					severity = mowas_messages_to_send[mowas_message_id]["severity"]
-					description = mowas_messages_to_send[mowas_message_id][
-						"description"
-					]
-					instruction = mowas_messages_to_send[mowas_message_id][
-						"instruction"
-					]
-					sent = mowas_messages_to_send[mowas_message_id]["sent"]
-					msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
-					areas = mowas_messages_to_send[mowas_message_id]["areas"]
+				if mowas_dapnet_enabled:
+					logger.info(msg="Preparing DAPNET messages")
+					generate_dapnet_messages(mowas_messages_to_send=mowas_messages_to_send)
+				if mowas_telegram_enabled:
+					logger.info(msg="Preparing Telegram messages")
+					generate_telegram_messages(mowas_messages_to_send=mowas_messages_to_send)
 
 			# Finally, go to sleep
 			logger.info(msg="Entering sleep mode ...")

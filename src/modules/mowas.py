@@ -87,7 +87,7 @@ def download_mowas_data(base_url: str, url_path: str):
 
 
 def process_mowas_data(
-    coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor"
+    coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor",mowas_dapnet_high_prio_level: str = "Minor"
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -137,6 +137,7 @@ def process_mowas_data(
 
     # Check if we have received something whose value we already know
     assert minimal_mowas_severity in typedef_mowas_severity
+    assert mowas_dapnet_high_prio_level in typedef_mowas_severity
 
     # For each of our own categories, try to download the MOWAS data
     for mowas_category in mowas_dictionary:
@@ -250,6 +251,9 @@ def process_mowas_data(
                         ) < typedef_mowas_severity.index(minimal_mowas_severity):
                             continue
 
+                        # Check the priority level of the future message to DAPNET and bump it up if necessary
+                        dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+
                         # Now let's extract the remaining information before we take a look at the message's geometric structure
                         mowas_headline = element["info"][0]["headline"]
                         mowas_urgency = element["info"][0]["urgency"]
@@ -343,6 +347,7 @@ def process_mowas_data(
                                 "msgtype": mowas_msgtype,
                                 "areas": areas_matching_latlon,
                                 "geocodes": geocodes_matching_latlon,
+                                "dapnet_high_prio": dapnet_high_prio_msg,
                             }
                             # ... and add it to our dictionary
                             mowas_messages_to_send[
@@ -379,5 +384,6 @@ if __name__ == "__main__":
             coordinates=my_coordinates,
             mowas_cache=mowas_message_cache,
             minimal_mowas_severity="Minor",
+            mowas_dapnet_high_prio_level="Minor"
         )
     )
