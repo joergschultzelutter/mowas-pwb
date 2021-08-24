@@ -365,7 +365,7 @@ def get_command_line_params():
         choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="SEVERE",
         type=str.upper,
-        help="Defines the minimal level where DAPNET messages will be sent out with high priority",
+        help="Defines the minimal level at which DAPNET messages will be sent out with high priority (rather than using standard settings)",
     )
 
 
