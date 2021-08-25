@@ -252,7 +252,11 @@ def process_mowas_data(
                             continue
 
                         # Check the priority level of the future message to DAPNET and bump it up if necessary
-                        dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+                        # but lower its priority if we deal with a "Cancel" message
+                        if mowas_msgtype is not "Cancel":
+                            dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+                        else:
+                            dapnet_high_prio_msg = False
 
                         # Now let's extract the remaining information before we take a look at the message's geometric structure
                         mowas_headline = element["info"][0]["headline"]
