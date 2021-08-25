@@ -267,12 +267,17 @@ def convert_text_to_plain_ascii(message_string: str):
     return message_string
 
 
-def run_interval_check(interval_value):
+def standard_run_interval_check(interval_value):
     interval_value = int(interval_value)
-    if interval_value < 30:
-        raise argparse.ArgumentTypeError("Minimum interval is 30 (minutes)")
+    if interval_value < 60:
+        raise argparse.ArgumentTypeError("Minimum standard interval is 60 (minutes)")
     return interval_value
 
+def emergency_run_interval_check(interval_value):
+    interval_value = int(interval_value)
+    if interval_value < 15:
+        raise argparse.ArgumentTypeError("Minimum emergency interval is 15 (minutes)")
+    return interval_value
 
 def get_command_line_params():
     parser = argparse.ArgumentParser()
@@ -313,11 +318,19 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--run-interval",
-        dest="run_interval",
-        default=30,
-        type=run_interval_check,
-        help="Run interval in minutes. Minimal value = 30 (minutes)",
+        "--standard-run-interval",
+        dest="standard_run_interval",
+        default=60,
+        type=standard_run_interval_check,
+        help="MOWAS check interval in case no previous incident for the given watch area has been detected. Minimal value = 60 (minutes)",
+    )
+
+    parser.add_argument(
+        "--emergency-run-interval",
+        dest="emergency_run_interval",
+        default=15,
+        type=emergency_run_interval_check,
+        help="MOWAS check interval in case at least one incident for the given watch area has been detected. Minimal value = 15 (minutes)",
     )
 
     parser.add_argument(
@@ -374,7 +387,8 @@ def get_command_line_params():
 
     mowas_configfile = args.configfile.name
     mowas_test_configuration = args.test_configuration
-    mowas_run_interval = args.run_interval
+    mowas_standard_run_interval = args.standard_run_interval
+    mowas_emergency_run_interval = args.emergency_run_interval
     mowas_dapnet_destination_callsign = args.dapnet_destination_callsign
     mowas_telegram_destination_id = args.telegram_destination_id
     mowas_disable_telegram = args.disable_telegram
@@ -399,7 +413,8 @@ def get_command_line_params():
     return (
         mowas_configfile,
         mowas_test_configuration,
-        mowas_run_interval,
+        mowas_standard_run_interval,
+        mowas_emergency_run_interval,
         mowas_dapnet_destination_callsign,
         mowas_telegram_destination_id,
         mowas_disable_telegram,
