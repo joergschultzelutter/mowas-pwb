@@ -46,7 +46,8 @@ if __name__ == "__main__":
 	(
 		mowas_configfile,
 		mowas_test_configuration,
-		mowas_run_interval,
+		mowas_standard_run_interval,
+		mowas_emergency_run_interval,
 		mowas_dapnet_destination_callsign,
 		mowas_telegram_destination_id,
 		mowas_disable_telegram,
@@ -118,6 +119,11 @@ if __name__ == "__main__":
 		logger.info(
 			msg=f"Cannot track call sign for {mowas_follow_the_ham} - aprs.fi credentials are not configured; exiting..."
 		)
+		exit(0)
+
+	# Check if the emergency sleep time is greater than the standard sleep time
+	if mowas_emergency_run_interval > mowas_standard_run_interval:
+		logger.info(msg=f"Interval 'emergency' settings of {mowas_emergency_run_interval} is greater than 'standard' setting of {mowas_standard_run_interval}; exiting ...")
 		exit(0)
 
 	# If the user wants us to track a ham radio user AND has configured
@@ -217,18 +223,29 @@ if __name__ == "__main__":
 				minimal_mowas_severity=mowas_warning_level,
 				mowas_dapnet_high_prio_level=mowas_dapnet_high_prio_level,
 			)
-			
+
+			# Did we find some new message updates that we need to send to the user?
 			if len(mowas_messages_to_send.keys()) > 0:
 				logger.info(msg=f"{len(mowas_messages_to_send)} new message(s) found")
+
+				# Use the emergency run interval setting for the sleep 
+				mowas_run_interval = mowas_emergency_run_interval
+
+				# Check if we need to send something to DAPNET
 				if mowas_dapnet_enabled:
 					logger.info(msg="Preparing DAPNET messages")
 					generate_dapnet_messages(mowas_messages_to_send=mowas_messages_to_send)
+
+				# Check if we need to send something to Telegram
 				if mowas_telegram_enabled:
 					logger.info(msg="Preparing Telegram messages")
 					generate_telegram_messages(mowas_messages_to_send=mowas_messages_to_send)
+			else:
+				# Nothing to send; use the longer sleep interval
+				mowas_run_interval = mowas_standard_run_interval
 
 			# Finally, go to sleep
-			logger.info(msg="Entering sleep mode ...")
+			logger.info(msg=f"Entering sleep mode for {mowas_run_interval} mins...")
 			time.sleep(mowas_run_interval * 60)
 			logger.info(msg="Recovered from sleep mode ...")
 		except (KeyboardInterrupt, SystemExit):
