@@ -273,11 +273,13 @@ def standard_run_interval_check(interval_value):
         raise argparse.ArgumentTypeError("Minimum standard interval is 60 (minutes)")
     return interval_value
 
+
 def emergency_run_interval_check(interval_value):
     interval_value = int(interval_value)
     if interval_value < 15:
         raise argparse.ArgumentTypeError("Minimum emergency interval is 15 (minutes)")
     return interval_value
+
 
 def get_command_line_params():
     parser = argparse.ArgumentParser()

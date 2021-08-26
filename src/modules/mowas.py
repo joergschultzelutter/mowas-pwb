@@ -87,7 +87,10 @@ def download_mowas_data(base_url: str, url_path: str):
 
 
 def process_mowas_data(
-    coordinates: list, mowas_cache: ExpiringDict, minimal_mowas_severity: str = "Minor",mowas_dapnet_high_prio_level: str = "Minor"
+    coordinates: list,
+    mowas_cache: ExpiringDict,
+    minimal_mowas_severity: str = "Minor",
+    mowas_dapnet_high_prio_level: str = "Minor",
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -254,7 +257,14 @@ def process_mowas_data(
                         # Check the priority level of the future message to DAPNET and bump it up if necessary
                         # but lower its priority if we deal with a "Cancel" message
                         if mowas_msgtype != "Cancel":
-                            dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+                            dapnet_high_prio_msg = (
+                                True
+                                if typedef_mowas_severity.index(
+                                    mowas_dapnet_high_prio_level
+                                )
+                                >= typedef_mowas_severity.index(mowas_severity)
+                                else False
+                            )
                         else:
                             dapnet_high_prio_msg = False
 
@@ -388,6 +398,6 @@ if __name__ == "__main__":
             coordinates=my_coordinates,
             mowas_cache=mowas_message_cache,
             minimal_mowas_severity="Minor",
-            mowas_dapnet_high_prio_level="Minor"
+            mowas_dapnet_high_prio_level="Minor",
         )
     )
