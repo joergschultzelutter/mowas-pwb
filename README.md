@@ -2,7 +2,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## MOWAS Personal Warning Beacon
-``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
+``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which sends emergency broadcasts from Germany's 'Modularem Warnsystem' to [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) accounts. MOWAS supports various categories such as floods, earthquakes et al.
 
 ## Feature set
 - Users can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
