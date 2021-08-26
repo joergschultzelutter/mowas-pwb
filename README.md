@@ -29,9 +29,10 @@ Supported MOWAS features:
     - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
     - Telegram: Specify the sender bot's access token
     - If you want to use the ``follow-the-ham`` program option, populate the program's aprs.fi access key
-    - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify. A configuration entry of ``mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333`` would result in two points that are going to be monitored:
-        - P1: ``lat = 51.838879``, ``lon = 8.32678``
-        - P2: ``lat = 51.829722``, ``lon = 9.448333``
+    - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify.
+    - A configuration entry of ``mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333`` would result in two coordinates that are going to be monitored independently from each other:
+        - C1: ``lat = 51.838879``, ``lon = 8.32678``
+        - C2: ``lat = 51.829722``, ``lon = 9.448333``
  - Finally, run the program. Specify a DAPNET ham radio call sign and/or a numeric Telegram user ID as targets. For your first run, I recommend using the ``generate_test_message`` program option - this will simply trigger a test message to DAPNET/Telegram, thus allowing you to tell whether your program configuration is ok.
 
 ## Command line parameters
