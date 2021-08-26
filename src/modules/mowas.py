@@ -253,7 +253,7 @@ def process_mowas_data(
 
                         # Check the priority level of the future message to DAPNET and bump it up if necessary
                         # but lower its priority if we deal with a "Cancel" message
-                        if mowas_msgtype is not "Cancel":
+                        if mowas_msgtype != "Cancel":
                             dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
                         else:
                             dapnet_high_prio_msg = False
