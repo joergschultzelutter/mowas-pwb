@@ -1,9 +1,11 @@
 # mowas-pwb
-[MOWAS](https://de.wikipedia.org/wiki/MoWaS) personal warning beacon
+mowas-pwb is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
 
-- User can specify 1..n fixed sets of lat/lon coordinates which will be validated against MOWAS warnings.
-- Additionally, licensed amateur radio operators can specify an APRS call sign whose lat/lon coordinates will also be monitored
-- User can specify a minimal warning level which needs to be met for triggering a message (e.g. "Severe", "Extreme"). mowas-pwb will only send messages to the user if the message's sttatus is greater or equal to the given warning level.
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+- Users can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
+- Additionally, licensed amateur radio operators can specify an APRS call sign whose dynamic lat/lon coordinates will be monitored in addition to the static warning areas
+- Users can specify a minimal warning level which needs to be met for triggering a message (e.g. "Severe", "Extreme"). ``mowas-pwb`` will only send messages to the user if the message's sttatus is greater or equal to the given warning level.
 - In addition to the aforementioned warning level, the user can specify a warning level threshold. Only messages whose status is greater or equal to this threshold level will be forwarded to the user's DAPNET account with high priority - all other messages will be suppressed. This is useful if you are e.g. only interested in warning messages of e.g. a disaster scope.
 
 Supported MOWAS features: 
