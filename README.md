@@ -1,8 +1,10 @@
 # mowas-pwb
-``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
-
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+## MOWAS Personal Warning Beacon
+``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
+
+## Feature set
 - Users can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
 - Additionally, licensed amateur radio operators can specify an APRS call sign whose dynamic lat/lon coordinates will be monitored in addition to the static warning areas
 - Users can specify a minimal warning level which needs to be met for triggering a message (e.g. "Severe", "Extreme"). ``mowas-pwb`` will only send messages to the user if the message's sttatus is greater or equal to the given warning level.
@@ -17,12 +19,12 @@ Supported MOWAS features:
 - For APRS tracking, a valid aprs.fi access key is required
 - Download the repo
 - Install the PIP packages:
-    - expiringdict
-    - numpy
-    - python-telegram-bot
-    - requests
-    - shapely
-    - unidecode
+    - ``expiringdict``
+    - ``numpy``
+    - ``python-telegram-bot``
+    - ``requests``
+    - ``shapely``
+    - ``unidecode``
 - Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. Then amend its entries.
     - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
     - Telegram: Specify the sender bot's access token
@@ -30,7 +32,7 @@ Supported MOWAS features:
     - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify. A configuration entry of ``mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333`` would result in two points that are going to be monitored:
         - P1: ``lat = 51.838879``, ``lon = 8.32678``
         - P2: ``lat = 51.829722``, ``lon = 9.448333``
- - Finally, run the program. Specify a DAPNET ham radio call sign and/or a numeric Telegram user ID as targets. For your first run, I recommend using the ````generate_test_message`` program option - this will simply trigger a test message to DAPNET/Telegram, thus allowing you to tell whether your program configuration is ok.
+ - Finally, run the program. Specify a DAPNET ham radio call sign and/or a numeric Telegram user ID as targets. For your first run, I recommend using the ``generate_test_message`` program option - this will simply trigger a test message to DAPNET/Telegram, thus allowing you to tell whether your program configuration is ok.
 
 ## Command line parameters
 
@@ -118,7 +120,7 @@ The potential side effect for this constraint is that if you start the program a
 
 - If you intend to host an instance of this program, any of the following options require you to obtain an amateur radio license:
     - Sending messages to DAPNET (requires: DAPNET access credentials)
-    - Usage of the program's __follow-the-ham__ option. (requires: aprs.fi access credentials)
+    - Usage of the program's ``follow-the-ham`` option. (requires: aprs.fi access credentials)
 - It is still possible to run and host the program as a Telegram-only messaging option.
 - APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR.
 
