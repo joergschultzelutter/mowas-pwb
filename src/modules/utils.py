@@ -290,13 +290,6 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--test-configuration",
-        dest="test_configuration",
-        action="store_true",
-        help="Checks the program config, sends one test message to the activated channel(s) and then exits the program",
-    )
-
-    parser.add_argument(
         "--disable-dapnet",
         dest="disable_dapnet",
         action="store_true",
@@ -386,7 +379,6 @@ def get_command_line_params():
     args = parser.parse_args()
 
     mowas_configfile = args.configfile.name
-    mowas_test_configuration = args.test_configuration
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
     mowas_dapnet_destination_callsign = args.dapnet_destination_callsign
@@ -412,7 +404,6 @@ def get_command_line_params():
 
     return (
         mowas_configfile,
-        mowas_test_configuration,
         mowas_standard_run_interval,
         mowas_emergency_run_interval,
         mowas_dapnet_destination_callsign,
