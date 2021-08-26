@@ -45,7 +45,6 @@ if __name__ == "__main__":
 	# Get our command line parameters
 	(
 		mowas_configfile,
-		mowas_test_configuration,
 		mowas_standard_run_interval,
 		mowas_emergency_run_interval,
 		mowas_dapnet_destination_callsign,
@@ -202,6 +201,7 @@ if __name__ == "__main__":
 
 		# Do we need to track the user's config on aprs.fi?
 		if mowas_follow_the_ham:
+			logger.debug(msg=f"Trying to get lat/lon for {mowas_follow_the_ham} on aprs.fi ...")
 			# yes; let's get the latitude and longitude info
 			success, latitude, longitude = get_position_on_aprsfi(
 				aprsfi_callsign=mowas_follow_the_ham,
@@ -211,12 +211,18 @@ if __name__ == "__main__":
 			# If we were unable to find the call sign on aprs.fi, 
 			# we will NOT trigger an error
 			if success:
-				lonlat = [longitude, latitude]
-				mowas_watch_areas.append(lonlat)
+				logger.debug(msg=f"APRS.fi coordinate retrieval successful; adding coordinates to watchlist ...")
+				latlon = [latitude, longitude]
+				mowas_watch_areas.append(latlon)
+			else:
+				logger.debug(msg=f"Unable to retrieve coordinates on aprs.fi; user's coordinates will not be watched ...")
+
 
 		logger.info(mowas_watch_areas)
 
+
 		try:
+			logger.debug(msg=f"Processing MOWAS data ...")
 			mowas_message_cache, mowas_messages_to_send = process_mowas_data(
 				coordinates=mowas_watch_areas,
 				mowas_cache=mowas_message_cache,
@@ -241,6 +247,8 @@ if __name__ == "__main__":
 					logger.info(msg="Preparing Telegram messages")
 					generate_telegram_messages(mowas_messages_to_send=mowas_messages_to_send)
 			else:
+				logger.debug(msg="No new messages found")
+
 				# Nothing to send; use the longer sleep interval
 				mowas_run_interval = mowas_standard_run_interval
 
