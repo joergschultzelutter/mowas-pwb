@@ -23,10 +23,63 @@ Supported MOWAS features:
 - __ttl__ This numeric value defines the time-to-live for the program's decaying memory dictionary in hours. Default is 8 (hours); once a message has been present in the program's decaying memory cache for __ttl__ hours, it will be resent to the user. See the separate chapter on how the TTL logic works
 - __dapnet-destination-callsign__ Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Default is ```None```. Value has to be specified if the program is instructed to send data to DAPNET.
 - __telegram-destination-id__ This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot ```telegraminfobot``` for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
-- __follow-the-ham__ Nope, this will not give you the directions to the nearest restaurant (mmmh, haaaam - yummmmmy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. Useful option if you're in the field and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is not supposed to be used on a permanent basis. Remember: with great power comes great responsibility.
+- __follow-the-ham__ Nope, this will not give you the directions to the nearest restaurant (mmmh, haaaammm - yummmmmy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. Useful option if you're in the field and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is not supposed to be used on a permanent basis. Remember: with great power comes great responsibility.
 - __warning-level__. Defines the minimal warning level that a message must have before the program recognizes it for processing. Currently, MOWS supports four warning levels (listed in ascending order of importance): ```MINOR```(default setting), ```MODERATE```, ```SEVERE``` and ```EXTREME```. If your message's warning level is below the given value for the __warning-level__ parameter, it will be ignored - even if its coordinates match with your watch coordinates.
 - __dapnet-high-prio-level__. Similar to the __warning-level__ parameter, you can specify a MOWAS warning threshold for MOWAS messages of the "Alert" and "Update" categories. If the MOWAS messages' warning level is greater or equal to __dapnet-high-pro-level__, then the outgoing DAPNET message will be sent to the user with high priority. In any other case, normal priority settings will be applied. Note that MOWAS "Cancel" messages will always be sent with standard priority.
 
+## Program config file
+
+mowas-pwb comes with a program config file which mainly contains API keys. In order to use the program, you need to configure this file.
+
+- __aprsdotfi_api_key__ is the aprs.fi access key that is used if you tell the program to use the __follow-the-ham__ option
+- __dapnet_login_callsign__ and __dapnet_login_passcode__ are required for sending data to DAPNET
+- __mowas_watch_areas__ defines your watch areas. mowas-pwb will check these areas and if there is a match, it might forward you that warning message.
+- __telegram_bot_token__ defines the Telegram bot which will deliver potential warning messages to you.
+
+    [mowas_config]
+
+    # API key for www.aprs.fi access
+    # API key "NOT_CONFIGURED" disable aprs.fi access
+    aprsdotfi_api_key = NOT_CONFIGURED
+
+    # DAPNET access credentials
+    # Callsign "NOT_CONFIGURED" disables DAPNET access
+    dapnet_login_callsign = NOT_CONFIGURED
+    dapnet_login_passcode = -1
+
+    # Lat / Lon coordinates that we intend to monitor
+    # Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
+    # Example: 51.838879,8.32678 51.829722,9.448333
+    mowas_watch_areas = 51.8127,8.32678 51.829722,9.448333 48.4794,10.771
+
+    # Telegram bot token - this is the bot that will send out the message
+    # "NOT_CONFIGURED" disables Telegram access
+    telegram_bot_token = NOT_CONFIGURED
+
+## TTL and processing logic
+
+### MOWAS "Alert" and "Update" message types
+
+mowas-pwb uses a decaying memory dictionary which will prevent message duplicates being sent to the user. The program's default life span for a messsage is 8 hours. If a MOWAS message (identified by its unique MOWAS message ID) has been sent to the user, it will enter this decaying dictionary. The same MOWAS message ID's content will be resent to the user if:
+
+- the MOWAS message ID is already present in the dictionary but changed its status (e.g. a message's status was changed from "Alert" to "Update")
+- the MOWAS message ID's is already present in the dictionary, its status in the dictionary AND in the current message is "Update" AND its update time stamp has changed. This indicates a message that was at least updated twice ("Alert" -> "Update" (1) --> "Update" (2))
+- the MOWAS message ID is NOT present in the dictionary AND its status is either "Alert" or "Update". We may never either have never encountered this message yet or it was already present in our dictionary but its entry has already expired. In that case, we will simply resend the message again and re-add the MOWAS message ID to our dictionary.
+
+### MOWAS "Cancel" message type
+
+Similar to the "Alert" and "Update" message types, mowas-pwb will handle "Cancel" messages in the following way:
+
+- If the MOWAS message ID is already present in the dictionary and its status has changed from "Alert"/"Update" to "Cancel", mowas-pwb will send out a cancel message to the user for one last time. The MOWAS message ID is then removed from the decaying dictionary.
+- If the MOWAS message ID is NOT present in the dictionary AND its status is "Cancel", the program will ignore this message. The MOWAS interface has no official documentation and it is unknown for how long a "Cancel" message will be present in the data stream. Rather than re-sending "Cancel" messages over and over, the program will ignore these cases.
+
+The potential side effect for this constraint is that if you start the program and there is a MOWAS "Cancel" message for your watch area(s), you will not receive a message by the program. You WOULD have received one if that area had either been in "Alert" or "Update" status, though. Anyway, as the imminent danger is over, that cancellation message will no longer be sent to the user.
+
+## Known issues
+
+- In order to match with a given watch area, the user's coordinates (```mowas_watch_areas``` from the program config file) have either to be inside of the polygon or intersect with that polygon.
+- Currently, there is no option that enables the user to specify and additional proximity to that polygon ("Polygon plus 10km distance")
+- This program uses native MOWAS data. All warning messages are in German - there does not seem to be an international message warning interface.
 
 ## The fine print
 
@@ -35,7 +88,6 @@ Supported MOWAS features:
     - Usage of the program's __follow-the-ham__ option. (requires: aprs.fi access credentials)
 - It is still possible to run and host the program as a Telegram-only messaging option.
 - APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR.
-
 
 ## Legal mumbo-jumbo
 
@@ -47,8 +99,7 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
 
-
-- If you intend to host your own instance of MPAD, you need to provide API access keys to the following services:
+- If you intend to host your own instance of mowas-pwb, you need to provide API access keys to the following services:
     - telegram.org (if you want the program to send messages to your Telegram account)
     - DAPNET / hampager.de (if you want the program to send messages to your DAPNET account)
     - optional: aprs.fi access key.
