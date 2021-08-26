@@ -14,47 +14,49 @@ Supported MOWAS features:
 
 ### Optional command line parameters
 
-- __configfile__ Specifies the program's config file name. Default is 'mowas-pwb.cfg'
-- __generate_test_message__ If this setting is specified, the program will start up as usual but will send only one test message to the specified recipient on DAPNET and/or Telegram. Once this data was sent to the respective APIs, the program will exit.
-- __disable-dapnet__ Disables any outgoing messages to DAPNET. Note: if you haven't configured your DAPNET access credentials, this option is automatically activated.
-- __disable-telegram__ Disables any outgoing messages to Telegram. Note: if you haven't configured your Telegram access credentials, this option is automatically activated.
-- __standard-run-interval__ This is the program's standard run interval in minutes; its minimum setting (and default value) is 60. Between each check of the MOWAS URLs, the program will sleep the specified number of minutes __unless__ at least one change has been detected which was sent to the user and the program will automatically switch to a different run interval. See __emergency-run-interval__ for additional information.
-- __emergency-run-interval__ This is the standard run interval in minutes in case at least one new or updated emergency message has been detected (read: something has happened and we had to alert the user with a message). This parameter's minimum setting and default value is 15 (minutes) and its value is enforced to be lower than the one for __standard-run-interval__.
-- __ttl__ This numeric value defines the time-to-live for the program's decaying memory dictionary in hours. Default is 8 (hours); once a message has been present in the program's decaying memory cache for __ttl__ hours, it will be resent to the user. See the separate chapter on how the TTL logic works
-- __dapnet-destination-callsign__ Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Default is ```None```. Value has to be specified if the program is instructed to send data to DAPNET.
-- __telegram-destination-id__ This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot ```telegraminfobot``` for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
-- __follow-the-ham__ Nope, this will not give you the directions to the nearest restaurant (mmmh, haaaammm - yummmmmy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. Useful option if you're in the field and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is not supposed to be used on a permanent basis. Remember: with great power comes great responsibility.
-- __warning-level__. Defines the minimal warning level that a message must have before the program recognizes it for processing. Currently, MOWS supports four warning levels (listed in ascending order of importance): ```MINOR```(default setting), ```MODERATE```, ```SEVERE``` and ```EXTREME```. If your message's warning level is below the given value for the __warning-level__ parameter, it will be ignored - even if its coordinates match with your watch coordinates.
-- __dapnet-high-prio-level__. Similar to the __warning-level__ parameter, you can specify a MOWAS warning threshold for MOWAS messages of the "Alert" and "Update" categories. If the MOWAS messages' warning level is greater or equal to __dapnet-high-pro-level__, then the outgoing DAPNET message will be sent to the user with high priority. In any other case, normal priority settings will be applied. Note that MOWAS "Cancel" messages will always be sent with standard priority.
+- ``configfile`` Specifies the program's config file name. Default is '__mowas-pwb.cfg__'
+- ``generate_test_message`` If this setting is specified, the program will start up as usual but will send only one test message to the specified recipient on DAPNET and/or Telegram. Once this data was sent to the respective APIs, the program will exit.
+- ``disable-dapnet`` Disables any outgoing messages to DAPNET. Note: if you haven't configured your DAPNET access credentials, this option is automatically activated.
+- ``disable-telegram`` Disables any outgoing messages to Telegram. Note: if you haven't configured your Telegram access credentials, this option is automatically activated.
+- ``standard-run-interval`` This is the program's standard run interval in minutes; its minimum setting (and default value) is 60. Between each check of the MOWAS URLs, the program will sleep the specified number of minutes __unless__ at least one change has been detected which was sent to the user and the program will automatically switch to a different run interval. See ``emergency-run-interval`` for additional information.
+- ``emergency-run-interval`` This is the standard run interval in minutes in case at least one new or updated emergency message has been detected (read: something has happened and we had to alert the user with a message). This parameter's minimum setting and default value is 15 (minutes) and its value is enforced to be lower than the one for __standard-run-interval__.
+- ``ttl`` This numeric value defines the time-to-live for the program's decaying memory dictionary in hours. Default is 8 (hours); once a message has been present in the program's decaying memory cache for __ttl__ hours, it will be resent to the user. See the separate chapter on how the TTL logic works
+- ``dapnet-destination-callsign`` Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Default is ```None```. Value has to be specified if the program is instructed to send data to DAPNET.
+- ``telegram-destination-id`` This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot __telegraminfobot__ for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
+- ``follow-the-ham`` Nope, this will not give you the directions to the nearest restaurant (mmmh, haaaammm - yummmmmy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. Useful option if you're in the field and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is not supposed to be used on a permanent basis. Remember: with great power comes great responsibility.
+- ``warning-level``. Defines the minimal warning level that a message must have before the program recognizes it for processing. Currently, MOWS supports four warning levels (listed in ascending order of importance): __MINOR__(default setting), __MODERATE__, __SEVERE__ and __EXTREME__. If your message's warning level is below the given value for the ``warning-level`` parameter, it will be ignored - even if its coordinates match with your watch coordinates.
+- ``dapnet-high-prio-level``. Similar to the ``warning-level`` parameter, you can specify a MOWAS warning threshold for MOWAS messages of the "Alert" and "Update" categories. If the MOWAS messages' warning level is greater or equal to ``dapnet-high-pro-level``, then the outgoing DAPNET message will be sent to the user with high priority. In any other case, normal priority settings will be applied. Note that MOWAS "Cancel" messages will always be sent with standard priority.
 
 ## Program config file
 
 mowas-pwb comes with a program config file which mainly contains API keys. In order to use the program, you need to configure this file.
 
-- __aprsdotfi_api_key__ is the aprs.fi access key that is used if you tell the program to use the __follow-the-ham__ option
-- __dapnet_login_callsign__ and __dapnet_login_passcode__ are required for sending data to DAPNET
-- __mowas_watch_areas__ defines your watch areas. mowas-pwb will check these areas and if there is a match, it might forward you that warning message.
-- __telegram_bot_token__ defines the Telegram bot which will deliver potential warning messages to you.
+- ``aprsdotfi_api_key`` is the aprs.fi access key that is used if you tell the program to use the ``follow-the-ham`` option
+- ``dapnet_login_callsign`` and ``dapnet_login_passcode`` are required for sending data to DAPNET
+- ``mowas_watch_areas`` defines your watch areas. mowas-pwb will check these areas and if there is a match, it might forward you that warning message.
+- ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
 
-    [mowas_config]
+```python
+[mowas_config]
 
-    # API key for www.aprs.fi access
-    # API key "NOT_CONFIGURED" disable aprs.fi access
-    aprsdotfi_api_key = NOT_CONFIGURED
+# API key for www.aprs.fi access
+# API key "NOT_CONFIGURED" disable aprs.fi access
+aprsdotfi_api_key = NOT_CONFIGURED
 
-    # DAPNET access credentials
-    # Callsign "NOT_CONFIGURED" disables DAPNET access
-    dapnet_login_callsign = NOT_CONFIGURED
-    dapnet_login_passcode = -1
+# DAPNET access credentials
+# Callsign "NOT_CONFIGURED" disables DAPNET access
+dapnet_login_callsign = NOT_CONFIGURED
+dapnet_login_passcode = -1
 
-    # Lat / Lon coordinates that we intend to monitor
-    # Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
-    # Example: 51.838879,8.32678 51.829722,9.448333
-    mowas_watch_areas = 51.8127,8.32678 51.829722,9.448333 48.4794,10.771
+# Lat / Lon coordinates that we intend to monitor
+# Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
+# Example: 51.838879,8.32678 51.829722,9.448333
+mowas_watch_areas = 51.8127,8.32678 51.829722,9.448333 48.4794,10.771
 
-    # Telegram bot token - this is the bot that will send out the message
-    # "NOT_CONFIGURED" disables Telegram access
-    telegram_bot_token = NOT_CONFIGURED
+# Telegram bot token - this is the bot that will send out the message
+# "NOT_CONFIGURED" disables Telegram access
+telegram_bot_token = NOT_CONFIGURED
+```
 
 ## TTL and processing logic
 
