@@ -52,8 +52,8 @@ Supported MOWAS features:
 If you have specified the ``follow-the-ham`` parameter AND aprs.fi's access key is configured, the program will initiate one request to aprs.fi during its startup process. This will allow you to detect if the call sign does exist on aprs.fi and if the aprs.fi access key is configured in a proper way. If this check is not passed successfully, the program startup will abort. Any _further_ errors in retrieving that call sign's position data will _not_ cause an error, though. The Program will simply continue to monitor the wath area that was provided to it through its program config file.
 
 ### Mandatory command line parameters
-- ``dapnet-destination-callsign`` Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Default is ```None```. Value has to be specified if the program is instructed to send data to DAPNET.
-- ``telegram-destination-id`` This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot __telegraminfobot__ for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
+- ``dapnet-destination-callsign`` Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Value has to be specified if the program is instructed to send data to DAPNET.
+- ``telegram-destination-id`` This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot ``userinfobot`` for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
 
 At least one output option (DAPNET or Telegram) needs to be configured in the program's config file and also provided via command line parameters - otherwise, the program will exit with an error message during startup.
 
@@ -66,7 +66,11 @@ At least one output option (DAPNET or Telegram) needs to be configured in the pr
 - ``mowas_watch_areas`` defines your watch areas. ``mowas-pwb`` will check these areas and if there is a match, it might forward you that warning message.
 - ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
 
-A value of NOT_CONFIGURED will automatically disable the program option that is associated with this value
+A variable with the value of 
+```python 
+NOT_CONFIGURED
+``` 
+will automatically disable the program option that is associated with this value
 
 ```python
 [mowas_config]
