@@ -82,6 +82,7 @@ The potential side effect for this constraint is that if you start the program a
 - In order to match with a given watch area, the user's coordinates (```mowas_watch_areas``` from the program config file) have either to be inside of the polygon or intersect with that polygon.
 - Currently, there is no option that enables the user to specify and additional proximity to that polygon ("Polygon plus 10km distance")
 - This program uses native MOWAS data. All warning messages are in German - there does not seem to be an international message warning interface.
+- Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one instance.
 
 ## The fine print
 
