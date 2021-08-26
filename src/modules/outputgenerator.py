@@ -25,7 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 def generate_dapnet_messages(mowas_messages_to_send: dict):
     output_list = []
     for mowas_message_id in mowas_messages_to_send:
@@ -41,6 +40,8 @@ def generate_dapnet_messages(mowas_messages_to_send: dict):
         sent = mowas_messages_to_send[mowas_message_id]["sent"]
         msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
+        geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
+        dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
 
     return output_list
 
@@ -60,6 +61,8 @@ def generate_telegram_messages(mowas_messages_to_send: dict):
         sent = mowas_messages_to_send[mowas_message_id]["sent"]
         msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
+        geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
+        dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
     return output_list
 
 
