@@ -1,5 +1,5 @@
 # mowas-pwb
-mowas-pwb is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
+``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which supports [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) in receiving emergency broadcasts from Germany's 'Modularem Warnsystem'. MOWAS supports various categories such as floods, earthquakes et al.
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -57,11 +57,11 @@ At least one output option (DAPNET or Telegram) needs to be configured in the pr
 
 ## Program config file
 
-mowas-pwb comes with a program config file which mainly contains API keys. In order to use the program, you need to configure this file.
+``mowas-pwb`` comes with a program config file which mainly contains API keys. In order to use the program, you need to configure this file.
 
 - ``aprsdotfi_api_key`` is the aprs.fi access key that is used if you tell the program to use the ``follow-the-ham`` option
 - ``dapnet_login_callsign`` and ``dapnet_login_passcode`` are required for sending data to DAPNET
-- ``mowas_watch_areas`` defines your watch areas. mowas-pwb will check these areas and if there is a match, it might forward you that warning message.
+- ``mowas_watch_areas`` defines your watch areas. ``mowas-pwb`` will check these areas and if there is a match, it might forward you that warning message.
 - ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
 
 A value of NOT_CONFIGURED will automatically disable the program option that is associated with this value
@@ -92,7 +92,7 @@ telegram_bot_token = NOT_CONFIGURED
 
 ### MOWAS "Alert" and "Update" message types
 
-mowas-pwb uses a decaying memory dictionary which will prevent message duplicates being sent to the user. The program's default life span for a messsage is 8 hours. If a MOWAS message (identified by its unique MOWAS message ID) has been sent to the user, it will enter this decaying dictionary. The same MOWAS message ID's content will be resent to the user if:
+``mowas-pwb`` uses a decaying memory dictionary which will prevent message duplicates being sent to the user. The program's default life span for a messsage is 8 hours. If a MOWAS message (identified by its unique MOWAS message ID) has been sent to the user, it will enter this decaying dictionary. The same MOWAS message ID's content will be resent to the user if:
 
 - the MOWAS message ID is already present in the dictionary but changed its status (e.g. a message's status was changed from "Alert" to "Update")
 - the MOWAS message ID's is already present in the dictionary, its status in the dictionary AND in the current message is "Update" AND its update time stamp has changed. This indicates a message that was at least updated twice ("Alert" -> "Update" (1) --> "Update" (2))
@@ -100,9 +100,9 @@ mowas-pwb uses a decaying memory dictionary which will prevent message duplicate
 
 ### MOWAS "Cancel" message type
 
-Similar to the "Alert" and "Update" message types, mowas-pwb will handle "Cancel" messages in the following way:
+Similar to the "Alert" and "Update" message types, ``mowas-pwb`` will handle "Cancel" messages in the following way:
 
-- If the MOWAS message ID is already present in the dictionary and its status has changed from "Alert"/"Update" to "Cancel", mowas-pwb will send out a cancel message to the user for one last time. The MOWAS message ID is then removed from the decaying dictionary.
+- If the MOWAS message ID is already present in the dictionary and its status has changed from "Alert"/"Update" to "Cancel", ``mowas-pwb`` will send out a cancel message to the user for one last time. The MOWAS message ID is then removed from the decaying dictionary.
 - If the MOWAS message ID is NOT present in the dictionary AND its status is "Cancel", the program will ignore this message. The MOWAS interface has no official documentation and it is unknown for how long a "Cancel" message will be present in the data stream. Rather than re-sending "Cancel" messages over and over, the program will ignore these cases.
 
 The potential side effect for this constraint is that if you start the program and there is a MOWAS "Cancel" message for your watch area(s), you will not receive a message by the program. You WOULD have received one if that area had either been in "Alert" or "Update" status, though. Anyway, as the imminent danger is over, that cancellation message will no longer be sent to the user.
@@ -132,7 +132,7 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
 
-- If you intend to host your own instance of mowas-pwb, you need to provide API access keys to the following services:
+- If you intend to host your own instance of ``mowas-pwb``, you need to provide API access keys to the following services:
     - telegram.org (if you want the program to send messages to your Telegram account)
     - DAPNET / hampager.de (if you want the program to send messages to your DAPNET account)
     - optional: aprs.fi access key.
