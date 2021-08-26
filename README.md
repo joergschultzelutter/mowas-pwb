@@ -36,6 +36,8 @@ mowas-pwb comes with a program config file which mainly contains API keys. In or
 - ``mowas_watch_areas`` defines your watch areas. mowas-pwb will check these areas and if there is a match, it might forward you that warning message.
 - ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
 
+A value of NOT_CONFIGURED will automatically disable the program option that is associated with this value
+
 ```python
 [mowas_config]
 
