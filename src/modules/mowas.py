@@ -142,6 +142,10 @@ def process_mowas_data(
     assert minimal_mowas_severity in typedef_mowas_severity
     assert mowas_dapnet_high_prio_level in typedef_mowas_severity
 
+    # message marker which tells us that we have received at least one
+    # Alert or Update message
+    got_alert_or_update = False
+
     # For each of our own categories, try to download the MOWAS data
     for mowas_category in mowas_dictionary:
         success, json_data = download_mowas_data(
@@ -381,8 +385,13 @@ def process_mowas_data(
                                 mowas_identifier
                             ] = mowas_messages_to_sent_payload
 
+                            # Finally, check if the message is either "Alert" or
+                            # "Update". We need this info at a later point in time
+                            if mowas_msgtype in ("Alert", "Update"):
+                                got_alert_or_update = True
+
     # Return the expiring cache and our messages to the user
-    return mowas_cache, mowas_messages_to_send
+    return mowas_cache, mowas_messages_to_send, got_alert_or_update
 
 
 if __name__ == "__main__":
