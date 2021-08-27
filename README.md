@@ -49,17 +49,17 @@ Supported MOWAS features:
 - ``standard-run-interval`` This is the program's standard run interval in minutes; its minimum setting (and default value) is 60. Between each check of the MOWAS URLs, the program will sleep the specified number of minutes __unless__ at least one change has been detected which was sent to the user and the program will automatically switch to a different run interval. See ``emergency-run-interval`` for additional information.
 - ``emergency-run-interval`` This is the standard run interval in minutes in case at least one new or updated emergency message has been detected (read: something has happened and we had to alert the user with a message). This parameter's minimum setting and default value is 15 (minutes) and its value is enforced to be lower than the one for __standard-run-interval__.
 - ``ttl`` This numeric value defines the time-to-live for the program's decaying memory dictionary in hours. Default is 8 (hours); once a message has been present in the program's decaying memory cache for __ttl__ hours, it will be resent to the user. See the separate chapter on how the TTL logic works
-- ``follow-the-ham`` This will _not_ give you the directions to the nearest restaurant (mmmh, :meat_on_bone: - yummy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. Useful option if you're in the field and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is not supposed to be used on a permanent basis. Remember that with great power comes great responsibility.
-- ``warning-level``. Defines the minimal warning level that a message must have before the program recognizes it for processing. Currently, MOWS supports four warning levels (listed in ascending order of importance): __MINOR__ (default setting), __MODERATE__, __SEVERE__ and __EXTREME__. If your message's warning level is below the given value for the ``warning-level`` parameter, it will be ignored - even if its coordinates match with your watch coordinates.
+- ``follow-the-ham`` This will _not_ give you the directions to the nearest restaurant (mmmh, :meat_on_bone: - yummy) but allows you to track one APRS call sign with or without SSID. In addition to the program's default set of coordinates that are monitored by default, this option will look up the user's call sign on aprs.fi, retrieve its lat/lon coordinates and then monitor these coordinates, too. This is a useful option if you're in a disaster area along with your APRS-capable HT and need to be aware of any dangers and emergencies that might be related to your current position. __Please use this option responsibly and only when necessary__. It is __not__ supposed to be used on a permanent basis. Remember: with great power comes great responsibility.
+- ``warning-level``. Defines the minimal warning level that a message must have before the program recognizes it for processing. Currently, MOWAS supports four warning levels (listed in ascending order of importance): __MINOR__ (default setting), __MODERATE__, __SEVERE__ and __EXTREME__. If your message's warning level is below the given value for the ``warning-level`` parameter, it will be ignored - even if its coordinates match with your watch coordinates.
 - ``dapnet-high-prio-level``. Similar to the ``warning-level`` parameter, you can specify a MOWAS warning threshold for MOWAS messages of the "Alert" and "Update" categories. If the MOWAS messages' warning level is greater or equal to ``dapnet-high-pro-level``, then the outgoing DAPNET message will be sent to the user with high priority. In any other case, normal priority settings will be applied. Note that MOWAS "Cancel" messages will always be sent with standard priority.
 
-If you have specified the ``follow-the-ham`` parameter AND aprs.fi's access key is configured, the program will initiate one request to aprs.fi during its startup process. This will allow you to detect if the call sign does exist on aprs.fi and if the aprs.fi access key is configured in a proper way. If this check is not passed successfully, the program startup will abort. Any _further_ errors in retrieving that call sign's position data will _not_ cause an error, though. The Program will simply continue to monitor the wath area that was provided to it through its program config file.
+If you have specified the ``follow-the-ham`` parameter AND aprs.fi's access key is configured, the program will initiate one request to aprs.fi during its startup process. This will allow you to detect if the call sign does exist on aprs.fi and if the aprs.fi access key is configured in a proper way. If this check is not passed successfully, the program startup will abort. Any _further_ errors in retrieving that call sign's position data will _not_ cause an error, though. The program will simply continue to monitor the watch area that was provided to it through its program config file; the call sign's availability on aprs.fi simply might have expired.
 
 ### Mandatory command line parameters
-- ``dapnet-destination-callsign`` Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. Value has to be specified if the program is instructed to send data to DAPNET.
-- ``telegram-destination-id`` This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot ``userinfobot`` for the retrieval of your numeric Telegram user ID. Value has to be specified if the program is instructed to send data to Telegram.
+- ``dapnet-destination-callsign`` Specifies the HAM radio operator's DAPNET call sign. This is the person that will receive our program's message(s). Additional SSID information can be specified but will not be honored by the program. This value has to be specified if the program is instructed to send data to DAPNET.
+- ``telegram-destination-id`` This is the NUMERIC Telegram user ID. This is the person that will receive our program's message(s). You can use the Telegram bot ``userinfobot`` for the retrieval of your numeric Telegram user ID. This value has to be specified if the program is instructed to send data to Telegram.
 
-At least one output option (DAPNET or Telegram) needs to be configured in the program's config file and also provided via command line parameters - otherwise, the program will exit with an error message during startup.
+At least one output option (DAPNET _or_ Telegram) needs to be configured in the program's config file and also provided via command line parameters - otherwise, the program will exit with an error message during startup.
 
 ## Program config file
 
@@ -124,14 +124,14 @@ The potential side effect for this constraint is that if you start the program a
 - This program uses native MOWAS data. All warning messages are in German - there does not seem to be an international message warning interface.
 - Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one instance.
 - Sometimes, the warncell info provided by MOWAS cannot be found in the official warncell registry. If that is the case, the (usually longer) descriptive area text from the original MOWAS message is used instead.
+- If you want to use this program for a different country's warning system:
+    - remove the call for retrieving the 'warncell' information
+    - replace the MOWAS module with your country's native warn system parser code
 
 ## The fine print
 
-- If you intend to host an instance of this program, any of the following options require you to obtain an amateur radio license:
-    - Sending messages to DAPNET (requires: DAPNET access credentials)
-    - Usage of the program's ``follow-the-ham`` option. (requires: aprs.fi access credentials)
-- It is still possible to run and host the program as a Telegram-only messaging option.
 - APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR.
+- aprs.fi services are provided by Hessu/OH7LZB - thank you!
 
 ## Legal mumbo-jumbo
 
@@ -139,15 +139,15 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - This is a hobby project. It has no commercial background whatsoever.
 
-- If you intend to host this software and exchange data with APRS-IS, you need to be a licensed ham radio operator. You also need to provide an APRS passcode for logging on to APRS-IS. If you don't know what this is and how to get such a passcode, then don't host an an instance of this program.
+- Both DAPNET messaging option or the ``follow-the-ham`` tracking option require you to be a licensed ham radio operator. If you run this program in Telegram-only mode, no ham radio license is required, though.
 
 - The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
 
 - If you intend to host your own instance of ``mowas-pwb``, you need to provide API access keys to the following services:
-    - telegram.org (if you want the program to send messages to your Telegram account)
-    - DAPNET / hampager.de (if you want the program to send messages to your DAPNET account)
-    - optional: aprs.fi access key.
+    - telegram.org
+    - DAPNET / hampager.de. Requires ham radio license.
+    - optional: aprs.fi access key. Requires ham radio license.
 
-- Don't rely on this service's availability.
+- Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once the latter are finally available in Germany - hey, it's only been 20 years since this technology has been invented; don't rush)
 
 If you use this program, then you agree to these terms and conditions. Thank you.
