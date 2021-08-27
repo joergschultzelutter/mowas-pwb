@@ -108,6 +108,8 @@ telegram_bot_token = NOT_CONFIGURED
 - the MOWAS message ID's is already present in the dictionary, its status in the dictionary AND in the current message is "Update" AND its update time stamp has changed. This indicates a message that was at least updated twice ("Alert" -> "Update" (1) --> "Update" (2))
 - the MOWAS message ID is NOT present in the dictionary AND its status is either "Alert" or "Update". We may never either have never encountered this message yet or it was already present in our dictionary but its entry has already expired. In that case, we will simply resend the message again and re-add the MOWAS message ID to our dictionary.
 
+If at least one "Alert" or "Update" message has been detected during a program cycle __which was deemed to be forwarded to the user__, ``mowas-pwb`` will assume that there is an incident going on. The sleep interval will change from 60 to 15 mins (default settings), thus allowing the program to stay up to date with any ongoing changes.
+
 ### MOWAS "Cancel" message type
 
 Similar to the "Alert" and "Update" message types, ``mowas-pwb`` will handle "Cancel" messages in the following way:
