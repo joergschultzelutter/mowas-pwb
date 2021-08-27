@@ -7,8 +7,8 @@
 ## Feature set
 - You can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
 - Additionally, licensed amateur radio operators can specify an APRS call sign whose lat/lon coordinates will be _dynamically_ monitored in addition to the static warning areas
-- You can specify a minimal warning level which needs to be met for triggering a message (e.g. "Severe", "Extreme"). ``mowas-pwb`` will only send messages to the your devices if the message's sttatus is greater or equal to the given warning level.
-- In addition to the aforementioned warning level, you can specify a warning level threshold. Only messages whose status is greater or equal to this threshold level will be forwarded to the user's DAPNET account with high priority - all other messages will be suppressed. This is useful if you are e.g. only interested in warning messages of e.g. a disaster scope.
+- You can specify a minimal warning level which needs to be met for triggering a message (e.g. "Severe", "Extreme"). ``mowas-pwb`` will only send messages to the your devices if the message's status is greater or equal to the given warning level. 
+- Additionally, you can specify a DAPNET-specific high priority message level. Alert/Update Messages whose warung levels meet or exceed this value will be sent out over DAPNET with a higher priority than standard messages.
 - ``mowas-pwb`` supports two kinds of run intervals:
     - The standard run interval (default: 60 mins) is applied if a previous program cycle did NOT trigger any outgoing messages to the user. This should be the default scenario. 
     - In case at least one Alert or Update message has been sent out to the user, ``mowas-pwb`` assumes that there is an ongoing emergency. The run interval will be set to a lower value (default: 15 mins). If there are no new messages to be sent to the user, that value will reset itself to the standard run interval at the next run cycle.
@@ -129,6 +129,7 @@ The potential side effect for this constraint is that if you start the program a
 - If you want to use this program for a different country's warning system:
     - remove the call for retrieving the 'warncell' information
     - replace the MOWAS module with your country's native warn system parser code
+    - change the DAPNET message group from "dl-all" (Germany) to your locale's transponder group.
 
 ## The fine print
 
