@@ -150,6 +150,6 @@ In reference to the European Union's GDPR regulations and other legal rules and 
     - DAPNET / hampager.de. __Requires ham radio license.__
     - optional: aprs.fi access key. __Requires ham radio license.__
 
-- Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once the latter are finally available in Germany - hey, it's only been 20 years since cell broadcasts have been invented; don't rush us)
+- Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once the latter are finally available in Germany - hey, it's been only 20 years since cell broadcasts were invented; don't rush us)
 
 If you use this program, then you agree to these terms and conditions. Thank you.
