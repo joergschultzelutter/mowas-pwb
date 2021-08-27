@@ -15,4 +15,5 @@ dapnet_login_passcode = -1
 mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333
 
 # Telegram bot token - this is the bot that will send out the message
-telegram_bot_token = abcdef
+# "NOT_CONFIGURED" disables Telegram access
+telegram_bot_token = NOT_CONFIGURED

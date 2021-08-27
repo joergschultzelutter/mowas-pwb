@@ -134,6 +134,13 @@ if __name__ == "__main__":
             )
             exit(0)
 
+    # Read the "Warncell" data which will later enables us to come up with proper
+    # (short) names for MOWAS areas in question
+    success, warncell_data = read_warncell_info()
+    if not success:
+        logger.info("Cannot read Warncell data from the DWD site; cannot continue")
+        exit(0)
+
     #
     # We've checked all parameters - let's start with setting up our environment
     #
@@ -171,10 +178,6 @@ if __name__ == "__main__":
         exit(0)
 
     # If we reach this point, then we are supposed to do some real work
-    success, warncell_data = read_warncell_info()
-    if not success:
-        logger.info("Cannot read Warncell data from the DWD site; cannot continue")
-        exit(0)
 
     # Register the SIGTERM handler; this will allow a safe shutdown of the program
     logger.info(msg="Registering SIGTERM handler for safe shutdown...")
@@ -237,13 +240,15 @@ if __name__ == "__main__":
                     logger.info(msg="Preparing DAPNET messages")
                     generate_dapnet_messages(
                         mowas_messages_to_send=mowas_messages_to_send
+                        warncell_data=warncell_data
                     )
 
                 # Check if we need to send something to Telegram
                 if mowas_telegram_enabled:
                     logger.info(msg="Preparing Telegram messages")
                     generate_telegram_messages(
-                        mowas_messages_to_send=mowas_messages_to_send
+                        mowas_messages_to_send=mowas_messages_to_send,
+                        warncell_data = warncell_data
                     )
             else:
                 logger.debug(msg="No new messages found")
