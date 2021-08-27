@@ -188,6 +188,9 @@ if __name__ == "__main__":
     logger.info(msg="Entering processing loop...")
     while True:
 
+        # Set the program's run interval to default settings
+        mowas_run_interval = mowas_standard_run_interval
+
         # use a copy of the watch areas as we may need to amend
         # this static information my adding the user's APRS
         # position data to it
@@ -221,7 +224,7 @@ if __name__ == "__main__":
 
         try:
             logger.debug(msg=f"Processing MOWAS data ...")
-            mowas_message_cache, mowas_messages_to_send = process_mowas_data(
+            mowas_message_cache, mowas_messages_to_send, got_alert_or_update = process_mowas_data(
                 coordinates=mowas_watch_areas,
                 mowas_cache=mowas_message_cache,
                 minimal_mowas_severity=mowas_warning_level,
@@ -233,13 +236,15 @@ if __name__ == "__main__":
                 logger.info(msg=f"{len(mowas_messages_to_send)} new message(s) found")
 
                 # Use the emergency run interval setting for the sleep
-                mowas_run_interval = mowas_emergency_run_interval
+                # if we have received at least one alert or update msg
+                if got_alert_or_update:
+                    mowas_run_interval = mowas_emergency_run_interval
 
                 # Check if we need to send something to DAPNET
                 if mowas_dapnet_enabled:
                     logger.info(msg="Preparing DAPNET messages")
                     generate_dapnet_messages(
-                        mowas_messages_to_send=mowas_messages_to_send
+                        mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data
                     )
 
@@ -252,9 +257,6 @@ if __name__ == "__main__":
                     )
             else:
                 logger.debug(msg="No new messages found")
-
-                # Nothing to send; use the longer sleep interval
-                mowas_run_interval = mowas_standard_run_interval
 
             # Finally, go to sleep
             logger.info(msg=f"Entering sleep mode for {mowas_run_interval} mins...")
