@@ -418,3 +418,6 @@ def get_command_line_params():
         mowas_time_to_live,
         mowas_dapnet_high_prio_level,
     )
+
+def remove_html_content(message_string: str):
+    return re.sub('<[^<]+?>', '', message_string)

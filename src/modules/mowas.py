@@ -333,8 +333,21 @@ def process_mowas_data(
                                         for geocode in geocodes:
                                             geocode_value = geocode["value"]
 
+                                    # We have a match? Then let's remember what we have
+                                    # Try to shorten the area names as this string is rather lengthy
                                     if area_desc not in areas_matching_latlon:
+                                        area_desc = area_desc.replace("Gemeinde/Stadt: ","",1)
+                                        area_desc = area_desc.replace("Landkreis/Stadt: ","",1)
+                                        area_desc = area_desc.replace("Bundesland: ","",1)
+                                        area_desc = area_desc.replace("Freistaat ","",1)
+                                        area_desc = area_desc.replace("Freie Hansestadt ","",1)
+                                        area_desc = area_desc.replace("Land: ","",1)
+                                        area_desc = area_desc.replace("Land ","",1)
                                         areas_matching_latlon.append(area_desc)
+
+                                    # Save the geocodes, too. This is our primary mean of identification
+                                    # area_desc will only be used of the geocode cannot be found 
+                                    # (MOWAS does seem to use incorrect geocodes from time to time)
                                     if geocode_value not in geocodes_matching_latlon:
                                         geocodes_matching_latlon.append(geocode_value)
 
