@@ -130,8 +130,8 @@ The potential side effect for this constraint is that if you start the program a
 
 ## The fine print
 
-- APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR.
-- aprs.fi services are provided by Hessu/OH7LZB - thank you!
+- APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR. Thank you Bob!
+- aprs.fi services are provided by Heikki Hannikainen/OH7LZB - thank you Hessu!
 
 ## Legal mumbo-jumbo
 
