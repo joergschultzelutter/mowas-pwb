@@ -147,8 +147,8 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - If you intend to host your own instance of ``mowas-pwb``, you need to provide API access keys to the following services:
     - telegram.org
-    - DAPNET / hampager.de. Requires ham radio license.
-    - optional: aprs.fi access key. Requires ham radio license.
+    - DAPNET / hampager.de. __Requires ham radio license.__
+    - optional: aprs.fi access key. __Requires ham radio license.__
 
 - Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once the latter are finally available in Germany - hey, it's only been 20 years since cell broadcasts have been invented; don't rush us)
 
