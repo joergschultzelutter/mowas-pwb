@@ -19,9 +19,9 @@ Supported MOWAS features:
 
 ## Installation
 - DAPNET and/or Telegrams access credentials are required.
-- For APRS tracking, a valid aprs.fi access key is required
+- For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
 - Download the repo
-- Install the PIP packages:
+- Install the PIP packages along with their dependencies:
     - ``expiringdict``
     - ``numpy``
     - ``python-telegram-bot``
@@ -126,12 +126,13 @@ The potential side effect for this constraint is that if you start the program a
 - In order to match with a given watch area, the user's coordinates (```mowas_watch_areas``` from the program config file) have either to be inside of the polygon or intersect with that polygon.
 - Currently, there is no option that enables the user to specify and additional proximity to that polygon ("Polygon plus 10km distance")
 - This program uses native MOWAS data. All warning messages are in German - there does not seem to be an international message warning interface.
-- Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one instance.
-- Sometimes, the warncell info provided by MOWAS cannot be found in the official warncell registry. If that is the case, the (usually longer) descriptive area text from the original MOWAS message is used instead.
+- Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one program instance.
+- As the MOWAS APIs are not officially available to end users, government authorities might either terminate the services without notice and / or change the format settings of the services that are currently exposed (but not officially available to end users)
+- Although all MOWAS messages do contain warncell references (which allows the program's DAPNET part to use the region's abbreviated region description), certain messages do contain invalid warncell identifiers. If such an case is encountered, MOWAS will use the (lenghty) original regional description instead. For DAPNET messages, the program will try to shorten that description by remmoving some clutter from that message.
 - If you want to use this program for a different country's warning system:
-    - remove the call for retrieving the 'warncell' information
+    - remove the call for retrieving the 'warncell' information - this one is only relevant to German users
     - replace the MOWAS module with your country's native warn system parser code
-    - change the DAPNET message group from "dl-all" (Germany) to your locale's transponder group.
+    - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
 
 ## The fine print
 
