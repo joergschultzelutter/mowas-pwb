@@ -144,14 +144,14 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - This is a hobby project. It has no commercial background whatsoever.
 
-- Both DAPNET messaging option or the ``follow-the-ham`` tracking option require you to be a licensed ham radio operator. If you run this program in Telegram-only mode, no ham radio license is required, though.
+- Both DAPNET messaging option or the ``follow-the-ham`` aprs.fi tracking option __require you to be a licensed ham radio operator__. If you run this program in Telegram-only mode, no ham radio license is required, though.
 
-- The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
+- In case the ``follow-the-ham`` option is used: The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
 
 - If you intend to host your own instance of ``mowas-pwb``, you need to provide API access keys to the following services:
     - telegram.org
-    - DAPNET / hampager.de. __Requires ham radio license.__
-    - optional: aprs.fi access key. __Requires ham radio license.__
+    - DAPNET / hampager.de. __Requires a valid ham radio license.__
+    - optional: aprs.fi access key. __Requires a valid ham radio license.__
 
 - Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once the latter are finally available in Germany - hey, it's been only 20 years since cell broadcasts were invented; don't rush us)
 
