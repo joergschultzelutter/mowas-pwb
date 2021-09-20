@@ -17,3 +17,11 @@ mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333
 # Telegram bot token - this is the bot that will send out the message
 # "NOT_CONFIGURED" disables Telegram access
 telegram_bot_token = NOT_CONFIGURED
+
+# SMTP  / IMAP shared Credentials
+# Providers like GMail require you to set an app-specific password
+# (see https://myaccount.google.com/apppasswords)
+# "NOT_CONFIGURED" disables the email account
+smtpimap_email_address = NOT_CONFIGURED
+smtpimap_email_password = NOT_CONFIGURED
+

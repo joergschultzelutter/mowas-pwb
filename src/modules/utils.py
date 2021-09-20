@@ -34,13 +34,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_program_config_from_file(config_filename: str):
+def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
     config = configparser.ConfigParser()
-    success = False
-
-    mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
-    mowas_dapnet_login_passcode = mowas_watch_areas_string = None
-    mowas_telegram_bot_token = None
     mowas_watch_areas = []
 
     try:
@@ -54,11 +49,20 @@ def get_program_config_from_file(config_filename: str):
         )
         mowas_watch_areas_string = config.get("mowas_config", "mowas_watch_areas")
         mowas_telegram_bot_token = config.get("mowas_config", "telegram_bot_token")
+
+        mowas_smtpimap_email_address = config.get(
+            "mowas_config", "smtpimap_email_address"
+        )
+        mowas_smtpimap_email_password = config.get(
+            "mowas_config", "smtpimap_email_password"
+        )
+
         success = True
     except:
         mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
         mowas_dapnet_login_passcode = mowas_watch_areas_string = None
         mowas_telegram_bot_token = None
+        mowas_smtpimap_email_address = mowas_smtpimap_email_password = None
         mowas_watch_areas = []
         success = False
 
@@ -69,9 +73,8 @@ def get_program_config_from_file(config_filename: str):
             mowas_watch_areas = b.tolist()
             success = True
         except:
-            c = []
             logger.info(
-                msg="Error in configuration file; cannot create MOWAS watch areas list"
+                msg="Error in configuration file; cannot create MOWAS watch areas list. Check if your config format is correct."
             )
             success = False
 
@@ -82,6 +85,8 @@ def get_program_config_from_file(config_filename: str):
         mowas_dapnet_login_passcode,
         mowas_watch_areas,
         mowas_telegram_bot_token,
+        mowas_smtpimap_email_address,
+        mowas_smtpimap_email_password,
     )
 
 
@@ -306,6 +311,13 @@ def get_command_line_params():
     )
 
     parser.add_argument(
+        "--disable-email",
+        dest="disable_email",
+        action="store_true",
+        help="Disables any messages to be sent out to the given email even if the config file contains proper credentials",
+    )
+
+    parser.add_argument(
         "--generate-test-message",
         dest="generate_test_message",
         action="store_true",
@@ -361,7 +373,7 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--warning_level",
+        "--warning-level",
         choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="MINOR",
         type=str.upper,
@@ -369,11 +381,19 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--dapnet_high_prio_level",
+        "--dapnet-high-prio-level",
         choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="SEVERE",
         type=str.upper,
         help="Defines the minimal level at which DAPNET messages will be sent out with high priority (rather than using standard settings)",
+    )
+
+    parser.add_argument(
+        "--email-recipient",
+        default=None,
+        dest="email_recipient",
+        type=str,
+        help="Email recipient that will receive MOWAS messages",
     )
 
     parser.set_defaults(add_example_data=False)
@@ -387,11 +407,13 @@ def get_command_line_params():
     mowas_telegram_destination_id = args.telegram_destination_id
     mowas_disable_telegram = args.disable_telegram
     mowas_disable_dapnet = args.disable_dapnet
+    mowas_disable_email = args.disable_email
     mowas_follow_the_ham = args.follow_the_ham
     mowas_generate_test_message = args.generate_test_message
     mowas_warning_level = args.warning_level
     mowas_time_to_live = args.time_to_live
     mowas_dapnet_high_prio_level = args.dapnet_high_prio_level
+    mowas_email_recipient = args.email_recipient
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
@@ -417,7 +439,14 @@ def get_command_line_params():
         mowas_warning_level,
         mowas_time_to_live,
         mowas_dapnet_high_prio_level,
+        mowas_disable_email,
+        mowas_email_recipient,
     )
 
+
 def remove_html_content(message_string: str):
-    return re.sub('<[^<]+?>', '', message_string)
+    return re.sub("<[^<]+?>", "", message_string)
+
+
+if __name__ == "__main__":
+    pass
