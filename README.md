@@ -169,7 +169,7 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - This is a hobby project. It has no commercial background whatsoever.
 
-- Although government warning messages are consumed by this app, this program is not an official Government warning app. __If it breaks, you get to keep both pieces.__ Although its purpose is to alert you during hazardous situations, don't rely on this program's availability and content during a life-and-death situation.  
+- Although official government warning message feeds are consumed by this program, ``mowas-pwb`` itself is not an official Government warning app. __If it breaks, you get to keep both pieces.__ Even though its purpose is to alert you during hazardous situations, don't rely on ``mowas-pwb``'s availability and content validity during a life-and-death situation. When in doubt, always consult additional sources of information such as TV, radio broadcasts and the Internet.
 
 - Both DAPNET messaging option or the ``follow-the-ham`` aprs.fi tracking option __require you to be a licensed ham radio operator__. If you run this program in Telegram-or-Email-only mode, no ham radio license is required, though.
 
@@ -179,7 +179,5 @@ In reference to the European Union's GDPR regulations and other legal rules and 
     - telegram.org
     - DAPNET / hampager.de. __Requires a valid ham radio license.__
     - optional: aprs.fi access key. __Requires a valid ham radio license.__
-
-- Don't rely on this service's availability. When in doubt, always consult other means of communication such as radio / TV broadcasts or cell broadcast messages (once cell broadcasts are finally available in Germany - hey, it's been only 20 years since they were invented; don't rush us)
 
 If you use this program, then you agree to these terms and conditions. Thank you.
