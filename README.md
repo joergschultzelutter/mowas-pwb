@@ -176,7 +176,8 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 - In case the ``follow-the-ham`` option is used: The user's position information (as well as other APRS user's position data) which is used by this program is acquired from freely accessible data sources such as aprs.fi et al. These data sources gather APRS information from ham radio users who did decide to have their position information actively submitted to the APRS network. Any of these information sources can already be used for a various user's position inquiry.
 
 - If you intend to host your own instance of ``mowas-pwb``, you need to provide API access keys to the following services:
-    - telegram.org
+    - sender's email and password and/or
+    - telegram.org and/or
     - DAPNET / hampager.de. __Requires a valid ham radio license.__
     - optional: aprs.fi access key. __Requires a valid ham radio license.__
 
