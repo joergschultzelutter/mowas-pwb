@@ -2,7 +2,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## MOWAS Personal Warning Beacon
-``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to [DAPNET](https://www.hampager.de) and [Telegram](https://www.telegram.org/) accounts. MOWAS supports various categories such as floods, earthquakes et al. You can install this program on platforms such as a Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
+``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to [DAPNET](https://www.hampager.de), [Telegram](https://www.telegram.org/) and email accounts. MOWAS supports various categories such as floods, earthquakes et al. You can install this program on platforms such as a Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
 
 ## Feature set
 - You can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
@@ -18,7 +18,7 @@ Supported MOWAS features:
 - supports alerts, updates and cancellation messages
 
 ## Installation
-- DAPNET and/or Telegrams access credentials are required.
+- DAPNET, Telegram and/or email account  access credentials are required.
 - For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
 - Download the repo
 - Install the PIP packages along with their dependencies:
@@ -169,7 +169,7 @@ In reference to the European Union's GDPR regulations and other legal rules and 
 
 - This is a hobby project. It has no commercial background whatsoever.
 
-- Although government warning messages are consumed by this app, this program is not an official Government warning app. If it breaks, you get to keep both pieces. 
+- Although government warning messages are consumed by this app, this program is not an official Government warning app. __If it breaks, you get to keep both pieces.__ Although its purpose is to alert you during hazardous situations, don't rely on this program's availability and content during a life-and-death situation.  
 
 - Both DAPNET messaging option or the ``follow-the-ham`` aprs.fi tracking option __require you to be a licensed ham radio operator__. If you run this program in Telegram-or-Email-only mode, no ham radio license is required, though.
 
