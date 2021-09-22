@@ -58,6 +58,7 @@ if __name__ == "__main__":
         mowas_dapnet_high_prio_level,
         mowas_disable_email,
         mowas_email_recipient,
+        mowas_enable_covid_content,
     ) = get_command_line_params()
 
     mowas_telegram_destination_id = 1234
@@ -79,6 +80,7 @@ if __name__ == "__main__":
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
+        mowas_active_categories,
     ) = get_program_config_from_file(config_filename=mowas_configfile)
     if not success:
         logger.info(msg="Error while parsing the program config file; exiting...")
@@ -249,6 +251,8 @@ if __name__ == "__main__":
                 mowas_cache=mowas_message_cache,
                 minimal_mowas_severity=mowas_warning_level,
                 mowas_dapnet_high_prio_level=mowas_dapnet_high_prio_level,
+                mowas_active_categories=mowas_active_categories,
+                enable_covid_messaging=mowas_enable_covid_content,
             )
 
             # Did we find some new message updates that we need to send to the user?
