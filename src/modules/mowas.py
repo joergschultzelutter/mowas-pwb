@@ -91,6 +91,8 @@ def process_mowas_data(
     mowas_cache: ExpiringDict,
     minimal_mowas_severity: str = "Minor",
     mowas_dapnet_high_prio_level: str = "Minor",
+    mowas_active_categories: list = ["TEMPEST","FLOOD","FLOOD_OLD","WILDFIRE","EARTHQUAKE","DISASTERS"],
+    enable_covid_messaging: bool = False,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -123,7 +125,7 @@ def process_mowas_data(
         "FLOOD": "/bbk.lhp/hochwassermeldungen.json",
         "WILDFIRE": "/bbk.dwd/waldbrand.json",
         "EARTHQUAKE": "/bbk.bgr/erdbeben.json",
-        "DANGER_ANNOUNCEMENTS": "/bbk.mowas/gefahrendurchsagen.json",
+        "DISASTERS": "/bbk.mowas/gefahrendurchsagen.json",
     }
 
     # Definitions for all possible valid values that MOWAS may provide us with
@@ -148,247 +150,264 @@ def process_mowas_data(
 
     # For each of our own categories, try to download the MOWAS data
     for mowas_category in mowas_dictionary:
-        success, json_data = download_mowas_data(
-            base_url="https://warnung.bund.de",
-            url_path=mowas_dictionary[mowas_category],
-        )
-        logger.debug(msg=f"Success for mowas_category {mowas_category}: {success}")
-        if success:
-            for element in json_data:
-                # general marker which tells us whether we should send this message
-                # if it meets all criteria
-                process_this_message = False
+        # Only process this category if it is set as "active"
+        # in the program config file
+        if mowas_category in mowas_active_categories:
+            # OK, let's try to get that data from the government server
+            success, json_data = download_mowas_data(
+                base_url="https://warnung.bund.de",
+                url_path=mowas_dictionary[mowas_category],
+            )
+            logger.debug(msg=f"Success for mowas_category {mowas_category}: {success}")
+            if success:
+                for element in json_data:
+                    # general marker which tells us whether we should send this message
+                    # if it meets all criteria
+                    process_this_message = False
 
-                # Extract the message's identifier - this is our message's primary key
-                mowas_identifier = element["identifier"]
+                    # Extract the message's identifier - this is our message's primary key
+                    mowas_identifier = element["identifier"]
 
-                # get the message's msgtype. Can either be Alert, Update or Cancel
-                mowas_msgtype = element["msgType"]
-                assert mowas_msgtype in typedef_mowas_msgtype
+                    # get the message's msgtype. Can either be Alert, Update or Cancel
+                    mowas_msgtype = element["msgType"]
+                    assert mowas_msgtype in typedef_mowas_msgtype
 
-                # Get the timestamp when this message was sent
-                mowas_sent = element["sent"]
+                    # Get the timestamp when this message was sent
+                    mowas_sent = element["sent"]
 
-                # Now let's check what we are supposed to do with this message
-                # If the message is of type "Cancel", remove it from our ExpiringDict
-                # (if present). The program guarantees that only the message types
-                # "Alert" and "Update" are present in our list
-                if mowas_msgtype == "Cancel":
-                    # Check if this message is present in our dict and remove it
-                    if mowas_identifier in mowas_cache:
-                        mowas_cache.pop(mowas_identifier)
-                        # We still want to send this "Cancel" message to the user
-                        # so let's ensure that we remember to do so. Still, the
-                        # cancel message is only sent if the message's geocoordinates
-                        # match with what the user has provided us with
-                        process_this_message = True
-
-                # If we deal with an "Update", there are a few situations that need
-                # to be taken upder advisement:
-                # 1) Key does not yet exist in our dictionary. ACTION: we will add it
-                # 	 The entry may never have been added to the dictionary OR was
-                # 	 present in the past but did experience its end-of-life
-                # 2) Key does exist within our dictionary, but msgtype is not "Update"
-                # 	 In this particular case, we might switch from "Action" to "Update".
-                # 	 As the message's coordinate ranges may have changed, we will remove
-                # 	 the entry from our dictionary and re-add it
-                # 3) Key does exist within our dictionary AND msgtype is "Update". This
-                # 	 will trigger no action on our end UNLESS the old "Update" message's
-                # 	 time stamp differs with the one from the new message
-                elif mowas_msgtype == "Update":
-                    # Do we have this entry in our expiring cache?
-                    if mowas_identifier in mowas_cache:
-                        # get the payload
-                        mowas_payload = mowas_cache[mowas_identifier]
-
-                        # then extract the msgtype from the payload
-                        mowas_cache_msgtype = mowas_payload["msgtype"]
-                        # Does its new status differ from the previous one? Then remove it
-                        # from our dictionary. This entry is either an Alert > Update or
-                        # Update > Alert (the latter should never happen)
-                        if mowas_cache_msgtype != mowas_msgtype:
+                    # Now let's check what we are supposed to do with this message
+                    # If the message is of type "Cancel", remove it from our ExpiringDict
+                    # (if present). The program guarantees that only the message types
+                    # "Alert" and "Update" are present in our list
+                    if mowas_msgtype == "Cancel":
+                        # Check if this message is present in our dict and remove it
+                        if mowas_identifier in mowas_cache:
                             mowas_cache.pop(mowas_identifier)
-                        else:
-                            # message types are both "Update"
-                            # Get the timestamp on when the data was sent
-                            mowas_cache_sent = mowas_payload["sent"]
-                            # See if the timestamps differ. Hint: this is a string comparison
-                            # If both entries differ, then let's get rid of the previous entry
-                            if mowas_sent != mowas_cache_sent:
+                            # We still want to send this "Cancel" message to the user
+                            # so let's ensure that we remember to do so. Still, the
+                            # cancel message is only sent if the message's geocoordinates
+                            # match with what the user has provided us with
+                            process_this_message = True
+
+                    # If we deal with an "Update", there are a few situations that need
+                    # to be taken upder advisement:
+                    # 1) Key does not yet exist in our dictionary. ACTION: we will add it
+                    # 	 The entry may never have been added to the dictionary OR was
+                    # 	 present in the past but did experience its end-of-life
+                    # 2) Key does exist within our dictionary, but msgtype is not "Update"
+                    # 	 In this particular case, we might switch from "Action" to "Update".
+                    # 	 As the message's coordinate ranges may have changed, we will remove
+                    # 	 the entry from our dictionary and re-add it
+                    # 3) Key does exist within our dictionary AND msgtype is "Update". This
+                    # 	 will trigger no action on our end UNLESS the old "Update" message's
+                    # 	 time stamp differs with the one from the new message
+                    elif mowas_msgtype == "Update":
+                        # Do we have this entry in our expiring cache?
+                        if mowas_identifier in mowas_cache:
+                            # get the payload
+                            mowas_payload = mowas_cache[mowas_identifier]
+
+                            # then extract the msgtype from the payload
+                            mowas_cache_msgtype = mowas_payload["msgtype"]
+                            # Does its new status differ from the previous one? Then remove it
+                            # from our dictionary. This entry is either an Alert > Update or
+                            # Update > Alert (the latter should never happen)
+                            if mowas_cache_msgtype != mowas_msgtype:
                                 mowas_cache.pop(mowas_identifier)
-                                # As the time stamps differ, remember that we may need to send
-                                # this message if it fits our criteria
-                                process_this_message = True
-                    else:
-                        # msgtype is "Update" but the message is not within our cache
-                        # Potential root causes:
-                        # 1) message was in the cache but has expired (and got removed)
-                        # 2) message was never in the case (e.g. due to a program restart)
-                        process_this_message = True
-                elif mowas_msgtype == "Alert":
-                    # Is this entry NOT in our expiring cache? Then let's process it
-                    # Assumptions:
-                    # 1) Message status cannot move back from "Update" to "Alert"
-                    # 2) Whenever an "Alert" gets updated, its msgtype changes to "Update"
-                    if mowas_identifier not in mowas_cache:
-                        process_this_message = True
-
-                # Now that we have determined if we should process this message or not,
-                # let's have a look at the actual message itself - that is, if
-                # we are supposed to process it.
-                if process_this_message:
-                    mowas_status = element["status"]
-
-                    # All MOWAS messages only seen to have one (1) sub element only
-                    # but let's ensure that our present message actually has one.
-                    # Future program versions may also need to process elements 2..n
-                    # in case they are present.
-                    if len(element["info"]) > 0:
-
-                        # Get the Severity
-                        mowas_severity = element["info"][0]["severity"]
-
-                        # Crash for now if we encounter an unknown severity
-                        assert mowas_severity in typedef_mowas_severity
-
-                        # Loop to the next element in case our current message's
-                        # severity level is too low (based on the user's input parameters)
-                        if typedef_mowas_severity.index(
-                            mowas_severity
-                        ) < typedef_mowas_severity.index(minimal_mowas_severity):
-                            continue
-
-                        # Check the priority level of the future message to DAPNET and bump it up if necessary
-                        # but lower its priority if we deal with a "Cancel" message
-                        if mowas_msgtype != "Cancel":
-                            dapnet_high_prio_msg = (
-                                True
-                                if typedef_mowas_severity.index(
-                                    mowas_dapnet_high_prio_level
-                                )
-                                >= typedef_mowas_severity.index(mowas_severity)
-                                else False
-                            )
+                            else:
+                                # message types are both "Update"
+                                # Get the timestamp on when the data was sent
+                                mowas_cache_sent = mowas_payload["sent"]
+                                # See if the timestamps differ. Hint: this is a string comparison
+                                # If both entries differ, then let's get rid of the previous entry
+                                if mowas_sent != mowas_cache_sent:
+                                    mowas_cache.pop(mowas_identifier)
+                                    # As the time stamps differ, remember that we may need to send
+                                    # this message if it fits our criteria
+                                    process_this_message = True
                         else:
-                            dapnet_high_prio_msg = False
+                            # msgtype is "Update" but the message is not within our cache
+                            # Potential root causes:
+                            # 1) message was in the cache but has expired (and got removed)
+                            # 2) message was never in the case (e.g. due to a program restart)
+                            process_this_message = True
+                    elif mowas_msgtype == "Alert":
+                        # Is this entry NOT in our expiring cache? Then let's process it
+                        # Assumptions:
+                        # 1) Message status cannot move back from "Update" to "Alert"
+                        # 2) Whenever an "Alert" gets updated, its msgtype changes to "Update"
+                        if mowas_identifier not in mowas_cache:
+                            process_this_message = True
 
-                        # Now let's extract the remaining information before we take a look at the message's geometric structure
-                        mowas_headline = element["info"][0]["headline"]
-                        mowas_urgency = element["info"][0]["urgency"]
-                        mowas_severity = element["info"][0]["severity"]
-                        mowas_description = (
-                            element["info"][0]["description"]
-                            if "description" in element["info"][0]
-                            else None
-                        )
-                        mowas_instruction = mowas_instruction = (
-                            element["info"][0]["instruction"]
-                            if "instruction" in element["info"][0]
-                            else None
-                        )
+                    # Now that we have determined if we should process this message or not,
+                    # let's have a look at the actual message itself - that is, if
+                    # we are supposed to process it.
+                    if process_this_message:
+                        mowas_status = element["status"]
 
-                        # Extract the list of areas from the element
-                        areas = element["info"][0]["area"]
+                        # All MOWAS messages only seen to have one (1) sub element only
+                        # but let's ensure that our present message actually has one.
+                        # Future program versions may also need to process elements 2..n
+                        # in case they are present.
+                        if len(element["info"]) > 0:
 
-                        # If any of the given lat/lon coordinates from the user match with
-                        # any of the given areas from this message, then we may want to send out
-                        # this message to the user
-                        area_matches_with_user_latlon = False
+                            # Get the Severity
+                            mowas_severity = element["info"][0]["severity"]
 
-                        # If we find a match then this list will contain all areas for
-                        # which we found a match related to our lat/lon coordinates
-                        areas_matching_latlon = []
-                        geocodes_matching_latlon = []
+                            # Crash for now if we encounter an unknown severity
+                            assert mowas_severity in typedef_mowas_severity
 
-                        for area in areas:
-                            polygon = area["polygon"]
-                            splitted_array = [
-                                point.split(",") for point in polygon[0].split(" ")
-                            ]
-                            numpy_array = np.array(splitted_array, dtype=np.float64)
-                            poly = Polygon(numpy_array)
+                            # Loop to the next element in case our current message's
+                            # severity level is too low (based on the user's input parameters)
+                            if typedef_mowas_severity.index(
+                                mowas_severity
+                            ) < typedef_mowas_severity.index(minimal_mowas_severity):
+                                continue
 
-                            # Coord has the format latitude,longitude
-                            for coord in coordinates:
-                                latitude = coord[0]
-                                longitude = coord[1]
-
-                                # The MOWAS polygon uses the format longitude,latitude
-                                # so let's create our point this way
-                                p = Point(longitude, latitude)
-
-                                # Check if we are either inside of the polygon or
-                                # touch its borders
-                                area_match = p.within(poly) or p.intersects(poly)
-
-                                # and set our global marker if we have found something
-                                area_matches_with_user_latlon = (
-                                    True
-                                    if area_match
-                                    else area_matches_with_user_latlon
-                                )
-
-                                # if we have found something for the current area, then
-                                # let's remember the area for which we had a match
-                                if area_match:
-                                    area_desc = area["areaDesc"]
-                                    if "geocode" in area:
-                                        geocodes = area["geocode"]
-                                        for geocode in geocodes:
-                                            geocode_value = geocode["value"]
-
-                                    # We have a match? Then let's remember what we have
-                                    # Try to shorten the area names as this string is rather lengthy
-                                    if area_desc not in areas_matching_latlon:
-                                        area_desc = area_desc.replace("Gemeinde/Stadt: ","",1)
-                                        area_desc = area_desc.replace("Landkreis/Stadt: ","",1)
-                                        area_desc = area_desc.replace("Bundesland: ","",1)
-                                        area_desc = area_desc.replace("Freistaat ","",1)
-                                        area_desc = area_desc.replace("Freie Hansestadt ","",1)
-                                        area_desc = area_desc.replace("Land: ","",1)
-                                        area_desc = area_desc.replace("Land ","",1)
-                                        areas_matching_latlon.append(area_desc)
-
-                                    # Save the geocodes, too. This is our primary mean of identification
-                                    # area_desc will only be used of the geocode cannot be found 
-                                    # (MOWAS does seem to use incorrect geocodes from time to time)
-                                    if geocode_value not in geocodes_matching_latlon:
-                                        geocodes_matching_latlon.append(geocode_value)
-
-                        # We went through all areas - now let's see of we found something
-                        if area_matches_with_user_latlon:
-                            # Add to the expiring dict unless it is a "Cancel" msg
+                            # Check the priority level of the future message to DAPNET and bump it up if necessary
+                            # but lower its priority if we deal with a "Cancel" message
                             if mowas_msgtype != "Cancel":
-                                # Create the expiring dictionary's payload...
-                                mowas_cache_payload = {
-                                    "msgtype": mowas_msgtype,
+                                dapnet_high_prio_msg = (
+                                    True
+                                    if typedef_mowas_severity.index(
+                                        mowas_dapnet_high_prio_level
+                                    )
+                                    >= typedef_mowas_severity.index(mowas_severity)
+                                    else False
+                                )
+                            else:
+                                dapnet_high_prio_msg = False
+
+                            # Now let's extract the remaining information before we take a look at the message's geometric structure
+                            mowas_headline = element["info"][0]["headline"]
+                            mowas_urgency = element["info"][0]["urgency"]
+                            mowas_severity = element["info"][0]["severity"]
+                            mowas_description = (
+                                element["info"][0]["description"]
+                                if "description" in element["info"][0]
+                                else None
+                            )
+                            mowas_instruction = mowas_instruction = (
+                                element["info"][0]["instruction"]
+                                if "instruction" in element["info"][0]
+                                else None
+                            )
+
+                            # Extract the list of areas from the element
+                            areas = element["info"][0]["area"]
+
+                            # If any of the given lat/lon coordinates from the user match with
+                            # any of the given areas from this message, then we may want to send out
+                            # this message to the user
+                            area_matches_with_user_latlon = False
+
+                            # If we find a match then this list will contain all areas for
+                            # which we found a match related to our lat/lon coordinates
+                            areas_matching_latlon = []
+                            geocodes_matching_latlon = []
+
+                            for area in areas:
+                                polygon = area["polygon"]
+                                splitted_array = [
+                                    point.split(",") for point in polygon[0].split(" ")
+                                ]
+                                numpy_array = np.array(splitted_array, dtype=np.float64)
+                                poly = Polygon(numpy_array)
+
+                                # Coord has the format latitude,longitude
+                                for coord in coordinates:
+                                    latitude = coord[0]
+                                    longitude = coord[1]
+
+                                    # The MOWAS polygon uses the format longitude,latitude
+                                    # so let's create our point this way
+                                    p = Point(longitude, latitude)
+
+                                    # Check if we are either inside of the polygon or
+                                    # touch its borders
+                                    area_match = p.within(poly) or p.intersects(poly)
+
+                                    # and set our global marker if we have found something
+                                    area_matches_with_user_latlon = (
+                                        True
+                                        if area_match
+                                        else area_matches_with_user_latlon
+                                    )
+
+                                    # if we have found something for the current area, then
+                                    # let's remember the area for which we had a match
+                                    if area_match:
+                                        area_desc = area["areaDesc"]
+                                        if "geocode" in area:
+                                            geocodes = area["geocode"]
+                                            for geocode in geocodes:
+                                                geocode_value = geocode["value"]
+
+                                        # We have a match? Then let's remember what we have
+                                        # Try to shorten the area names as this string is rather lengthy
+                                        if area_desc not in areas_matching_latlon:
+                                            area_desc = area_desc.replace("Gemeinde/Stadt: ","",1)
+                                            area_desc = area_desc.replace("Landkreis/Stadt: ","",1)
+                                            area_desc = area_desc.replace("Bundesland: ","",1)
+                                            area_desc = area_desc.replace("Freistaat ","",1)
+                                            area_desc = area_desc.replace("Freie Hansestadt ","",1)
+                                            area_desc = area_desc.replace("Land: ","",1)
+                                            area_desc = area_desc.replace("Land ","",1)
+                                            areas_matching_latlon.append(area_desc)
+
+                                        # Save the geocodes, too. This is our primary mean of identification
+                                        # area_desc will only be used of the geocode cannot be found 
+                                        # (MOWAS does seem to use incorrect geocodes from time to time)
+                                        if geocode_value not in geocodes_matching_latlon:
+                                            geocodes_matching_latlon.append(geocode_value)
+
+                            # We went through all areas - now let's see of we found something
+                            if area_matches_with_user_latlon:
+                                # Check if Covid content is present. If yes, then check if 
+                                # the user wants to receive Covid news
+                                add_data = True
+
+                                # Check if the message contains Covid content and flag the
+                                # message as "not to be added" if related content has been found
+                                if not enable_covid_messaging:
+                                    content = [mowas_headline.lower(),mowas_description.lower(),mowas_instruction.lower()]
+                                    if any("covid" in s for s in content or "corona" in s for s in content):
+                                        add_data = False
+
+                                # Add to the expiring dict unless it is a "Cancel" msg
+                                if mowas_msgtype != "Cancel":
+                                    # Create the expiring dictionary's payload...
+                                    mowas_cache_payload = {
+                                        "msgtype": mowas_msgtype,
+                                        "sent": mowas_sent,
+                                    }
+                                    # ... and add the entry to the expiring dict
+                                    if add_data:
+                                        mowas_cache[mowas_identifier] = mowas_cache_payload
+
+                                # Create the outgoing message's payload ...
+                                mowas_messages_to_sent_payload = {
+                                    "headline": mowas_headline,
+                                    "urgency": mowas_urgency,
+                                    "severity": mowas_severity,
+                                    "description": mowas_description,
+                                    "instruction": mowas_instruction,
                                     "sent": mowas_sent,
+                                    "msgtype": mowas_msgtype,
+                                    "areas": areas_matching_latlon,
+                                    "geocodes": geocodes_matching_latlon,
+                                    "dapnet_high_prio": dapnet_high_prio_msg,
                                 }
-                                # ... and add the entry to the expiring dict
-                                mowas_cache[mowas_identifier] = mowas_cache_payload
+                                # ... and add it to our dictionary
+                                if add_data:
+                                    mowas_messages_to_send[
+                                        mowas_identifier
+                                    ] = mowas_messages_to_sent_payload
 
-                            # Create the outgoing message's payload ...
-                            mowas_messages_to_sent_payload = {
-                                "headline": mowas_headline,
-                                "urgency": mowas_urgency,
-                                "severity": mowas_severity,
-                                "description": mowas_description,
-                                "instruction": mowas_instruction,
-                                "sent": mowas_sent,
-                                "msgtype": mowas_msgtype,
-                                "areas": areas_matching_latlon,
-                                "geocodes": geocodes_matching_latlon,
-                                "dapnet_high_prio": dapnet_high_prio_msg,
-                            }
-                            # ... and add it to our dictionary
-                            mowas_messages_to_send[
-                                mowas_identifier
-                            ] = mowas_messages_to_sent_payload
-
-                            # Finally, check if the message is either "Alert" or
-                            # "Update". We need this info at a later point in time
-                            if mowas_msgtype in ("Alert", "Update"):
-                                got_alert_or_update = True
+                                # Finally, check if the message is either "Alert" or
+                                # "Update". We need this info at a later point in time
+                                if mowas_msgtype in ("Alert", "Update"):
+                                    got_alert_or_update = True
 
     # Return the expiring cache and our messages to the user
     return mowas_cache, mowas_messages_to_send, got_alert_or_update

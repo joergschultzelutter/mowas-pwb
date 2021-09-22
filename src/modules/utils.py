@@ -48,6 +48,10 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
             "mowas_config", "dapnet_login_passcode"
         )
         mowas_watch_areas_string = config.get("mowas_config", "mowas_watch_areas")
+        a = [point.split(",") for point in mowas_watch_areas_string.split(" ")]
+        b = np.array(a, dtype=np.float64)
+        mowas_watch_areas = b.tolist()
+
         mowas_telegram_bot_token = config.get("mowas_config", "telegram_bot_token")
 
         mowas_smtpimap_email_address = config.get(
@@ -56,27 +60,29 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_smtpimap_email_password = config.get(
             "mowas_config", "smtpimap_email_password"
         )
+        mowas_acs= config.get(
+            "mowas_config", "mowas_active_categories"
+        )
+
+        mowas_active_categories = [s.strip().upper() for s in mowas_acs.split(',') if mowas_acs != ""]
+        if len(mowas_active_categories) == 0:
+            logger.info(msg="Config file error; at least one MOWAS category needs to be specified")
+            raise ValueError("Error in config file")
+        
+        for ac in mowas_active_categories:
+            if ac not in ["TEMPEST","FLOOD","FLOOD_OLD","WILDFIRE","EARTHQUAKE","DISASTERS"]:
+                logger.info(msg=f"Config file error; received category '{ac}'")
+                raise ValueError("Error in config file")
 
         success = True
     except:
+        logger.info(msg="Error in configuration file; Check if your config format is correct.")
         mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
         mowas_dapnet_login_passcode = mowas_watch_areas_string = None
         mowas_telegram_bot_token = None
         mowas_smtpimap_email_address = mowas_smtpimap_email_password = None
-        mowas_watch_areas = []
+        mowas_watch_areas = mowas_active_categories = []
         success = False
-
-    if success:
-        try:
-            a = [point.split(",") for point in mowas_watch_areas_string.split(" ")]
-            b = np.array(a, dtype=np.float64)
-            mowas_watch_areas = b.tolist()
-            success = True
-        except:
-            logger.info(
-                msg="Error in configuration file; cannot create MOWAS watch areas list. Check if your config format is correct."
-            )
-            success = False
 
     return (
         success,
@@ -87,6 +93,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
+        mowas_active_categories,
     )
 
 
@@ -142,14 +149,14 @@ def make_pretty_dapnet_messages(
                     Separator that is going to be used for dividing the single
                     elements that the user is going to add
     add_sep: 'bool'
-                    True = we will add the separator when more than one item
-                                       is in our string. This is the default
+                    True =  we will add the separator when more than one item
+                            is in our string. This is the default
                     False = do not add the separator (e.g. if we add the
-                                                    very first line of text, then we don't want a
-                                                    comma straight after the location
+                            very first line of text, then we don't want a
+                            comma straight after the location)
     force_outgoing_unicode_messages: 'bool'
                     False = all outgoing UTF-8 content will be down-converted
-                                                    to ASCII content
+                            to ASCII content
                     True = all outgoing UTF-8 content will sent out 'as is'
 
     Returns
@@ -396,6 +403,13 @@ def get_command_line_params():
         help="Email recipient that will receive MOWAS messages",
     )
 
+    parser.add_argument(
+        "--enable-covid-content",
+        dest="enable_covid_content",
+        action="store_true",
+        help="As there is a torrent of Covid-19 related news on a daily basis, mowas-pwb removes these messages by default. If you still want to receive those messages, then enable this setting",
+    )
+
     parser.set_defaults(add_example_data=False)
 
     args = parser.parse_args()
@@ -414,6 +428,7 @@ def get_command_line_params():
     mowas_time_to_live = args.time_to_live
     mowas_dapnet_high_prio_level = args.dapnet_high_prio_level
     mowas_email_recipient = args.email_recipient
+    mowas_enable_covid_content = args.enable_covid_content
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
@@ -441,6 +456,7 @@ def get_command_line_params():
         mowas_dapnet_high_prio_level,
         mowas_disable_email,
         mowas_email_recipient,
+        mowas_enable_covid_content,
     )
 
 
