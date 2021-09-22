@@ -25,3 +25,13 @@ telegram_bot_token = NOT_CONFIGURED
 smtpimap_email_address = NOT_CONFIGURED
 smtpimap_email_password = NOT_CONFIGURED
 
+# MOWAS categories to be monitored. These identifiers describe
+# the MOWAS URLs from which this program is going to download
+# data from and then tries to match the given watch coordinates 
+# against potential warning messages. By default, all available
+# MOWAS categories are about to be monitored. Please separate
+# the categories with a comma. At least one (valid) category
+# needs to be present.
+# Valid values: TEMPEST, FLOOD, FLOOD_OLD (currently no longer
+# in use by MOWAS), WILDFIRE, EARTHQUAKE, DISASTERS
+mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
