@@ -157,6 +157,7 @@ The potential side effect for this constraint is that if you start the program a
     - replace the MOWAS module with your country's native warn system parser code
     - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
 - There is no message dupe check; if the same message is present in more than one MOWAS category and ``mowas-pwb`` deemed this message to be valid for your coordinates and program parameters' selection, you may receive that message more than once.
+- You may want to set up you Telegram bot as a private bot. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html)
 
 ## The fine print
 
