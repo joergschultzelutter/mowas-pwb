@@ -30,7 +30,9 @@ Supported MOWAS features:
     - ``unidecode``
 - Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. Then amend its entries.
     - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
-    - Telegram: Specify the sender bot's access token (via ``The Botfather`` bot)
+    - Telegram: 
+        - Specify the sender bot's access token (via ``The Botfather`` bot).
+        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will fail. Just select the bot of yours in Telegram, click the __Start__ button and you're good to go. This is a Telegram security setting which ```mowas-pwb``` cannot bypass. If you don't establish the initial connection or stop the bot, sending messages to Telegram will fail and these failures will be noted in the program's log file.
     - Email: specify user/password
     - If you want to use the ``follow-the-ham`` program option, populate the program's aprs.fi access key
     - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify.
@@ -157,7 +159,7 @@ The potential side effect for this constraint is that if you start the program a
     - replace the MOWAS module with your country's native warn system parser code
     - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
 - There is no message dupe check; if the same message is present in more than one MOWAS category and ``mowas-pwb`` deemed this message to be valid for your coordinates and program parameters' selection, you may receive that message more than once.
-- You may want to set up you Telegram bot as a private bot. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html)
+- You may want to set up you Telegram bot as a private bot. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html).
 
 ## The fine print
 
