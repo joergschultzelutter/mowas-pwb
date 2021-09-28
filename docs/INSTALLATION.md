@@ -14,7 +14,9 @@
     - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
     - Telegram: 
         - Specify the sender bot's access token (via ``The Botfather`` bot).
-        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will fail. Just select the bot of yours in Telegram, click the __Start__ button and you're good to go. This is a Telegram security setting which ```mowas-pwb``` cannot bypass. If you don't establish the initial connection or stop the bot, sending messages to Telegram will fail and these failures will be noted in the program's log file.
+        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will not be able to send messages to that account. 
+            - Just select the bot of yours in Telegram, click the __Start__ button and you're good to go. This is a Telegram security setting which ```mowas-pwb``` cannot bypass. 
+            - If you don't establish the initial connection or stop the bot, sending messages to Telegram will fail and these failures will be noted in the program's log file.
     - Email: specify user/password
     - If you want to use the ``follow-the-ham`` program option, populate the program's aprs.fi access key
     - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify.
