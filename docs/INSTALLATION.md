@@ -1,0 +1,24 @@
+# Installation
+- DAPNET, Telegram and/or email account  access credentials are required.
+- For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
+- Download the repo
+- Install the PIP packages along with their dependencies:
+    - ``expiringdict``
+    - ``numpy``
+    - ``python-telegram-bot``
+    - ``requests``
+    - ``shapely``
+    - ``unidecode``
+- Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. Then amend its entries.
+    - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
+    - Telegram: 
+        - Specify the sender bot's access token (via ``The Botfather`` bot).
+        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will fail. Just select the bot of yours in Telegram, click the __Start__ button and you're good to go. This is a Telegram security setting which ```mowas-pwb``` cannot bypass. If you don't establish the initial connection or stop the bot, sending messages to Telegram will fail and these failures will be noted in the program's log file.
+    - Email: specify user/password
+    - If you want to use the ``follow-the-ham`` program option, populate the program's aprs.fi access key
+    - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify.
+    - A configuration entry of ``mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333`` would result in two coordinates that are going to be monitored independently from each other:
+        - C1: ``lat = 51.838879``, ``lon = 8.32678``
+        - C2: ``lat = 51.829722``, ``lon = 9.448333``
+    - Specify which categories ``mowas-pwb`` is supposed to monitor. Valid values: ``TEMPEST``,``FLOOD``,``FLOOD_OLD``,``WILDFIRE``,``EARTHQUAKE``,``DISASTER``. Default = all categories; at least one category needs to be specified.
+ - Finally, run the program. Specify a DAPNET ham radio call sign and/or a numeric Telegram user ID as targets. For your first run, I recommend using the ``generate_test_message`` program option - this will simply trigger a test message to DAPNET/Telegram, thus allowing you to tell whether your program configuration is ok.
