@@ -1,4 +1,5 @@
 # Installation
+## General instructions
 - DAPNET, Telegram and/or email account  access credentials are required.
 - For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
 - Download the repo
@@ -22,3 +23,60 @@
         - C2: ``lat = 51.829722``, ``lon = 9.448333``
     - Specify which categories ``mowas-pwb`` is supposed to monitor. Valid values: ``TEMPEST``,``FLOOD``,``FLOOD_OLD``,``WILDFIRE``,``EARTHQUAKE``,``DISASTER``. Default = all categories; at least one category needs to be specified.
  - Finally, run the program. Specify a DAPNET ham radio call sign and/or a numeric Telegram user ID as targets. For your first run, I recommend using the ``generate_test_message`` program option - this will simply trigger a test message to DAPNET/Telegram, thus allowing you to tell whether your program configuration is ok.
+
+## Program config file
+
+``mowas-pwb`` comes with a program config file which mainly contains API keys. In order to use the program, you need to configure this file.
+
+- ``aprsdotfi_api_key`` is the aprs.fi access key that is used if you tell the program to use the ``follow-the-ham`` option
+- ``dapnet_login_callsign`` and ``dapnet_login_passcode`` are required for sending data to DAPNET
+- ``mowas_watch_areas`` defines your watch areas. ``mowas-pwb`` will check these areas and if there is a match, it might forward you that warning message.
+- ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
+- ``smtpimap_email_address`` and ``smtpimap_email_password`` are required for sending data from this email account to the user
+- ``mowas_active_categories`` defines the number of MOWAS categories which will be monitored by ``mowas-pwb``. By default, this setting contains all available MOWAS categories.
+
+A variable with the value of 
+```python 
+NOT_CONFIGURED
+``` 
+will automatically disable the program option that is associated with this value
+
+```python
+[mowas_config]
+
+# API key for www.aprs.fi access
+# API key "NOT_CONFIGURED" disable aprs.fi access
+aprsdotfi_api_key = NOT_CONFIGURED
+
+# DAPNET access credentials
+# Callsign "NOT_CONFIGURED" disables DAPNET access
+dapnet_login_callsign = NOT_CONFIGURED
+dapnet_login_passcode = -1
+
+# Lat / Lon coordinates that we intend to monitor
+# Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
+# Example: 51.838879,8.32678 51.829722,9.448333
+mowas_watch_areas = 51.8127,8.32678 51.829722,9.448333 48.4794,10.771
+
+# Telegram bot token - this is the bot that will send out the message
+# "NOT_CONFIGURED" disables Telegram access
+telegram_bot_token = NOT_CONFIGURED
+
+# SMTP  / IMAP shared Credentials
+# Providers like GMail require you to set an app-specific password
+# (see https://myaccount.google.com/apppasswords)
+# "NOT_CONFIGURED" disables the email account
+smtpimap_email_address = NOT_CONFIGURED
+smtpimap_email_password = NOT_CONFIGURED
+
+# MOWAS categories to be monitored. These identifiers describe
+# the MOWAS URLs from which this program is going to download
+# data from and then tries to match the given watch coordinates 
+# against potential warning messages. By default, all available
+# MOWAS categories are about to be monitored. Please separate
+# the categories with a comma. At least one (valid) category
+# needs to be present.
+# Valid values: TEMPEST, FLOOD, FLOOD_OLD (currently no longer
+# in use by MOWAS), WILDFIRE, EARTHQUAKE, DISASTERS
+mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
+```
