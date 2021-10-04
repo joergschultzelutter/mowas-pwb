@@ -6,7 +6,7 @@
 
 ## Feature set
 - You can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
-- Additionally, licensed amateur radio operators are capable of specifying an APRS call sign whose lat/lon coordinates will be _dynamically_ monitored in addition to the static warning areas.
+- Additionally, licensed amateur radio operators are capable of specifying an APRS call sign whose lat/lon coordinates will be _dynamically_ monitored in addition to the static warning areas. This option can be of use if you have to visit a disaster area and want to receive alerts based on your (ham radio transceiver's) _current_ position.
 - You can specify a minimal warning level which needs to be met for triggering a message (e.g. ``Severe``, ``Extreme``). ``mowas-pwb`` will only send messages to the your devices if the message's status is greater or equal to the given warning level. 
 - Additionally, you can specify a DAPNET-specific high priority message level. ``Alert``/``Update`` Messages whose warning levels meet or exceed this value will be sent out over DAPNET with a higher priority than standard messages.
 - ``mowas-pwb`` supports two kinds of run intervals:
