@@ -23,15 +23,15 @@ The potential side effect for this constraint is that if you start the program a
 
 ## Known issues
 
-- In order to match with a given watch area, the user's coordinates (```mowas_watch_areas``` from the program config file) have either to be inside of the polygon or intersect with that polygon.
+- In order to match with a given watch area, the user's coordinates (```mowas_watch_areas``` from the program config file) have either to be _inside_ of the given polygon or _intersect_ with it.
 - Currently, there is no option that enables the user to specify and additional proximity to that polygon ("Polygon plus 10km distance")
 - This program uses native MOWAS data. All warning messages are in German - there does not seem to be an international message warning interface.
-- Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one program instance.
+- Obviously, the current version of this program does not scale and cannot support multiple user's needs with just one program instance -  you can specify only _one_ DAPNET/Telegram/Email target account.
 - As the MOWAS APIs are not officially available to end users, government authorities might either terminate the services without notice and / or change the format settings of the services that are currently exposed (but not officially available to end users)
-- Although all MOWAS messages do contain warncell references (which allows the program's DAPNET part to use the region's abbreviated region description), certain messages do contain invalid warncell identifiers. If such an case is encountered, MOWAS will use the (lenghty) original regional description instead. For DAPNET messages, the program will try to shorten that description by removing some clutter from that message.
+- Although all MOWAS messages do contain warncell references (which allows the program's DAPNET part to use the region's abbreviated region description), certain messages do contain invalid warncell identifiers. If such an case is encountered, MOWAS will use the (lenghty) original regional description instead. For DAPNET messages which are limited to 80 characters per message, the program will try to shorten that description by removing some clutter from that message.
 - If you want to use this program for a different country's warning system:
     - remove the call for retrieving the 'warncell' information - this one is only relevant to German users
     - replace the MOWAS module with your country's native warn system parser code
     - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
-- There is no message dupe check; if the same message is present in more than one MOWAS category and ``mowas-pwb`` deemed this message to be valid for your coordinates and program parameters' selection, you may receive that message more than once.
-- You may want to set up you Telegram bot as a private bot. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html).
+- There is no message dupe check; if the same message is present in more than one MOWAS category and ``mowas-pwb`` deemed this message to be valid for your coordinates and program parameters' selection, you may receive that message more than once - unless the MOWAS government feed provides the message with the same unique identifier.
+- You may want to set up you Telegram bot as a private bot, thus preventing other Telegram users from discovering and using it. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html).
