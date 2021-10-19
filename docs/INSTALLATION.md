@@ -3,21 +3,15 @@
 - DAPNET, Telegram and/or email account  access credentials are required.
 - For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
 - Download the repo
-- Install the PIP packages along with their dependencies:
-    - ``expiringdict``
-    - ``numpy``
-    - ``python-telegram-bot``
-    - ``requests``
-    - ``shapely``
-    - ``unidecode``
-- Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. Then amend its entries.
-    - DAPNET: Specify user and password for the account that will have to send the message to the user via DAPNET API
-    - Telegram: 
-        - Specify the sender bot's access token (via ``The Botfather`` bot).
-        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will not be able to send messages to that account. 
+- ``pip install -r dependencies.txt``
+- Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. This is the default filename - if you want to use a different config filename, you need to specify it when running the program. Once you've copied the file, apply the following changes:
+    - __DAPNET__: Specify the __sender's__ user and password if you have one.
+    - __Telegram__: 
+        - Specify the __sender's__ bot's access token (via ``The Botfather`` bot).
+        - Note that in order to permit the new bot to send data to your destination account, you __must__ first initiate a one-time chat between your Telegram target account and that bot - or the program will not be able to send messages to that account. This is a one-time manual setup.
             - Just select the bot of yours in Telegram, click the __Start__ button and you're good to go. This is a Telegram security setting which ```mowas-pwb``` cannot bypass. 
             - If you don't establish the initial connection or stop the bot, sending messages to Telegram will fail and these failures will be noted in the program's log file.
-    - Email: specify user/password
+    - __Email__: specify the __sender's__ user/password
     - If you want to use the ``follow-the-ham`` program option, populate the program's aprs.fi access key
     - Ultimately, you need to specify the coordinates that you want to monitor. Each coordinate tuple is separated by a 'space' character. There is no limit in how many points you can specify.
     - A configuration entry of ``mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333`` would result in two coordinates that are going to be monitored independently from each other:
