@@ -7,16 +7,16 @@
 ## Feature set
 - You can specify 1..n fixed sets of lat/lon warning areas which will be validated against MOWAS warnings.
 - Additionally, licensed amateur radio operators are capable of specifying an APRS call sign whose lat/lon coordinates will be _dynamically_ monitored in addition to the static warning areas. This option can be of use if you have to visit a disaster area and want to receive alerts based on your (ham radio transceiver's) _current_ position.
-- You can specify a minimal warning level which needs to be met for triggering a message (e.g. ``Severe``, ``Extreme``). ``mowas-pwb`` will only send messages to the your devices if the message's status is greater or equal to the given warning level. 
-- Additionally, you can specify a DAPNET-specific high priority message level. ``Alert``/``Update`` Messages whose warning levels meet or exceed this value will be sent out over DAPNET with a higher priority than standard messages.
+- You can specify a minimal warning level which needs to be met for triggering a message (e.g. ``Severe``, ``Extreme``). ``mowas-pwb`` will only send you notifications if the warning message's status is greater or equal to the given warning level. 
+- Additionally, you can specify a DAPNET-specific high priority message level. MOWAS ``Alert``/``Update`` messages whose warning levels meet or exceed this message level will be sent out over DAPNET with a higher priority than standard messages.
 - ``mowas-pwb`` supports two kinds of run intervals:
-    - The standard run interval (default: 60 mins) is applied if a previous program cycle did not trigger any outgoing messages to the user or where the message's warning level does not meet the emergency level settings. This should be the default scenario. 
-    - In case at least one ``Alert`` or ``Update`` message has been sent out to the user, ``mowas-pwb`` assumes that there is an ongoing emergency. The run interval will be set to a much lower value (default: 15 mins), thus ensuring that you will always be informed on the latest updates. If there are no new messages to be sent to the user or the message severity decreases, that value will reset itself to the standard run interval at the next run cycle.
+    - The standard run interval (default and minimal setting: 60 mins) is applied if a previous program cycle did _not_ trigger any outgoing messages to the user _or_ where the message's warning level does not meet the emergency level settings. This is the default scenario - nothing is going on, so ``mowas-pwb`` just taps the government feeds every hour for potential updates.
+    - In case at least one ``Alert`` or ``Update`` message has been sent out to the user, ``mowas-pwb`` assumes that there is an ongoing emergency. Therefore, the default run interval is no longer applicable and will be set to a much lower value (default and minimal setting: 15 mins), thus ensuring that you will always be up to date wrt the latest updates. If there are no _new_ messages to be sent to the user or the message severity decreases, that value will reset itself to the standard run interval at the next run cycle. ``mowas-pwb`` will keep track of the messages that have already been sent to you, thus preventing you from getting spammed with messages - see [processing logic information](docs/ADDITIONAL_INFO.md)
 
 Supported MOWAS features: 
 - supports all current MOWAS categories (tempest, flood, wildfire, earthquake, emergency announcements)
-- MOWAS categories can be enabled or disabled. You can also add new MOWAS categories if they are made avaiable through the official government feeds.
-- supports alerts, updates and cancellation messages
+- All MOWAS categories can be enabled or disabled in the program's configuration file. 
+- You can easily add new MOWAS categories if they are made available through the official government feeds.
 
 ## Program details
 - [Installation and Configuration](docs/INSTALLATION.md)
