@@ -20,7 +20,7 @@
 import logging
 import smtplib
 import imaplib
-from email.message import EmailMessage
+#from email.message import EmailMessage
 import re
 import datetime
 from utility_modules import read_program_config

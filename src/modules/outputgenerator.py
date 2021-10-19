@@ -23,7 +23,7 @@ from warncell import read_warncell_info
 
 # Set up the global logger variable
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+    level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,4 @@ if __name__ == "__main__":
 
     #https://warnung.bund.de/bbk.status/status_032410000000.json
 
-
     mowas_messages_to_send = {"DE-BY-A-W083-20200828-000": {"headline": "Vorübergehende Änderung der Trinkwasserqualität: Chlorung besteht weiterhin", "urgency": "Immediate", "severity": "Minor", "description": "Die Chlorung besteht weiterhin.", "instruction": "Informieren Sie sich in den Medien, zum Beispiel im Lokalradio.<br/>Das Wasser muss nicht mehr abgekocht werden.", "sent": "2020-08-28T11:00:08+02:00", "msgtype": "Alert", "areas": ["Stadt Gersthofen, Gemeinde Gablingen"], "geocodes": ["097720000000"], "dapnet_high_prio": True}}
-
-    logger.info(generate_dapnet_messages(mowas_messages_to_send=mowas_messages_to_send,warncell_data=warncell_data))

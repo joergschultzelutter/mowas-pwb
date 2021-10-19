@@ -19,7 +19,7 @@
 #
 import logging
 import json
-from modules.utils import get_program_config_from_file, make_pretty_dapnet_messages
+from utils import get_program_config_from_file, make_pretty_dapnet_messages
 import requests
 from requests.auth import HTTPBasicAuth
 import time
@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 def send_dapnet_message(
     to_callsign: str,
     message: str,
-    message_status: str,
     dapnet_login_callsign: str,
     dapnet_login_passcode: str,
     dapnet_api_transmitter_group: str = "dl-all",
@@ -52,7 +51,7 @@ def send_dapnet_message(
         depending on the message length
     dapnet_login_callsign: 'str'
         login user name to the DAPNET API
-    dapnet_login_password: 'str'
+    dapnet_login_passcode: 'str'
         login password to the DAPNET API
     dapnet_api_transmitter_group: 'str'
         Default is 'dl-all' as the program only targets
@@ -73,12 +72,6 @@ def send_dapnet_message(
 
     success = False
 
-    # Check if we have received a valid MOWAS status
-    message_status = message_status.upper()
-    assert message_status in ("ALERT", "UPDATE", "CANCEL")
-
-    message_short_status = f"{message_status[0]}:"
-
     if dapnet_login_callsign.upper() == "N0CALL":
         logger.info(
             msg="mowas-pwb: DAPNET API credentials are not configured, cannot send msg"
@@ -88,19 +81,15 @@ def send_dapnet_message(
         # Get rid of the SSID in the TO callsign (if accidentally present)
         dapnet_to_callsign = to_callsign.split("-")[0].upper()
 
-        # Start with the message identifier: A/U/C: --> Alert/Update/Cancel
         destination_list = make_pretty_dapnet_messages(
-            message_to_add=message_short_status, add_sep=False
-        )
-        destination_list = make_pretty_dapnet_messages(
-            message_to_add=message, destination_list=destination_list, add_sep=False
+            message_to_add=message, add_sep=True
         )
 
         # Send the message(s)
         for destination_message in destination_list:
 
             dapnet_payload = {
-                "text": f"{dapnet_from_callsign.upper()}: {message_txt}",
+                "text": f"{destination_message}",
                 "callSignNames": [f"{dapnet_to_callsign}"],
                 "transmitterGroupNames": [f"{dapnet_api_transmitter_group}"],
                 "emergency": dapnet_high_priority_message,
@@ -130,7 +119,7 @@ def send_dapnet_message(
                 ):
                     time.sleep(10.0)
             else:
-                logger.debug(
+                logger.info(
                     msg=f"Simulating DAPNET 'Send'; message='{destination_message}'"
                 )
         success = True
