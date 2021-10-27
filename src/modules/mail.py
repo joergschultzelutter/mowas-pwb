@@ -23,7 +23,7 @@ import imaplib
 #from email.message import EmailMessage
 import re
 import datetime
-from utility_modules import read_program_config
+from utils import read_program_config
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -35,129 +35,25 @@ logger = logging.getLogger(__name__)
 #
 # YES - I KNOW. Normal people would import this from a file. Welcome to Team Different.
 
-plaintext_template = """\
-AUTOMATED EMAIL - PLEASE DO NOT RESPOND
-
-mowas-pwb report:
-
-This position report was requested by REPLACE_USERSCALLSIGN via APRS and was processed by MPAD (Multi-Purpose APRS Daemon). Generated at REPLACE_DATETIME_CREATED
-More info on MPAD can be found here: https://www.github.com/joergschultzelutter/mpad
----
-Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
-"""
-
-html_template = """\
-<h2>Automated email - please do not respond</h2>
-<p>mowas-pwb report</p>
-<ul>
-<li><a href="REPLACE_APRSDOTFI" target="_blank" rel="noopener">aprs.fi</a></li>
-<li><a href="REPLACE_FINDUDOTCOM" target="_blank" rel="noopener">FindU.com</a></li>
-<li><a href="REPLACE_GOOGLEMAPS" target="_blank" rel="noopener">Google Maps</a>&nbsp;</li>
-<li><a href="REPLACE_QRZDOTCOM" target="_blank" rel="noopener">QRZ.com</a>&nbsp;</li>
-</ul>
-<table border="1">
-<thead>
-<tr style="background-color: #bbbbbb;">
-<td><strong>Position details</strong></td>
-<td><strong>Values</strong></td>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>&nbsp;Maidenhead</strong> Grid Locator</td>
-<td>&nbsp;REPLACE_MAIDENHEAD</td>
-</tr>
-<tr>
-<td><strong>&nbsp;DMS</strong> Degrees and Decimal Minutes&nbsp;</td>
-<td>&nbsp;REPLACE_DMS</td>
-</tr>
-<tr>
-<td><strong>&nbsp;UTM</strong> Universal Transverse Mercator</td>
-<td>&nbsp;REPLACE_UTM</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;MGRS</strong> Military Grid Reference System</p>
-<p><strong>&nbsp;USNG</strong> United States National Grid</p>
-</td>
-<td>&nbsp;REPLACE_MGRS</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Latitude and Longitude</strong></p>
-</td>
-<td>&nbsp;REPLACE_LATLON</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Altitude</strong></p>
-</td>
-<td>&nbsp;REPLACE_ALTITUDE</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Last heard on APRS-IS</strong></p>
-</td>
-<td>&nbsp;REPLACE_LASTHEARD</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Address data</strong></p>
-</td>
-<td>
-<p>&nbsp;REPLACE_ADDRESS_DATA</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p>This position report was requested by <strong>REPLACE_USERSCALLSIGN</strong> via APRS and was processed by <a href="https://aprs.fi/#!call=a%2FMPAD&amp;timerange=3600&amp;tail=3600" target="_blank" rel="noopener">MPAD (Multi-Purpose APRS Daemon)</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong></p>
-<p>More info on MPAD can be found here: <a href="https://www.github.com/joergschultzelutter/mpad" target="_blank" rel="noopener">https://www.github.com/joergschultzelutter/mpad</a></p>
-<hr />
-<p>Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
-"""
-
-mail_subject_template = "APRS Position Report for REPLACE_MESSAGECALLSIGN"
 
 
-def send_email_position_report(response_parameters: dict):
+
+def send_email_message(plaintext_message: str, html_message: str, subject_message: str, smtpimap_email_address: str, smtpimap_email_password: str, mail_recipient: str):
     """
-    Prepare an APRS-IS email message with an aprs.fi position_report
+    Send an already prepared email message to an SMTP server
 
     Parameters
     ==========
-    response_parameters : 'dict'
-        The all-knowing dictionary with our settings and parser values
 
     Returns
     =======
-    success: 'bool'
-        False in case an error has occurred
-    output_list: 'list'
-        List item, containing the message(s) that are going to be sent
-        back to the APRS user (does not contain any email content)
     """
 
-    smtpimap_email_address = response_parameters["smtpimap_email_address"]
-    smtpimap_email_password = response_parameters["smtpimap_email_password"]
-
-    # copy the templates
-    plaintext_message = plaintext_template
-    html_message = html_template
-    subject_message = mail_subject_template
-
-
-    # add the Time Created information
-    utc_create_time = datetime.datetime.utcnow()
-    msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
-    plaintext_message = plaintext_message.replace(
-        "REPLACE_DATETIME_CREATED", msg_string
-    )
-    html_message = html_message.replace("REPLACE_DATETIME_CREATED", msg_string)
 
     # Finally, generate the message
     msg = EmailMessage()
     msg["Subject"] = subject_message
-    msg["From"] = f"MPAD Multi-Purpose APRS Daemon <{smtpimap_email_address}>"
+    msg["From"] = f"MOWAS Personal Warning Beacon <{smtpimap_email_address}>"
     msg["To"] = mail_recipient
     msg.set_content(plaintext_message)
     msg.add_alternative(html_message, subtype="html")
