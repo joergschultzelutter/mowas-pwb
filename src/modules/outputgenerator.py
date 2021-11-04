@@ -20,6 +20,9 @@
 import logging
 from utils import convert_text_to_plain_ascii, remove_html_content
 from warncell import read_warncell_info
+from telegramdotcom import send_telegram_message
+from dapnet import send_dapnet_message
+from mail import send_email_message
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -105,14 +108,17 @@ html_template = """\
 """
 
 # Email template - mail subject
-mail_subject_template = "MOWAS Personal Warning Beacon -  Report REPLACE_DATETIME_CREATED"
+mail_subject_template = (
+    "MOWAS Personal Warning Beacon -  Report REPLACE_DATETIME_CREATED"
+)
+
 
 def generate_dapnet_messages(mowas_messages_to_send: dict, warncell_data: dict):
 
     # This is our target list element which contains all messages that
-    # are to be sent to our DAPNET account. One list entry equals one 
-    # logical message along with its DAPNET priority. As DAPNET can only 
-    # digest 80 chars per physical message, the send-to-DAPNET function 
+    # are to be sent to our DAPNET account. One list entry equals one
+    # logical message along with its DAPNET priority. As DAPNET can only
+    # digest 80 chars per physical message, the send-to-DAPNET function
     # will chop up the messages into multi-message packets, if necessary
     output_list = {}
 
@@ -134,7 +140,7 @@ def generate_dapnet_messages(mowas_messages_to_send: dict, warncell_data: dict):
         #
         # Everything needs to be converted to plain ASCII 7-bit
         # Message always starts with an indicator whether this is an Alert, Update or Cancel
-        # A: => Alert, U: => Update, C: => Cancel 
+        # A: => Alert, U: => Update, C: => Cancel
         msg = f"{msgtype[0:1]}:"
 
         # Remove potential HTML content from msg headline, convert it to ASCII and add it to the message
@@ -156,7 +162,11 @@ def generate_dapnet_messages(mowas_messages_to_send: dict, warncell_data: dict):
                 # geocode's index, we know the position of the full-blown text
                 idx = geocodes.index(geocode)
                 if len(areas) <= idx + 1:
-                    msg = msg + convert_text_to_plain_ascii(remove_html_content(areas[idx])) + " "
+                    msg = (
+                        msg
+                        + convert_text_to_plain_ascii(remove_html_content(areas[idx]))
+                        + " "
+                    )
 
         # Remove any trailing blanks
         msg = msg.rstrip()
@@ -181,6 +191,7 @@ def generate_telegram_messages(mowas_messages_to_send: dict, warncell_data: dict
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
         dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
+
     return output_list
 
 
@@ -223,10 +234,14 @@ def generate_email_messages(mowas_messages_to_send: dict, warncell_data: dict):
         plaintext_template = plaintext_template.replace("REPLACE_TIMESTAMP", sent)
 
         html_template = html_template.replace("REPLACE_DESCRIPTION", description)
-        plaintext_template = plaintext_template.replace("REPLACE_DESCRIPTION", description)
+        plaintext_template = plaintext_template.replace(
+            "REPLACE_DESCRIPTION", description
+        )
 
         html_template = html_template.replace("REPLACE_INSTRUCTIONS", instruction)
-        plaintext_template = plaintext_template.replace("REPLACE_INSTRUCTIONS", instruction)
+        plaintext_template = plaintext_template.replace(
+            "REPLACE_INSTRUCTIONS", instruction
+        )
 
         # add the Time Created information
         utc_create_time = datetime.datetime.utcnow()
@@ -235,20 +250,11 @@ def generate_email_messages(mowas_messages_to_send: dict, warncell_data: dict):
             "REPLACE_DATETIME_CREATED", msg_string
         )
         html_message = html_message.replace("REPLACE_DATETIME_CREATED", msg_string)
-        mail_subject_message = mail_subject_message.replace("REPLACE_DATETIME_CREATED", msg_string)
-
-
-
+        mail_subject_message = mail_subject_message.replace(
+            "REPLACE_DATETIME_CREATED", msg_string
+        )
 
     return output_list
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -257,6 +263,19 @@ if __name__ == "__main__":
         logger.info("Cannot read warncell data")
         exit(0)
 
-    #https://warnung.bund.de/bbk.status/status_032410000000.json
+    # https://warnung.bund.de/bbk.status/status_032410000000.json
 
-    mowas_messages_to_send = {"DE-BY-A-W083-20200828-000": {"headline": "Vorübergehende Änderung der Trinkwasserqualität: Chlorung besteht weiterhin", "urgency": "Immediate", "severity": "Minor", "description": "Die Chlorung besteht weiterhin.", "instruction": "Informieren Sie sich in den Medien, zum Beispiel im Lokalradio.<br/>Das Wasser muss nicht mehr abgekocht werden.", "sent": "2020-08-28T11:00:08+02:00", "msgtype": "Alert", "areas": ["Stadt Gersthofen, Gemeinde Gablingen"], "geocodes": ["097720000000"], "dapnet_high_prio": True}}
+    mowas_messages_to_send = {
+        "DE-BY-A-W083-20200828-000": {
+            "headline": "Vorübergehende Änderung der Trinkwasserqualität: Chlorung besteht weiterhin",
+            "urgency": "Immediate",
+            "severity": "Minor",
+            "description": "Die Chlorung besteht weiterhin.",
+            "instruction": "Informieren Sie sich in den Medien, zum Beispiel im Lokalradio.<br/>Das Wasser muss nicht mehr abgekocht werden.",
+            "sent": "2020-08-28T11:00:08+02:00",
+            "msgtype": "Alert",
+            "areas": ["Stadt Gersthofen, Gemeinde Gablingen"],
+            "geocodes": ["097720000000"],
+            "dapnet_high_prio": True,
+        }
+    }
