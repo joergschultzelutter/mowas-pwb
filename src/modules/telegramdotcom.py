@@ -29,7 +29,11 @@ logger = logging.getLogger(__name__)
 
 
 def send_telegram_message(
-    bot_token: str, user_id: int, message: str, simulate_send: bool = False
+    bot_token: str,
+    user_id: int,
+    message: str,
+    is_html_content: bool = False,
+    simulate_send: bool = False,
 ):
     """
     Send content to the Telegram API
@@ -43,8 +47,11 @@ def send_telegram_message(
         retrieval of your user ID
     message: 'str'
         Message that will be sent to the user
+    is_html_content: 'bool'
+        Set to True if 'message'contains HTML formatting
+        Default is False
     simulate_send: 'bool'
-        Set to true if you want to simulate sending
+        Set to True if you want to simulate sending
         content to the Telegram API
 
     Returns
@@ -54,7 +61,15 @@ def send_telegram_message(
         logger.info(msg="Sending Message to Telegram API")
         mybot = telegram.Bot(token=bot_token)
         try:
-            mybot.sendMessage(chat_id=user_id, text=message)
+            if is_html_content:
+                mybot.sendMessage(
+                    chat_id=user_id,
+                    text=message,
+                    parseMode=ParseMode.HTML,
+                    disable_web_page_preview=False,
+                )
+            else:
+                mybot.sendMessage(chat_id=user_id, text=message)
         except telegram.error.Unauthorized:
             logger.info(
                 msg="Cannot send the message to your Telegram account (reason:unauthorized)!"
