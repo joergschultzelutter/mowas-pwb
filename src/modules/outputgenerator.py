@@ -304,7 +304,7 @@ def generate_email_messages(
             html_message=html_message,
             subject_message=f"mowas-pwb {msgtype}",
             smtpimap_email_address=smtpimap_email_address,
-            smtpimap_email_password=smtpimap_email_address,
+            smtpimap_email_password=smtpimap_email_password,
             mail_recipient=mail_recipient,
         )
 
