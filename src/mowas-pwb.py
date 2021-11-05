@@ -26,7 +26,11 @@ from modules.utils import (
     signal_term_handler,
     get_command_line_params,
 )
-from modules.outputgenerator import generate_dapnet_messages, generate_telegram_messages
+from modules.outputgenerator import (
+    generate_dapnet_messages,
+    generate_email_messages,
+    generate_telegram_messages,
+)
 from modules.aprsdotfi import get_position_on_aprsfi
 from modules.telegramdotcom import send_telegram_message
 from modules.dapnet import send_dapnet_message
@@ -266,19 +270,36 @@ if __name__ == "__main__":
 
                 # Check if we need to send something to DAPNET
                 if mowas_dapnet_enabled:
-                    logger.info(msg="Preparing DAPNET messages")
+                    logger.info(msg="Generating DAPNET notifications")
                     generate_dapnet_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
+                        mowas_dapnet_destination_callsign=mowas_dapnet_destination_callsign,
+                        mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
+                        mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
                     )
 
                 # Check if we need to send something to Telegram
                 if mowas_telegram_enabled:
-                    logger.info(msg="Preparing Telegram messages")
+                    logger.info(msg="Generating Telegram notifications")
                     generate_telegram_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
+                        mowas_telegram_bot_token=mowas_telegram_bot_token,
+                        telegram_target_id=mowas_telegram_destination_id,
                     )
+
+                # Finally, check if we need to send something via Email
+                if mowas_email_enabled:
+                    logger.info(msg="Preparing Email notifications")
+                    generate_email_messages(
+                        mowas_messages_to_send=mowas_messages_to_send,
+                        warncell_data=warncell_data,
+                        smtpimap_email_address=mowas_smtpimap_email_address,
+                        smtpimap_email_password=mowas_smtpimap_email_password,
+                        mail_recipient=mowas_email_recipient,
+                    )
+
             else:
                 logger.debug(msg="No new messages found")
 
