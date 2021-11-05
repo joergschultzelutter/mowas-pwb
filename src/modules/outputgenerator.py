@@ -23,6 +23,7 @@ from warncell import read_warncell_info
 from telegramdotcom import send_telegram_message
 from dapnet import send_dapnet_message
 from mail import send_email_message
+from datetime import datetime
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -113,14 +114,15 @@ mail_subject_template = (
 )
 
 
-def generate_dapnet_messages(mowas_messages_to_send: dict, warncell_data: dict):
+def generate_dapnet_messages(
+    mowas_messages_to_send: dict,
+    warncell_data: dict,
+    mowas_dapnet_destination_callsign: str,
+    mowas_dapnet_login_callsign: str,
+    mowas_dapnet_login_passcode: str,
+):
 
-    # This is our target list element which contains all messages that
-    # are to be sent to our DAPNET account. One list entry equals one
-    # logical message along with its DAPNET priority. As DAPNET can only
-    # digest 80 chars per physical message, the send-to-DAPNET function
-    # will chop up the messages into multi-message packets, if necessary
-    output_list = {}
+    logger.debug(msg="Starting DAPNET message processing")
 
     # Iterate through our list of messages
     # Get all of the information that is associated with our message
@@ -171,15 +173,26 @@ def generate_dapnet_messages(mowas_messages_to_send: dict, warncell_data: dict):
         # Remove any trailing blanks
         msg = msg.rstrip()
 
-        # and add our message to the dictionary
-        message = {"msg": msg, "priority": dapnet_high_prio}
-        output_list[mowas_message_id] = message
+        # Finally, send this particular message to DAPNET and then loop to the next message
+        logger.debug(msg="Sending message to DAPNET")
+        send_dapnet_message(
+            to_callsign=mowas_dapnet_destination_callsign,
+            dapnet_login_callsign=mowas_dapnet_login_callsign,
+            dapnet_login_passcode=mowas_dapnet_login_passcode,
+            dapnet_high_priority_message=dapnet_high_prio,
+        )
 
-    return output_list
+    logger.debug(msg="Finished DAPNET message processing")
 
 
-def generate_telegram_messages(mowas_messages_to_send: dict, warncell_data: dict):
-    output_list = []
+def generate_telegram_messages(
+    mowas_messages_to_send: dict,
+    warncell_data: dict,
+    mowas_telegram_bot_token: str,
+    telegram_target_id: str,
+):
+    logger.debug(msg="Starting Telegram message processing")
+
     for mowas_message_id in mowas_messages_to_send:
         headline = mowas_messages_to_send[mowas_message_id]["headline"]
         urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
@@ -192,11 +205,43 @@ def generate_telegram_messages(mowas_messages_to_send: dict, warncell_data: dict
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
         dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
 
-    return output_list
+        newline = "\n"
+
+        # Generate the message as HTML content
+        telegram_message = f"<b>mowas-pwb notification</b>: "
+        telegram_message = telegram_message + f"<b>{headline}</b>" + newline + newline
+        telegram_message = (
+            telegram_message + f"<b>Message Type:<\b> {msgtype}" + newline
+        )
+        telegram_message = telegram_message + f"<b>Urgency:<\b> {urgency}" + newline
+        telegram_message = telegram_message + f"<b>Severity:<\b> {severity}" + newline
+        telegram_message = (
+            telegram_message + f"<b>Timestamp:<\b> {sent}" + newline + newline
+        )
+        telegram_message = (
+            telegram_message + f"<b>Description:<\b> {description}" + newline + newline
+        )
+        telegram_message = telegram_message + f"<b>Instructions:<\b> {instruction}"
+
+        # Ultimately, send this particular message to Telegram and then loop to the next one
+        send_telegram_message(
+            bot_token=mowas_telegram_bot_token,
+            user_id=telegram_target_id,
+            message=telegram_message,
+            is_html_content=True,
+        )
+
+    logger.debug(msg="Finished Telegram message processing")
 
 
-def generate_email_messages(mowas_messages_to_send: dict, warncell_data: dict):
-    output_list = []
+def generate_email_messages(
+    mowas_messages_to_send: dict,
+    warncell_data: dict,
+    smtpimap_email_address: str,
+    smtpimap_email_password: str,
+    mail_recipient: str,
+):
+    logger.debug(msg="Starting Email message processing")
     for mowas_message_id in mowas_messages_to_send:
         headline = mowas_messages_to_send[mowas_message_id]["headline"]
         urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
@@ -253,8 +298,17 @@ def generate_email_messages(mowas_messages_to_send: dict, warncell_data: dict):
         mail_subject_message = mail_subject_message.replace(
             "REPLACE_DATETIME_CREATED", msg_string
         )
+        # Ultimately, send this particular message via Email and then loop to the next one
+        send_email_message(
+            plaintext_message=plaintext_message,
+            html_message=html_message,
+            subject_message=f"mowas-pwb {msgtype}",
+            smtpimap_email_address=smtpimap_email_address,
+            smtpimap_email_password=smtpimap_email_address,
+            mail_recipient=mail_recipient,
+        )
 
-    return output_list
+    logger.debug(msg="Finished Email message processing")
 
 
 if __name__ == "__main__":
