@@ -121,6 +121,25 @@ def generate_dapnet_messages(
     mowas_dapnet_login_callsign: str,
     mowas_dapnet_login_passcode: str,
 ):
+    """
+    Generates DAPNET messages and triggers transmission to the user
+
+    Parameters
+    ==========
+    mowas_messages_to_send : 'dict'
+        dictionary, containing all messages that are to be sent to the end user
+    warncell_data: 'dict'
+        warncell data; these are references to German municipal areas, cities etc
+    mowas_dapnet_destination_callsign: str
+        This is the RECIPIENT's ham radio call sign. SSID can be omitted but will
+        be ignored as part of the 'send' process
+    mowas_dapnet_login_callsign: str
+        This is the SENDER's DAPNET User ID
+    mowas_dapnet_login_passcode: str
+        This is the SENDER's DAPNET User passcode
+    Returns
+    =======
+    """
 
     logger.debug(msg="Starting DAPNET message processing")
 
@@ -191,6 +210,25 @@ def generate_telegram_messages(
     mowas_telegram_bot_token: str,
     telegram_target_id: str,
 ):
+
+    """
+    Generates Telegram messages and triggers transmission to the user
+
+    Parameters
+    ==========
+    mowas_messages_to_send : 'dict'
+        dictionary, containing all messages that are to be sent to the end user
+    warncell_data: 'dict'
+        warncell data; these are references to German municipal areas, cities etc
+    mowas_telegram_bot_token: str
+        This is the SENDER's bot token ID
+    telegram_target_id: str
+        This is the RECIPIENT's telegram ID in NUMERIC format. Use the Telegram
+        Bot 'UserInfoBot' to get this data for your accout
+    Returns
+    =======
+    """
+
     logger.debug(msg="Starting Telegram message processing")
 
     for mowas_message_id in mowas_messages_to_send:
@@ -241,6 +279,25 @@ def generate_email_messages(
     smtpimap_email_password: str,
     mail_recipient: str,
 ):
+    """
+    Generates Email messages and triggers transmission to the user
+
+    Parameters
+    ==========
+    mowas_messages_to_send : 'dict'
+        dictionary, containing all messages that are to be sent to the end user
+    warncell_data: 'dict'
+        warncell data; these are references to German municipal areas, cities etc
+    smtpimap_email_address: str
+        This is the SENDER's SMTP Email Address
+    smtpimap_email_password: str
+        This is the SENDER's SMTP Email Password
+    mail_recipient: str
+        This is the RECIPIENT's email address
+    Returns
+    =======
+    """
+
     logger.debug(msg="Starting Email message processing")
     for mowas_message_id in mowas_messages_to_send:
         headline = mowas_messages_to_send[mowas_message_id]["headline"]
