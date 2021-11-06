@@ -34,6 +34,7 @@ from modules.outputgenerator import (
 from modules.aprsdotfi import get_position_on_aprsfi
 from modules.telegramdotcom import send_telegram_message
 from modules.dapnet import send_dapnet_message
+from modules.mail import send_email_message
 from expiringdict import ExpiringDict
 import time
 
@@ -80,11 +81,17 @@ if __name__ == "__main__":
         mowas_aprsdotfi_api_key,
         mowas_dapnet_login_callsign,
         mowas_dapnet_login_passcode,
-        mowas_watch_areas_config,
+        mowas_watch_areas,
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
+        mowas_smtp_server_address,
+        mowas_smtp_server_port,
         mowas_active_categories,
+        mowas_imap_server_address,
+        mowas_imap_server_port,
+        mowas_imap_mailbox_name,
+        mowas_imap_mail_retention_max_days,
     ) = get_program_config_from_file(config_filename=mowas_configfile)
     if not success:
         logger.info(msg="Error while parsing the program config file; exiting...")
@@ -96,12 +103,13 @@ if __name__ == "__main__":
     mowas_dapnet_enabled = False if mowas_dapnet_login_callsign == "NOT_CONFIGURED" else True
     mowas_telegram_enabled = False if mowas_telegram_bot_token == "NOT_CONFIGURED" else True
     mowas_email_enabled = False if (mowas_smtpimap_email_address == "NOT_CONFIGURED" or mowas_smtpimap_email_password == "NOT_CONFIGURED") else True
+    mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_mail_retention_max_days == 0) else True
     # fmt: on
 
     # some basic checks on whether the user wants us to do the impossible :-)
 
     if mowas_telegram_enabled and mowas_telegram_destination_id == 0:
-        logger.debug(msg="Valid Telegram destination ID is missing; disabling Telegram")
+        logger.info(msg="Valid Telegram destination ID is missing; disabling Telegram")
         mowas_telegram_enabled = False
 
     if mowas_dapnet_enabled and mowas_dapnet_destination_callsign == None:
@@ -171,11 +179,11 @@ if __name__ == "__main__":
     # let's do so and exit the program afterwards
     if mowas_generate_test_message:
         message = (
-            "mowas-pwd is properly configured if you were able to receive this message"
+            "mowas-pwb is properly configured if you were able to receive this message"
         )
         if mowas_dapnet_enabled:
             logger.info(
-                msg=f"Sending mowas-wbw test message to DAPNET account {mowas_dapnet_destination_callsign}"
+                msg=f"Sending mowas-pwb test message to DAPNET account {mowas_dapnet_destination_callsign}"
             )
             success = send_dapnet_message(
                 to_callsign=mowas_dapnet_destination_callsign,
@@ -197,6 +205,23 @@ if __name__ == "__main__":
                 simulate_send=True,
             )
             logger.info(msg=f"Telegram message status: {success}")
+        if mowas_email_enabled:
+            logger.info(
+                msg=f"Sending mowas-pwb test message to Email account {mowas_email_recipient}"
+            )
+            plaintext_message = "If you have received this email, then your account has been properly configured"
+            html_message = f"<b>{plaintext_message}</b>"
+            send_email_message(
+                plaintext_message=plaintext_message,
+                html_message=html_message,
+                subject_message="mowas-pwb setup check",
+                smtpimap_email_address=mowas_smtpimap_email_address,
+                smtpimap_email_password=mowas_smtpimap_email_password,
+                mail_recipient=mowas_email_recipient,
+                smtp_server_address=mowas_smtp_server_address,
+                smtp_server_port=mowas_smtp_server_port,
+            )
+        logger.info(msg="Test message cycle complete; exiting")
         exit(0)
 
     # If we reach this point, then we are supposed to do some real work

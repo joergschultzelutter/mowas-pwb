@@ -19,8 +19,7 @@
 #
 
 import logging
-import telegram
-
+from telegram import ParseMode, Bot, error
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -59,7 +58,7 @@ def send_telegram_message(
     """
     if not simulate_send:
         logger.info(msg="Sending Message to Telegram API")
-        mybot = telegram.Bot(token=bot_token)
+        mybot = Bot(token=bot_token)
         try:
             if is_html_content:
                 mybot.sendMessage(
@@ -70,12 +69,12 @@ def send_telegram_message(
                 )
             else:
                 mybot.sendMessage(chat_id=user_id, text=message)
-        except telegram.error.Unauthorized:
+        except error.Unauthorized:
             logger.info(
                 msg="Cannot send the message to your Telegram account (reason:unauthorized)!"
             )
             logger.info(
-                msg="Check your configured credentials and ensure to have established an initial connection between your destination account and your bot"
+                msg="Check your configured credentials. Ensure to have established an INITIAL connection between your destination account and your bot account!"
             )
     else:
         logger.info(msg=f"Simulating Telegram message 'Send'; message='{message}'")

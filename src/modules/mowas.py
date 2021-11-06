@@ -91,7 +91,14 @@ def process_mowas_data(
     mowas_cache: ExpiringDict,
     minimal_mowas_severity: str = "Minor",
     mowas_dapnet_high_prio_level: str = "Minor",
-    mowas_active_categories: list = ["TEMPEST","FLOOD","FLOOD_OLD","WILDFIRE","EARTHQUAKE","DISASTERS"],
+    mowas_active_categories: list = [
+        "TEMPEST",
+        "FLOOD",
+        "FLOOD_OLD",
+        "WILDFIRE",
+        "EARTHQUAKE",
+        "DISASTERS",
+    ],
     enable_covid_messaging: bool = False,
 ):
     """
@@ -346,32 +353,59 @@ def process_mowas_data(
                                         # We have a match? Then let's remember what we have
                                         # Try to shorten the area names as this string is rather lengthy
                                         if area_desc not in areas_matching_latlon:
-                                            area_desc = area_desc.replace("Gemeinde/Stadt: ","",1)
-                                            area_desc = area_desc.replace("Landkreis/Stadt: ","",1)
-                                            area_desc = area_desc.replace("Bundesland: ","",1)
-                                            area_desc = area_desc.replace("Freistaat ","",1)
-                                            area_desc = area_desc.replace("Freie Hansestadt ","",1)
-                                            area_desc = area_desc.replace("Land: ","",1)
-                                            area_desc = area_desc.replace("Land ","",1)
+                                            area_desc = area_desc.replace(
+                                                "Gemeinde/Stadt: ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Landkreis/Stadt: ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Bundesland: ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Freistaat ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Freie Hansestadt ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Land: ", "", 1
+                                            )
+                                            area_desc = area_desc.replace(
+                                                "Land ", "", 1
+                                            )
                                             areas_matching_latlon.append(area_desc)
 
                                         # Save the geocodes, too. This is our primary mean of identification
-                                        # area_desc will only be used of the geocode cannot be found 
+                                        # area_desc will only be used of the geocode cannot be found
                                         # (MOWAS does seem to use incorrect geocodes from time to time)
-                                        if geocode_value not in geocodes_matching_latlon:
-                                            geocodes_matching_latlon.append(geocode_value)
+                                        if (
+                                            geocode_value
+                                            not in geocodes_matching_latlon
+                                        ):
+                                            geocodes_matching_latlon.append(
+                                                geocode_value
+                                            )
 
                             # We went through all areas - now let's see of we found something
                             if area_matches_with_user_latlon:
-                                # Check if Covid content is present. If yes, then check if 
+                                # Check if Covid content is present. If yes, then check if
                                 # the user wants to receive Covid news
                                 add_data = True
 
                                 # Check if the message contains Covid content and flag the
                                 # message as "not to be added" if related content has been found
                                 if not enable_covid_messaging:
-                                    content = [mowas_headline.lower(),mowas_description.lower(),mowas_instruction.lower()]
-                                    if any("covid" in s for s in content or "corona" in s for s in content):
+                                    content = [
+                                        mowas_headline.lower(),
+                                        mowas_description.lower(),
+                                        mowas_instruction.lower(),
+                                    ]
+                                    if any(
+                                        "covid" in s
+                                        for s in content or "corona" in s
+                                        for s in content
+                                    ):
                                         add_data = False
 
                                 # Add to the expiring dict unless it is a "Cancel" msg
@@ -383,7 +417,9 @@ def process_mowas_data(
                                     }
                                     # ... and add the entry to the expiring dict
                                     if add_data:
-                                        mowas_cache[mowas_identifier] = mowas_cache_payload
+                                        mowas_cache[
+                                            mowas_identifier
+                                        ] = mowas_cache_payload
 
                                 # Create the outgoing message's payload ...
                                 mowas_messages_to_sent_payload = {

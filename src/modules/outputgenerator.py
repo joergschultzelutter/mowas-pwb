@@ -31,88 +31,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Email template (plain text)
-plaintext_template = """\
-AUTOMATED EMAIL - PLEASE DO NOT RESPOND
-
-MOWAS Personal Warning Beacon - Report:
-
-
-Message Headline:       REPLACE_HEADLINE
-Message Type:           REPLACE_MESSAGE_TYPE
-Urgency:                REPLACE_URGENCY
-Severity:               REPLACE_SEVERITY
-Message Timestamp:      REPLACE_TIMESTAMP
-Description:            REPLACE_DESCRIPTION
-Instructions:           REPLACE_INSTRUCTIONS
-
-This position report was processed by mowas-pwb. Generated at REPLACE_DATETIME_CREATED
-More info on mowas-pwb can be found here: https://www.github.com/joergschultzelutter/mowas-pwb
----
-
-Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
-"""
-
-# Email template (HTML)
-html_template = """\
-<h2>Automated email - please do not respond</h2>
-<p>MOWAS Personal Warning Beacon - Report:</p>
-<table border="1">
-<thead>
-<tr style="background-color: #bbbbbb;">
-<td><strong>Details</strong></td>
-<td><strong>Values</strong></td>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<p><strong>&nbsp;Headline</strong>&nbsp;</p>
-</td>
-<td>&nbsp;REPLACE_HEADLINE</td>
-</tr>
-<tr>
-<td><strong>&nbsp;Message Type</strong></td>
-<td>&nbsp;REPLACE_MESSAGE_TYPE</td>
-</tr>
-<tr>
-<td><strong>&nbsp;Urgency</strong>&nbsp;</td>
-<td>&nbsp;REPLACE_URGENCY</td>
-</tr>
-<tr>
-<td><strong>&nbsp;Severity</strong>&nbsp;</td>
-<td>&nbsp;REPLACE_SEVERITY</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Message Timestamp</strong></p>
-</td>
-<td>&nbsp;REPLACE_TIMESTAMP</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Description</strong></p>
-</td>
-<td>&nbsp;REPLACE_DESCRIPTION</td>
-</tr>
-<tr>
-<td>
-<p><strong>&nbsp;Instructions</strong></p>
-</td>
-<td>&nbsp;REPLACE_INSTRUCTIONS</td>
-</tr>
-</tbody>
-</table>
-<p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong></p>
-<hr />
-<p>Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
-"""
-
-# Email template - mail subject
-mail_subject_template = (
-    "MOWAS Personal Warning Beacon -  Report REPLACE_DATETIME_CREATED"
-)
-
 
 def generate_dapnet_messages(
     mowas_messages_to_send: dict,
@@ -195,6 +113,7 @@ def generate_dapnet_messages(
         # Finally, send this particular message to DAPNET and then loop to the next message
         logger.debug(msg="Sending message to DAPNET")
         send_dapnet_message(
+            message=msg,
             to_callsign=mowas_dapnet_destination_callsign,
             dapnet_login_callsign=mowas_dapnet_login_callsign,
             dapnet_login_passcode=mowas_dapnet_login_passcode,
@@ -208,7 +127,7 @@ def generate_telegram_messages(
     mowas_messages_to_send: dict,
     warncell_data: dict,
     mowas_telegram_bot_token: str,
-    telegram_target_id: str,
+    telegram_target_id: int,
 ):
 
     """
@@ -298,6 +217,88 @@ def generate_email_messages(
     =======
     """
 
+    # Email template (plain text)
+    plaintext_template = """\
+    AUTOMATED EMAIL - PLEASE DO NOT RESPOND
+
+    MOWAS Personal Warning Beacon - Report:
+
+
+    Message Headline:       REPLACE_HEADLINE
+    Message Type:           REPLACE_MESSAGE_TYPE
+    Urgency:                REPLACE_URGENCY
+    Severity:               REPLACE_SEVERITY
+    Message Timestamp:      REPLACE_TIMESTAMP
+    Description:            REPLACE_DESCRIPTION
+    Instructions:           REPLACE_INSTRUCTIONS
+
+    This position report was processed by mowas-pwb. Generated at REPLACE_DATETIME_CREATED
+    More info on mowas-pwb can be found here: https://www.github.com/joergschultzelutter/mowas-pwb
+    ---
+
+    Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
+    """
+
+    # Email template (HTML)
+    html_template = """\
+    <h2>Automated email - please do not respond</h2>
+    <p>MOWAS Personal Warning Beacon - Report:</p>
+    <table border="1">
+    <thead>
+    <tr style="background-color: #bbbbbb;">
+    <td><strong>Details</strong></td>
+    <td><strong>Values</strong></td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>
+    <p><strong>&nbsp;Headline</strong>&nbsp;</p>
+    </td>
+    <td>&nbsp;REPLACE_HEADLINE</td>
+    </tr>
+    <tr>
+    <td><strong>&nbsp;Message Type</strong></td>
+    <td>&nbsp;REPLACE_MESSAGE_TYPE</td>
+    </tr>
+    <tr>
+    <td><strong>&nbsp;Urgency</strong>&nbsp;</td>
+    <td>&nbsp;REPLACE_URGENCY</td>
+    </tr>
+    <tr>
+    <td><strong>&nbsp;Severity</strong>&nbsp;</td>
+    <td>&nbsp;REPLACE_SEVERITY</td>
+    </tr>
+    <tr>
+    <td>
+    <p><strong>&nbsp;Message Timestamp</strong></p>
+    </td>
+    <td>&nbsp;REPLACE_TIMESTAMP</td>
+    </tr>
+    <tr>
+    <td>
+    <p><strong>&nbsp;Description</strong></p>
+    </td>
+    <td>&nbsp;REPLACE_DESCRIPTION</td>
+    </tr>
+    <tr>
+    <td>
+    <p><strong>&nbsp;Instructions</strong></p>
+    </td>
+    <td>&nbsp;REPLACE_INSTRUCTIONS</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong></p>
+    <hr />
+    <p>Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
+    """
+
+    # Email template - mail subject
+    mail_subject_template = (
+        "MOWAS Personal Warning Beacon -  Report REPLACE_DATETIME_CREATED"
+    )
+
     logger.debug(msg="Starting Email message processing")
     for mowas_message_id in mowas_messages_to_send:
         headline = mowas_messages_to_send[mowas_message_id]["headline"]
@@ -346,7 +347,7 @@ def generate_email_messages(
         )
 
         # add the Time Created information
-        utc_create_time = datetime.datetime.utcnow()
+        utc_create_time = datetime.utcnow()
         msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
         plaintext_message = plaintext_message.replace(
             "REPLACE_DATETIME_CREATED", msg_string
@@ -359,7 +360,7 @@ def generate_email_messages(
         send_email_message(
             plaintext_message=plaintext_message,
             html_message=html_message,
-            subject_message=f"mowas-pwb {msgtype}",
+            subject_message=mail_subject_message,
             smtpimap_email_address=smtpimap_email_address,
             smtpimap_email_password=smtpimap_email_password,
             mail_recipient=mail_recipient,

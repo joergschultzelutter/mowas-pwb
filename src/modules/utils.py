@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
     config = configparser.ConfigParser()
-    mowas_watch_areas = []
 
     try:
         config.read(config_filename)
@@ -60,28 +59,48 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_smtpimap_email_password = config.get(
             "mowas_config", "smtpimap_email_password"
         )
-        mowas_acs= config.get(
-            "mowas_config", "mowas_active_categories"
+        mowas_smtp_server_address = config.get("mowas_config", "smtp_server_address")
+        mowas_smtp_server_port = config.get("mowas_config", "smtp_server_port")
+        mowas_imap_server_address = config.get("mowas_config", "imap_server_address")
+        mowas_imap_server_port = config.get("mowas_config", "imap_server_port")
+        mowas_imap_mailbox_name = config.get("mowas_config", "imap_mailbox_name")
+        mowas_imap_mail_retention_max_days = config.get(
+            "mowas_config", "imap_mail_retention_max_days"
         )
 
-        mowas_active_categories = [s.strip().upper() for s in mowas_acs.split(',') if mowas_acs != ""]
+        mowas_acs = config.get("mowas_config", "mowas_active_categories")
+
+        mowas_active_categories = [
+            s.strip().upper() for s in mowas_acs.split(",") if mowas_acs != ""
+        ]
         if len(mowas_active_categories) == 0:
-            logger.info(msg="Config file error; at least one MOWAS category needs to be specified")
+            logger.info(
+                msg="Config file error; at least one MOWAS category needs to be specified"
+            )
             raise ValueError("Error in config file")
-        
+
         for ac in mowas_active_categories:
-            if ac not in ["TEMPEST","FLOOD","FLOOD_OLD","WILDFIRE","EARTHQUAKE","DISASTERS"]:
+            if ac not in [
+                "TEMPEST",
+                "FLOOD",
+                "FLOOD_OLD",
+                "WILDFIRE",
+                "EARTHQUAKE",
+                "DISASTERS",
+            ]:
                 logger.info(msg=f"Config file error; received category '{ac}'")
                 raise ValueError("Error in config file")
 
         success = True
     except:
-        logger.info(msg="Error in configuration file; Check if your config format is correct.")
+        logger.info(
+            msg="Error in configuration file; Check if your config format is correct."
+        )
         mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
-        mowas_dapnet_login_passcode = mowas_watch_areas_string = None
-        mowas_telegram_bot_token = None
+        mowas_dapnet_login_passcode = mowas_telegram_bot_token = None
         mowas_smtpimap_email_address = mowas_smtpimap_email_password = None
         mowas_watch_areas = mowas_active_categories = []
+        mowas_imap_mail_retention_max_days = 0
         success = False
 
     return (
@@ -93,7 +112,13 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
+        mowas_smtp_server_address,
+        mowas_smtp_server_port,
         mowas_active_categories,
+        mowas_imap_server_address,
+        mowas_imap_server_port,
+        mowas_imap_mailbox_name,
+        mowas_imap_mail_retention_max_days,
     )
 
 
