@@ -26,9 +26,10 @@
 
 - ``aprsdotfi_api_key`` is the aprs.fi access key that is used if you tell the program to use the ``follow-the-ham`` option
 - ``dapnet_login_callsign`` and ``dapnet_login_passcode`` are required for sending data to DAPNET
-- ``mowas_watch_areas`` defines your watch areas. ``mowas-pwb`` will check these areas and if there is a match, it might forward you that warning message.
+- ``mowas_watch_areas`` defines your static watch areas. ``mowas-pwb`` will check these areas and if there is a match, it might forward you that warning message.
 - ``telegram_bot_token`` defines the Telegram bot which will deliver potential warning messages to you.
-- ``smtpimap_email_address`` and ``smtpimap_email_password`` are required for sending data from this email account to the user
+- ``smtpimap_email_address``, ``smtpimap_email_password`` ``smtpimap_server_address`` and ``smtpimap_server_port`` are required for sending data from this email account to the user
+-``imap_server_address``, ``imap_server_port`` ``imap_mailbox_name`` and ``imap_mail_retention_max_days`` need to be properly populated if ``mowas-pwb`` is supposed to clean up your mail account's "Sent" folder after x days.  
 - ``mowas_active_categories`` defines the number of MOWAS categories which will be monitored by ``mowas-pwb``. By default, this setting contains all available MOWAS categories.
 
 A variable with the value of 
@@ -52,7 +53,7 @@ dapnet_login_passcode = -1
 # Lat / Lon coordinates that we intend to monitor
 # Format: lat1,lon1<space>lat2,lon2<space>.....latn,lonn
 # Example: 51.838879,8.32678 51.829722,9.448333
-mowas_watch_areas = 51.8127,8.32678 51.829722,9.448333 48.4794,10.771
+mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333
 
 # Telegram bot token - this is the bot that will send out the message
 # "NOT_CONFIGURED" disables Telegram access
@@ -64,6 +65,21 @@ telegram_bot_token = NOT_CONFIGURED
 # "NOT_CONFIGURED" disables the email account
 smtpimap_email_address = NOT_CONFIGURED
 smtpimap_email_password = NOT_CONFIGURED
+smtp_server_address = "smtp.gmail.com"
+smtp_server_port = 465
+
+# This is an optional garbage disposal handler which auto-deletes
+# all messages from your mail account. Any value different to "0"
+# will activate the garbage collector and delete all messages after
+#
+# Do NOT activate this setting for non-dedicated
+# mowas-pwb mail accounts as you WILL lose all of your emails in
+# your "Sent" folder. You have been warned.
+#
+imap_server_address = "imap.gmail.com"
+imap_server_port = 993
+imap_mail_retention_max_days = 0  # Delete mails after x days (0 = disable)
+imap_mailbox_name = '"[Gmail]/Sent Mail"'
 
 # MOWAS categories to be monitored. These identifiers describe
 # the MOWAS URLs from which this program is going to download
