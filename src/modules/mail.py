@@ -23,7 +23,7 @@ import imaplib
 from email.message import EmailMessage
 import re
 import datetime
-from utils import get_program_config_from_file
+from .utils import get_program_config_from_file
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"

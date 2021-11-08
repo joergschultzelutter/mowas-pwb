@@ -18,11 +18,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 import logging
-from utils import convert_text_to_plain_ascii, remove_html_content
-from warncell import read_warncell_info
-from telegramdotcom import send_telegram_message
-from dapnet import send_dapnet_message
-from mail import send_email_message
+from .utils import convert_text_to_plain_ascii, remove_html_content
+from .warncell import read_warncell_info
+from .telegramdotcom import send_telegram_message
+from .dapnet import send_dapnet_message
+from .mail import send_email_message
 from datetime import datetime
 
 # Set up the global logger variable

@@ -19,7 +19,7 @@
 #
 
 import requests
-from utils import get_program_config_from_file
+from .utils import get_program_config_from_file
 import logging
 
 # Default user agent which is used by the program for sending requests to aprs.fi

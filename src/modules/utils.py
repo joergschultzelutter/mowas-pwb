@@ -61,13 +61,26 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         )
         mowas_smtp_server_address = config.get("mowas_config", "smtp_server_address")
         mowas_smtp_server_port = config.get("mowas_config", "smtp_server_port")
+        try:
+            mowas_smtp_server_port = int(mowas_smtp_server_port)
+        except ValueError:
+            mowas_smtp_server_port = 0
+            mowas_smtp_server_address = "NOT_CONFIGURED"
         mowas_imap_server_address = config.get("mowas_config", "imap_server_address")
         mowas_imap_server_port = config.get("mowas_config", "imap_server_port")
+        try:
+            mowas_imap_server_port = int(mowas_imap_server_port)
+        except ValueError:
+            mowas_imap_server_port = 0
+        mowas_imap_server_address = "NOT_CONFIGURED"
         mowas_imap_mailbox_name = config.get("mowas_config", "imap_mailbox_name")
         mowas_imap_mail_retention_max_days = config.get(
             "mowas_config", "imap_mail_retention_max_days"
         )
-
+        try:
+            mowas_imap_mail_retention_max_days = int(mowas_imap_mail_retention_max_days)
+        except:
+            mowas_imap_mail_retention_max_days = 0
         mowas_acs = config.get("mowas_config", "mowas_active_categories")
 
         mowas_active_categories = [

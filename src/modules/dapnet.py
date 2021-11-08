@@ -19,7 +19,7 @@
 #
 import logging
 import json
-from utils import get_program_config_from_file, make_pretty_dapnet_messages
+from .utils import get_program_config_from_file, make_pretty_dapnet_messages
 import requests
 from requests.auth import HTTPBasicAuth
 import time

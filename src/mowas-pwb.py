@@ -22,7 +22,7 @@ import signal
 from modules.mowas import process_mowas_data
 from modules.warncell import read_warncell_info
 from modules.utils import (
-    get_program_config_from_file as get_program_config_from_file,
+    get_program_config_from_file,
     signal_term_handler,
     get_command_line_params,
 )
@@ -37,6 +37,7 @@ from modules.dapnet import send_dapnet_message
 from modules.mail import send_email_message
 from expiringdict import ExpiringDict
 import time
+from apscheduler.schedulers.background import BackgroundScheduler
 import apscheduler.schedulers.base
 from modules.mail import imap_garbage_collector
 
@@ -83,7 +84,7 @@ if __name__ == "__main__":
         mowas_aprsdotfi_api_key,
         mowas_dapnet_login_callsign,
         mowas_dapnet_login_passcode,
-        mowas_watch_areas,
+        mowas_watch_areas_config,       # separate value as we may need to change it if APRS tracking is enabled
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     mowas_dapnet_enabled = False if mowas_dapnet_login_callsign == "NOT_CONFIGURED" else True
     mowas_telegram_enabled = False if mowas_telegram_bot_token == "NOT_CONFIGURED" else True
     mowas_email_enabled = False if (mowas_smtpimap_email_address == "NOT_CONFIGURED" or mowas_smtpimap_email_password == "NOT_CONFIGURED") else True
-    mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_server_address == "NOT_CONFIGURED" or mowas_imap_mail_retention_max_days == 0) else True
+    mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_server_address == "NOT_CONFIGURED" or mowas_imap_mail_retention_max_days == 0 or not mowas_email_enabled) else True
     # fmt: on
 
     # some basic checks on whether the user wants us to do the impossible :-)
