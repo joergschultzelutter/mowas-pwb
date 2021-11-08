@@ -37,6 +37,8 @@ from modules.dapnet import send_dapnet_message
 from modules.mail import send_email_message
 from expiringdict import ExpiringDict
 import time
+import apscheduler.schedulers.base
+from modules.mail import imap_garbage_collector
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     mowas_dapnet_enabled = False if mowas_dapnet_login_callsign == "NOT_CONFIGURED" else True
     mowas_telegram_enabled = False if mowas_telegram_bot_token == "NOT_CONFIGURED" else True
     mowas_email_enabled = False if (mowas_smtpimap_email_address == "NOT_CONFIGURED" or mowas_smtpimap_email_password == "NOT_CONFIGURED") else True
-    mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_mail_retention_max_days == 0) else True
+    mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_server_address == "NOT_CONFIGURED" or mowas_imap_mail_retention_max_days == 0) else True
     # fmt: on
 
     # some basic checks on whether the user wants us to do the impossible :-)
@@ -230,7 +232,36 @@ if __name__ == "__main__":
     logger.info(msg="Registering SIGTERM handler for safe shutdown...")
     signal.signal(signal.SIGTERM, signal_term_handler)
 
+    # Set up the ExpiringDict for our entries
     mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=mowas_time_to_live)
+
+    # Check if we need to install/activate the Email garbage collector
+    mail_gc_scheduler = None
+    if mowas_imap_gc_enabled:
+        logger.info(msg="Spinning up the IMAP garbage collector per our user's request")
+
+        # Set up the scheduler
+        mail_gc_scheduler = BackgroundScheduler()
+
+        # Then add the Garbage Collector process as scheduler task
+        mail_gc.scheduler.add_job(
+            imap_garbage_collector,
+            "interval",
+            id="imap_garbage_collector",
+            days=mowas_imap_mail_retention_max_days,
+            args=[
+                mowas_smtpimap_email_address,
+                mowas_smtpimap_email_password,
+                mowas_imap_server_port,
+                mowas_imap_server_address,
+                mowas_imap_mail_retention_max_days,
+                mowas_imap_mailbox_name,
+            ],
+        )
+
+        # And finally start the scheduler
+        mail_gc_scheduler.start()
+        logger.info(msg="IMAP garbage collector has been activated")
 
     logger.info(msg="Entering processing loop...")
     while True:
@@ -336,4 +367,18 @@ if __name__ == "__main__":
             logger.info(
                 msg="Received KeyboardInterrupt or SystemExit in progress; shutting down ..."
             )
+            # Check if we need to terminate the garbage collector scheduler
+            if mowas_imap_gc_enabled and mail_gc_scheduler:
+                logger.info(msg="Pausing IMAP Garbage Collector")
+                mail_gc_scheduler.pause()
+                mail_gc_scheduler.remove_all_jobs()
+                logger.info(msg="Stopping IMAP Garbage Collector")
+                if mail_gc_scheduler.state != apscheduler.schedulers.base.STATE_STOPPED:
+                    try:
+                        mail_gc_scheduler.shutdown()
+                    except:
+                        logger.info(
+                            msg="Exception occurred during shutdown SystemExit loop"
+                        )
+            # Finally, terminate the loop
             break
