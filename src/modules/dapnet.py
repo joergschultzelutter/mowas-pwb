@@ -143,7 +143,6 @@ if __name__ == "__main__":
             send_dapnet_message(
                 to_callsign="DF1JSL-8",
                 message="Die Besten der Besten der Besten, Sir",
-                message_status="Alert",
                 dapnet_login_callsign=mowas_dapnet_login_callsign,
                 dapnet_login_passcode=mowas_dapnet_login_passcode,
                 dapnet_high_priority_message=False,
