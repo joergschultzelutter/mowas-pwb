@@ -76,6 +76,9 @@ smtp_server_port = 465
 # mowas-pwb mail accounts as you WILL lose all of your emails in
 # your "Sent" folder. You have been warned.
 #
+# Server port 0, server address NOT CONFIGURED or retention_days=0
+# will automatically disable the garbage collector
+#
 imap_server_address = "imap.gmail.com"
 imap_server_port = 993
 imap_mail_retention_max_days = 0  # Delete mails after x days (0 = disable)
