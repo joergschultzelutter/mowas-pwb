@@ -23,6 +23,7 @@ import requests
 import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
+from utils import remove_html_content
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -311,6 +312,7 @@ def process_mowas_data(
                             # If we find a match then this list will contain all areas for
                             # which we found a match related to our lat/lon coordinates
                             areas_matching_latlon = []
+                            areas_matching_latlon_abbrev = []   # Abbreviated version for DAPNET as we only have 80 chars
                             geocodes_matching_latlon = []
 
                             for area in areas:
@@ -353,28 +355,31 @@ def process_mowas_data(
                                         # We have a match? Then let's remember what we have
                                         # Try to shorten the area names as this string is rather lengthy
                                         if area_desc not in areas_matching_latlon:
-                                            area_desc = area_desc.replace(
+
+
+                                            area_desc_abbrev = area_desc.replace(
                                                 "Gemeinde/Stadt: ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Landkreis/Stadt: ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Bundesland: ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Freistaat ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Freie Hansestadt ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Land: ", "", 1
                                             )
-                                            area_desc = area_desc.replace(
+                                            area_desc_abbrev = area_desc_abbrev.replace(
                                                 "Land ", "", 1
                                             )
                                             areas_matching_latlon.append(area_desc)
+                                            areas_matching_latlon_abbrev.append(area_desc_abbrev)
 
                                         # Save the geocodes, too. This is our primary mean of identification
                                         # area_desc will only be used of the geocode cannot be found
@@ -423,14 +428,15 @@ def process_mowas_data(
 
                                 # Create the outgoing message's payload ...
                                 mowas_messages_to_sent_payload = {
-                                    "headline": mowas_headline,
+                                    "headline": remove_html_content(message_string=mowas_headline),
                                     "urgency": mowas_urgency,
                                     "severity": mowas_severity,
-                                    "description": mowas_description,
-                                    "instruction": mowas_instruction,
+                                    "description": remove_html_content(message_string=mowas_description),
+                                    "instruction": remove_html_content(message_string=mowas_instruction),
                                     "sent": mowas_sent,
                                     "msgtype": mowas_msgtype,
                                     "areas": areas_matching_latlon,
+                                    "areas_matching_latlon_abbrev": areas_matching_latlon_abbrev,
                                     "geocodes": geocodes_matching_latlon,
                                     "dapnet_high_prio": dapnet_high_prio_msg,
                                 }
@@ -462,13 +468,13 @@ if __name__ == "__main__":
     # Coordinates = latitude, longitude
     my_coordinates = [
         [
-            51.8127,
-            8.9183,
+            48.4781,
+            10.774,
         ],
         [
-            48.4794,
-            10.771,
-        ],
+            48.4781,
+            10.773
+        ]
     ]
     logger.info(
         process_mowas_data(
