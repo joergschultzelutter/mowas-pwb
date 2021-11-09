@@ -317,10 +317,15 @@ def process_mowas_data(
 
                             for area in areas:
                                 polygon = area["polygon"]
-                                splitted_array = [
-                                    point.split(",") for point in polygon[0].split(" ")
-                                ]
-                                numpy_array = np.array(splitted_array, dtype=np.float64)
+                                # fmt: off
+                                # First, convert original MOWAS data to an array list
+                                lonlat_array = [point.split(",") for point in polygon[0].split(" ")]
+                                # and then convert it from lon/lat to lat/lon as we need that format later
+                                latlon_array = [(float(val[1]), float(val[0])) for val in lonlat_array]
+                                # fmt: on
+
+                                #
+                                numpy_array = np.array(latlon_array, dtype=np.float64)
                                 poly = Polygon(numpy_array)
 
                                 # Coord has the format latitude,longitude
@@ -328,9 +333,8 @@ def process_mowas_data(
                                     latitude = coord[0]
                                     longitude = coord[1]
 
-                                    # The MOWAS polygon uses the format longitude,latitude
-                                    # so let's create our point this way
-                                    p = Point(longitude, latitude)
+                                    # Let's create our coordinate that we want to check
+                                    p = Point(latitude, longitude)
 
                                     # Check if we are either inside of the polygon or
                                     # touch its borders
