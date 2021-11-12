@@ -166,7 +166,7 @@ def process_mowas_data(
                 base_url="https://warnung.bund.de",
                 url_path=mowas_dictionary[mowas_category],
             )
-            logger.debug(msg=f"Success for mowas_category {mowas_category}: {success}")
+            logger.debug(msg=f"Processing mowas_category {mowas_category}: {success}")
             if success:
                 for element in json_data:
                     # general marker which tells us whether we should send this message
@@ -314,6 +314,7 @@ def process_mowas_data(
                             areas_matching_latlon = []
                             areas_matching_latlon_abbrev = []   # Abbreviated version for DAPNET as we only have 80 chars
                             geocodes_matching_latlon = []
+                            coords_matching_latlon = []
 
                             for area in areas:
                                 polygon = area["polygon"]
@@ -396,6 +397,14 @@ def process_mowas_data(
                                                 geocode_value
                                             )
 
+                                        # Remember the set of coordinates which caused that match
+                                        coordinates = {
+                                            "latitude": latitude,
+                                            "longitude": longitude
+                                        }
+                                        if coordinates not in coords_matching_latlon:
+                                            coords_matching_latlon.append(coordinates)
+
                             # We went through all areas - now let's see of we found something
                             if area_matches_with_user_latlon:
                                 # Check if Covid content is present. If yes, then check if
@@ -443,12 +452,35 @@ def process_mowas_data(
                                     "areas_matching_latlon_abbrev": areas_matching_latlon_abbrev,
                                     "geocodes": geocodes_matching_latlon,
                                     "dapnet_high_prio": dapnet_high_prio_msg,
+                                    "latlon_polygon": latlon_array,
+                                    "coords_matching_latlon": coords_matching_latlon,
                                 }
-                                # ... and add it to our dictionary
+                                # ... and add it to our dictionary (or update an existing element)
+                                # This code assumes that MOWAS uses unique message identifiers across
+                                # its various categories
                                 if add_data:
-                                    mowas_messages_to_send[
-                                        mowas_identifier
-                                    ] = mowas_messages_to_sent_payload
+
+                                    # Check if we have already received this message
+                                    if mowas_identifier not in mowas_messages_to_send:
+                                        # No - then let's add it
+                                        mowas_messages_to_send[
+                                            mowas_identifier
+                                        ] = mowas_messages_to_sent_payload
+                                    else:
+                                        # Message is already present; we may need to update it
+                                        existing_message = mowas_messages_to_send[mowas_identifier]
+                                        existing_coords = existing_message["coords_matching_latlon"]
+
+                                        # amend the existing set of coordinates, if necessary
+                                        for coord in coords_matching_latlon:
+                                            if coord not in existing_coords:
+                                                existing_coords.append(coord)
+
+                                        # replace the entry in the dict element
+                                        existing_message["coords_matching_latlon"] = existing_coords
+
+                                        # Finally, update the amended entry
+                                        mowas_messages_to_send[mowas_identifier] = existing_message
 
                                 # Finally, check if the message is either "Alert" or
                                 # "Update". We need this info at a later point in time
