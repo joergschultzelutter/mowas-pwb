@@ -99,7 +99,7 @@ def render_png_map(
         else:
             # if pycairo is not present, render via pillow
             image = context.render_pillow(800, 500)
-            image.save(iobuffer)
+            image.save(iobuffer, format="png")
 
         # reset the buffer position
         iobuffer.seek(0)
