@@ -35,6 +35,7 @@ from modules.aprsdotfi import get_position_on_aprsfi
 from modules.telegramdotcom import send_telegram_message
 from modules.dapnet import send_dapnet_message
 from modules.mail import send_email_message
+from modules.staticmap import render_png_map
 from expiringdict import ExpiringDict
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
