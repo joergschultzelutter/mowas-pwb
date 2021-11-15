@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 def render_png_map(
     polygon_area: list,
     monitoring_positions: list,
-    aprs_latitude: float = 0.0,
-    aprs_longitude: float = 0.0,
+    aprs_latitude: float = None,
+    aprs_longitude: float = None,
 ):
     """
     Render a static PNG image of the destination area where a MOWAS event
