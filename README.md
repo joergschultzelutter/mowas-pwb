@@ -27,5 +27,5 @@ Supported MOWAS features:
 
 ## The fine print
 
-- APRS is a registered trademark of APRS Software and Bob Bruninga, WB4APR. Thank you Bob!
+- APRS is a registered trademark of APRS Software and Bob Bruninga/WB4APR. Thank you Bob!
 - aprs.fi services are provided by Heikki Hannikainen/OH7LZB - thank you Hessu!
