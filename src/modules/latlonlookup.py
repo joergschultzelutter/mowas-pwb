@@ -29,11 +29,8 @@ logger = logging.getLogger(__name__)
 # Default user agent which is used by the program for sending requests to aprs.fi
 default_user_agent = f"mowas-pwb (+https://github.com/joergschultzelutter/mowas-pwb/)"
 
-def get_reverse_geopy_data(
-    latitude: float,
-    longitude: float,
-    language: str = "de"
-):
+
+def get_reverse_geopy_data(latitude: float, longitude: float, language: str = "de"):
     """
     Get human-readable address data for a lat/lon combination
     ==========
@@ -119,6 +116,7 @@ def get_reverse_geopy_data(
     }
 
     return success, response_data
+
 
 if __name__ == "__main__":
     logger.info(get_reverse_geopy_data(latitude=37.7790262, longitude=-122.4199061))

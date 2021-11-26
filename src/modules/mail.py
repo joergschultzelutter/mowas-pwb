@@ -21,9 +21,10 @@ import logging
 import smtplib
 import imaplib
 from email.message import EmailMessage
+from email.utils import make_msgid
 import re
 import datetime
-from .utils import get_program_config_from_file
+from utils import get_program_config_from_file
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -45,6 +46,7 @@ def send_email_message(
     mail_recipient: str,
     smtp_server_address: str,
     smtp_server_port: int,
+    html_image: bytes = None
 ):
     """
     Send an already prepared email message to an SMTP server
@@ -62,7 +64,17 @@ def send_email_message(
     msg["From"] = f"MOWAS Personal Warning Beacon <{smtpimap_email_address}>"
     msg["To"] = mail_recipient
     msg.set_content(plaintext_message)
-    msg.add_alternative(html_message, subtype="html")
+
+    # Image present? Then encode it properly
+    if html_image:
+        image_cid = make_msgid()
+        msg.add_alternative(html_message.format(image_cid=image_cid[1:-1]), subtype='html')
+        x = msg.get_payload()
+
+        msg.get_payload()[1].add_related(html_image,maintype="image",subtype="png",cid=image_cid)
+    else:
+        # otherwise, send the HTML content without an image
+        msg.add_alternative(html_message, subtype="html")
 
     success, output_message = send_message_via_snmp(
         smtpimap_email_address=smtpimap_email_address,
