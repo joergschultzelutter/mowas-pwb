@@ -336,6 +336,22 @@ def emergency_run_interval_check(interval_value):
     return interval_value
 
 
+def language_check(langage_value):
+    # fmt:off
+    supported_languages = ["bg","cs","da","el","en-gb","en-us","es","et","fi","fr","hu","it","ja","lt","lv","nl","pl","pt-br","pt-pt","ro","ru","sk","sl","sv","zh"]
+    # fmt:on
+    if language_value:
+        language_value = langage_value.lower()
+        if language_value not in supported_languages:
+            raise argparse.ArgumentTypeError(
+                f"Unsupported target language {language_value}; supported: {supported_languages}"
+            )
+        else:
+            return language_value
+    else:
+        return None
+
+
 def get_command_line_params():
     parser = argparse.ArgumentParser()
 
@@ -453,6 +469,14 @@ def get_command_line_params():
         help="As there is a torrent of Covid-19 related news on a daily basis, mowas-pwb removes these messages by default. If you still want to receive those messages, then enable this setting",
     )
 
+    parser.add_argument(
+        "--translate-to",
+        default=None,
+        type=language_check,
+        dest=target_language,
+        help="ISO639-1 target language for MOWAS messages (will not be invoked for DAPNET messages)",
+    )
+
     parser.set_defaults(add_example_data=False)
 
     args = parser.parse_args()
@@ -472,6 +496,7 @@ def get_command_line_params():
     mowas_dapnet_high_prio_level = args.dapnet_high_prio_level
     mowas_email_recipient = args.email_recipient
     mowas_enable_covid_content = args.enable_covid_content
+    mowas_target_language = args.target_language
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
@@ -500,6 +525,7 @@ def get_command_line_params():
         mowas_disable_email,
         mowas_email_recipient,
         mowas_enable_covid_content,
+        mowas_target_language,
     )
 
 
