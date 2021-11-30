@@ -85,7 +85,7 @@ if __name__ == "__main__":
         mowas_aprsdotfi_api_key,
         mowas_dapnet_login_callsign,
         mowas_dapnet_login_passcode,
-        mowas_watch_areas_config,       # separate value as we may need to change it if APRS tracking is enabled
+        mowas_watch_areas,
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
@@ -96,6 +96,7 @@ if __name__ == "__main__":
         mowas_imap_server_port,
         mowas_imap_mailbox_name,
         mowas_imap_mail_retention_max_days,
+        mowas_deepldotcom_api_key,
     ) = get_program_config_from_file(config_filename=mowas_configfile)
     if not success:
         logger.info(msg="Error while parsing the program config file; exiting...")

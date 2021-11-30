@@ -51,6 +51,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         b = np.array(a, dtype=np.float64)
         mowas_watch_areas = b.tolist()
 
+        mowas_deepldotcom_api_key = config.get("mowas_config", "deepldotcom_api_key")
         mowas_telegram_bot_token = config.get("mowas_config", "telegram_bot_token")
 
         mowas_smtpimap_email_address = config.get(
@@ -113,7 +114,10 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_dapnet_login_passcode = mowas_telegram_bot_token = None
         mowas_smtpimap_email_address = mowas_smtpimap_email_password = None
         mowas_watch_areas = mowas_active_categories = []
-        mowas_imap_mail_retention_max_days = 0
+        mowas_imap_mail_retention_max_days = mowas_imap_server_port = 0
+        mowas_smtp_server_port = 0
+        mowas_smtp_server_address = mowas_imap_server_address = None
+        mowas_imap_mailbox_name = mowas_deepldotcom_api_key = None
         success = False
 
     return (
@@ -132,6 +136,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_imap_server_port,
         mowas_imap_mailbox_name,
         mowas_imap_mail_retention_max_days,
+        mowas_deepldotcom_api_key,
     )
 
 

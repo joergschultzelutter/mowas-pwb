@@ -119,6 +119,16 @@ if __name__ == "__main__":
         mowas_dapnet_login_passcode,
         mowas_watch_areas,
         mowas_telegram_bot_token,
+        mowas_smtpimap_email_address,
+        mowas_smtpimap_email_password,
+        mowas_smtp_server_address,
+        mowas_smtp_server_port,
+        mowas_active_categories,
+        mowas_imap_server_address,
+        mowas_imap_server_port,
+        mowas_imap_mailbox_name,
+        mowas_imap_mail_retention_max_days,
+        mowas_deepldotcom_api_key,
     ) = get_program_config_from_file()
     if success:
         logger.info(get_position_on_aprsfi("vriendschap", mowas_aprsdotfi_api_key))

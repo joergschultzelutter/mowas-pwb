@@ -46,7 +46,7 @@ def send_email_message(
     mail_recipient: str,
     smtp_server_address: str,
     smtp_server_port: int,
-    html_image: bytes = None
+    html_image: bytes = None,
 ):
     """
     Send an already prepared email message to an SMTP server
@@ -68,10 +68,14 @@ def send_email_message(
     # Image present? Then encode it properly
     if html_image:
         image_cid = make_msgid()
-        msg.add_alternative(html_message.format(image_cid=image_cid[1:-1]), subtype='html')
+        msg.add_alternative(
+            html_message.format(image_cid=image_cid[1:-1]), subtype="html"
+        )
         x = msg.get_payload()
 
-        msg.get_payload()[1].add_related(html_image,maintype="image",subtype="png",cid=image_cid)
+        msg.get_payload()[1].add_related(
+            html_image, maintype="image", subtype="png", cid=image_cid
+        )
     else:
         # otherwise, send the HTML content without an image
         msg.add_alternative(html_message, subtype="html")
@@ -256,9 +260,12 @@ if __name__ == "__main__":
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
+        mowas_smtp_server_address,
+        mowas_smtp_server_port,
         mowas_active_categories,
         mowas_imap_server_address,
         mowas_imap_server_port,
         mowas_imap_mailbox_name,
         mowas_imap_mail_retention_max_days,
+        mowas_deepldotcom_api_key,
     ) = get_program_config_from_file()
