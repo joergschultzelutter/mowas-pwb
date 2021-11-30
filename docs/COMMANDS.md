@@ -29,3 +29,5 @@ If you have specified the ``follow-the-ham`` parameter AND aprs.fi's access key 
 - ``email-recipient`` Specifies the email address of the person that will receive our program's message(s). This value has to be specified if the program is instructed to send data to an email account.
 
 At least __one__ of these three output options (DAPNET _or_ Telegram _or_ Email) needs to be configured in the program's config file __and__ also provided via command line parameters - otherwise, the program will exit with an error message during startup. Keep in mind that you can disable notification options without the need for modifying the program configuration file.
+
+Have a look at the [program's processing logic and known issues](docs/ADDITIONAL_INFO.md)

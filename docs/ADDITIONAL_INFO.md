@@ -30,9 +30,11 @@ The potential side effect for this constraint is that if you start the program a
 - As the MOWAS APIs are not officially available to end users, government authorities might either terminate the services without notice and / or change the format settings of the services that are currently exposed (but not officially available to end users)
 - Although all MOWAS messages do contain warncell references (which allows the program's DAPNET part to use the region's abbreviated region description), certain messages do contain invalid warncell identifiers. If such an case is encountered, MOWAS will use the (lenghty) original regional description instead. For DAPNET messages which are limited to 80 characters per message, the program will try to shorten that description by removing some clutter from that message.
 - If you want to use this program for a different country's warning system:
-    - remove the call for retrieving the 'warncell' information - this one is only relevant to German users
-    - replace the MOWAS module with your country's native warn system parser code
-    - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
+  - remove the call for retrieving the 'warncell' information - this one is only relevant to German users
+  - replace the MOWAS module with your country's native warn system parser code
+  - change the DAPNET message group setting from ``dl-all`` (Germany) to your locale's transponder group.
 - There is no message dupe check; if the same message is present in more than one MOWAS category and ``mowas-pwb`` deemed this message to be valid for your coordinates and program parameters' selection, you may receive that message more than once - unless the MOWAS government feed provides the message with the same unique identifier.
 - All MOWAS messages contain a LOT of text, meaning that DAPNET users will likely receive a lot of messages in case an alarm is triggered (keep in mind that DAPNET is limited to 80 chars per messages). Unfortunately, abbreviated warning messages are not available.
 - You may want to set up you Telegram bot as a private bot, thus preventing other Telegram users from discovering and using it. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html).
+
+Have a look at the [legal information](docs/LEGAL.md)
