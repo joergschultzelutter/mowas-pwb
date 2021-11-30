@@ -68,6 +68,7 @@ if __name__ == "__main__":
         mowas_disable_email,
         mowas_email_recipient,
         mowas_enable_covid_content,
+        mowas_target_language,
     ) = get_command_line_params()
 
     mowas_telegram_destination_id = 1234
