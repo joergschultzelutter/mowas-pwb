@@ -61,4 +61,4 @@ mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
 # you intend to use the program's auto-translation functionalities.
 # You can register for a free API access key here:
 # https://www.deepl.com/pro-api?cta=header-pro-api
-deepldotcom_api_key=NOT_CONFIGURED
+deepldotcom_api_key = NOT_CONFIGURED

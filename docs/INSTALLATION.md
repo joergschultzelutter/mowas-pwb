@@ -31,22 +31,23 @@
 - ``smtpimap_email_address``, ``smtpimap_email_password`` ``smtpimap_server_address`` and ``smtpimap_server_port`` are required for sending data from this email account to the user
 -``imap_server_address``, ``imap_server_port`` ``imap_mailbox_name`` and ``imap_mail_retention_max_days`` need to be properly populated if ``mowas-pwb`` is supposed to clean up your mail account's "Sent" folder after x days.  
 - ``mowas_active_categories`` defines the number of MOWAS categories which will be monitored by ``mowas-pwb``. By default, this setting contains all available MOWAS categories.
+- ``deepldotcom_api_key`` needs to be populated with a deepl.com API key in case you intend to use the program's auto-translation option
 
 A variable with the value of 
 ```python 
 NOT_CONFIGURED
 ``` 
-will automatically disable the program option that is associated with this value
+will automatically ___disable___ the program option that is associated with this value
 
 ```python
 [mowas_config]
 
 # API key for www.aprs.fi access
-# API key "NOT_CONFIGURED" disable aprs.fi access
+# API key NOT_CONFIGURED disable aprs.fi access
 aprsdotfi_api_key = NOT_CONFIGURED
 
 # DAPNET access credentials
-# Callsign "NOT_CONFIGURED" disables DAPNET access
+# Callsign NOT_CONFIGURED disables DAPNET access
 dapnet_login_callsign = NOT_CONFIGURED
 dapnet_login_passcode = -1
 
@@ -56,16 +57,16 @@ dapnet_login_passcode = -1
 mowas_watch_areas = 51.838879,8.32678 51.829722,9.448333
 
 # Telegram bot token - this is the bot that will send out the message
-# "NOT_CONFIGURED" disables Telegram access
+# NOT_CONFIGURED disables Telegram access
 telegram_bot_token = NOT_CONFIGURED
 
 # SMTP  / IMAP shared Credentials
 # Providers like GMail require you to set an app-specific password
 # (see https://myaccount.google.com/apppasswords)
-# "NOT_CONFIGURED" disables the email account
+# NOT_CONFIGURED disables the email account
 smtpimap_email_address = NOT_CONFIGURED
 smtpimap_email_password = NOT_CONFIGURED
-smtp_server_address = "smtp.gmail.com"
+smtp_server_address = smtp.gmail.com
 smtp_server_port = 465
 
 # This is an optional garbage disposal handler which auto-deletes
@@ -75,14 +76,17 @@ smtp_server_port = 465
 # Do NOT activate this setting for non-dedicated
 # mowas-pwb mail accounts as you WILL lose all of your emails in
 # your "Sent" folder. You have been warned.
-#
+# 
 # Server port 0, server address NOT CONFIGURED or retention_days=0
 # will automatically disable the garbage collector
 #
-imap_server_address = "imap.gmail.com"
+imap_server_address = imap.gmail.com
 imap_server_port = 993
-imap_mail_retention_max_days = 0  # Delete mails after x days (0 = disable)
-imap_mailbox_name = '"[Gmail]/Sent Mail"'
+imap_mailbox_name = [Gmail]/Sent Mail
+
+# IMAP garbage collector - delete 'sent' mails after x days
+# 0 = disable garbage collector
+imap_mail_retention_max_days = 0
 
 # MOWAS categories to be monitored. These identifiers describe
 # the MOWAS URLs from which this program is going to download
@@ -94,4 +98,10 @@ imap_mailbox_name = '"[Gmail]/Sent Mail"'
 # Valid values: TEMPEST, FLOOD, FLOOD_OLD (currently no longer
 # in use by MOWAS), WILDFIRE, EARTHQUAKE, DISASTERS
 mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
+
+# deepl.com API Key (www.deepl.com). You need to populate this value if
+# you intend to use the program's auto-translation functionalities.
+# You can register for a free API access key here:
+# https://www.deepl.com/pro-api?cta=header-pro-api
+deepldotcom_api_key = NOT_CONFIGURED
 ```
