@@ -37,4 +37,4 @@ The potential side effect for this constraint is that if you start the program a
 - All MOWAS messages contain a LOT of text, meaning that DAPNET users will likely receive a lot of messages in case an alarm is triggered (keep in mind that DAPNET is limited to 80 chars per messages). Unfortunately, abbreviated warning messages are not available.
 - You may want to set up you Telegram bot as a private bot, thus preventing other Telegram users from discovering and using it. Good instructions on how to do this can be found here: [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html).
 
-Have a look at the [legal information](docs/LEGAL.md)
+Have a look at the [legal information](LEGAL.md)

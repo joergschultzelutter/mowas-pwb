@@ -106,4 +106,4 @@ mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
 deepldotcom_api_key = NOT_CONFIGURED
 ```
 
-Have a look at the [program's command line parameters](docs/COMMANDS.md)
+Have a look at the [program's command line parameters](COMMANDS.md)
