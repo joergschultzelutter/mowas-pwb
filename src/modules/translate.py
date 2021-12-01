@@ -86,10 +86,11 @@ if __name__ == "__main__":
         mowas_deepldotcom_api_key,
     ) = get_program_config_from_file()
 
-    logger.info(
-        msg=translate_content(
-            deepl_api_key=mowas_deepldotcom_api_key,
-            target_language="FR",
-            original_text="Hallo Welt",
+    if success:
+        logger.info(
+            msg=translate_content(
+                deepl_api_key=mowas_deepldotcom_api_key,
+                target_language="FR",
+                original_text="Hallo Welt",
+            )
         )
-    )
