@@ -18,7 +18,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 import logging
-from utils import convert_text_to_plain_ascii, remove_html_content
+from utils import (
+    convert_text_to_plain_ascii,
+    remove_html_content,
+    get_program_config_from_file,
+)
 from warncell import read_warncell_info
 from telegramdotcom import send_telegram_message
 from dapnet import send_dapnet_message
@@ -26,6 +30,8 @@ from mail import send_email_message
 from datetime import datetime
 from staticmap import render_png_map
 from latlonlookup import get_reverse_geopy_data
+import random
+import time
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -225,145 +231,103 @@ def generate_email_messages(
 
     # Email template (plain text)
     plaintext_template = """\
-    AUTOMATED EMAIL - PLEASE DO NOT RESPOND
+AUTOMATED EMAIL - PLEASE DO NOT RESPOND
 
-    MOWAS Personal Warning Beacon - Report:
+MOWAS Personal Warning Beacon - Report. Affected coordinates:
+    
+REPLACE_PLAINTEXT_ADDRESSES
 
+Message Headline:       REPLACE_HEADLINE
+Message Type:           REPLACE_MESSAGE_TYPE
+Urgency:                REPLACE_URGENCY
+Severity:               REPLACE_SEVERITY
+Message Timestamp:      REPLACE_TIMESTAMP
+Description:            REPLACE_DESCRIPTION
+Instructions:           REPLACE_INSTRUCTIONS
 
-    Message Headline:       REPLACE_HEADLINE
-    Message Type:           REPLACE_MESSAGE_TYPE
-    Urgency:                REPLACE_URGENCY
-    Severity:               REPLACE_SEVERITY
-    Message Timestamp:      REPLACE_TIMESTAMP
-    Description:            REPLACE_DESCRIPTION
-    Instructions:           REPLACE_INSTRUCTIONS
+This position report was processed by mowas-pwb. Generated at REPLACE_DATETIME_CREATED
+More info on mowas-pwb can be found here: https://www.github.com/joergschultzelutter/mowas-pwb
+---
 
-    This position report was processed by mowas-pwb. Generated at REPLACE_DATETIME_CREATED
-    More info on mowas-pwb can be found here: https://www.github.com/joergschultzelutter/mowas-pwb
-    ---
-
-    Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
+Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
     """
 
     # Email template without image (HTML)
     html_template_without_image = """\
-    <h2>Automated email - please do not respond</h2>
-    <p>MOWAS Personal Warning Beacon - Report:</p>
-    <table border="1">
-    <thead>
-    <tr style="background-color: #bbbbbb;">
-    <td><strong>Details</strong></td>
-    <td><strong>Values</strong></td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Headline</strong>&nbsp;</p>
-    </td>
-    <td>&nbsp;REPLACE_HEADLINE</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Message Type</strong></td>
-    <td>&nbsp;REPLACE_MESSAGE_TYPE</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Urgency</strong>&nbsp;</td>
-    <td>&nbsp;REPLACE_URGENCY</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Severity</strong>&nbsp;</td>
-    <td>&nbsp;REPLACE_SEVERITY</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Message Timestamp</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_TIMESTAMP</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Description</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_DESCRIPTION</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Instructions</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_INSTRUCTIONS</td>
-    </tr>
-    </tbody>
-    </table>
-    <p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong></p>
-    <hr />
-    <p>Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
+<h2>Automated email - please do not respond</h2>
+<p>MOWAS Personal Warning Beacon - Report. Affected coordinates:</p>
+<h3>Affected coordinates</h3>
+<table border="1">
+<thead>
+<tr style="background-color: #bbbbbb;">
+<td><strong>Latitude</strong></td>
+<td><strong>Longitude</strong></td>
+<td><strong>Address</strong></td>
+<td><strong>User's APRS pos</strong></td>
+</tr>
+</thead>
+<tbody>
+REPLACE_HTML_ADDRESSES
+</tbody>
+</table>
+<h3>Message Details</h3>
+<li><strong>&nbsp;Headline</strong>&nbsp;:&nbsp;REPLACE_HEADLINE</li>
+<li><strong>&nbsp;Message Type</strong>&nbsp;:&nbsp;REPLACE_MESSAGE_TYPE</li>
+<li><strong>&nbsp;Urgency</strong>&nbsp;:&nbsp;REPLACE_URGENCY</li>
+<li><strong>&nbsp;Severity</strong>&nbsp;:&nbsp;REPLACE_SEVERITY</li>
+<li><strong>&nbsp;Message Timestamp</strong>&nbsp;:&nbsp;REPLACE_TIMESTAMP</li>
+<li><strong>&nbsp;Description</strong>&nbsp;:&nbsp;REPLACE_DESCRIPTION</li>
+<li><strong>&nbsp;Instructions</strong>&nbsp;:&nbsp;REPLACE_INSTRUCTIONS</li>
+&nbsp;
+<p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong></p>
+<hr />
+<p>Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
     """
 
     # Email template with image (HTML)
     html_template_with_image = """\
-    <h2>Automated email - please do not respond</h2>
-    <p>MOWAS Personal Warning Beacon - Report:</p>
-    <table border="1">
-    <thead>
-    <tr style="background-color: #bbbbbb;">
-    <td><strong>Details</strong></td>
-    <td><strong>Values</strong></td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Headline</strong>&nbsp;</p>
-    </td>
-    <td>&nbsp;REPLACE_HEADLINE</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Message Type</strong></td>
-    <td>&nbsp;REPLACE_MESSAGE_TYPE</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Urgency</strong>&nbsp;</td>
-    <td>&nbsp;REPLACE_URGENCY</td>
-    </tr>
-    <tr>
-    <td><strong>&nbsp;Severity</strong>&nbsp;</td>
-    <td>&nbsp;REPLACE_SEVERITY</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Message Timestamp</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_TIMESTAMP</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Description</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_DESCRIPTION</td>
-    </tr>
-    <tr>
-    <td>
-    <p><strong>&nbsp;Instructions</strong></p>
-    </td>
-    <td>&nbsp;REPLACE_INSTRUCTIONS</td>
-    </tr>
-    </tbody>
-    </table>
-    <hr />
-    <img src="cid:{image_cid}" />
-    <hr />
-    <p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong>. Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>
+<h2>Automated email - please do not respond</h2>
+<p>MOWAS Personal Warning Beacon - Report</p>
+<h3>Affected coordinates</h3>
+<table border="1">
+<thead>
+<tr style="background-color: #bbbbbb;">
+<td><strong>Latitude</strong></td>
+<td><strong>Longitude</strong></td>
+<td><strong>Address</strong></td>
+<td><strong>User's APRS pos</strong></td>
+</tr>
+</thead>
+<tbody>
+REPLACE_HTML_ADDRESSES
+</tbody>
+</table>
+<h3>Message Details</h3>
+<li><strong>&nbsp;Headline</strong>&nbsp;:&nbsp;REPLACE_HEADLINE</li>
+<li><strong>&nbsp;Message Type</strong>&nbsp;:&nbsp;REPLACE_MESSAGE_TYPE</li>
+<li><strong>&nbsp;Urgency</strong>&nbsp;:&nbsp;REPLACE_URGENCY</li>
+<li><strong>&nbsp;Severity</strong>&nbsp;:&nbsp;REPLACE_SEVERITY</li>
+<li><strong>&nbsp;Message Timestamp</strong>&nbsp;:&nbsp;REPLACE_TIMESTAMP</li>
+<li><strong>&nbsp;Description</strong>&nbsp;:&nbsp;REPLACE_DESCRIPTION</li>
+<li><strong>&nbsp;Instructions</strong>&nbsp;:&nbsp;REPLACE_INSTRUCTIONS</li>
+<hr />
+<p><img src="cid:{image_cid}" /></p>
+<hr />
+<p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong>. Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>    
     """
 
-    address_element_template = """\
-    <tr>
-    <td>REPLACE_LATITUDE</td>
-    <td>REPLACE_LONGITUDE</td>
-    <td>REPLACE_ADDRESS</td>
-    <td><center>REPLACE_APRS</center></td>
-    </tr>
+    html_address_element_template = """\
+<tr>
+<td>REPLACE_LATITUDE</td>
+<td>REPLACE_LONGITUDE</td>
+<td>REPLACE_ADDRESS</td>
+<td><center>REPLACE_APRS</center></td>
+</tr>
     """
+
+    plaintext_address_element_template = (
+        "Lat/Lon: REPLACE_LATITUDE/REPLACE_LONGITUDE. Address: REPLACE_ADDRESS"
+    )
 
     # Email template - mail subject
     mail_subject_template = (
@@ -395,7 +359,22 @@ def generate_email_messages(
             aprs_longitude=aprs_longitude,
         )
 
-        address_coords = []
+        # try to build the HTML section which contains our addresses.
+        # There should be at least one - otherwise, we should never have
+        # generated this message
+        #
+        # For each lat/lon coordinate set, the program will go a reverse
+        # address lookup on OpenStreetMap and get that position's real
+        # address. If ONE of these elements is also identical to the
+        # user's current APRS coordinates, the address will get
+        # highlighted accordingly.
+        #
+        # Note: there is no dupe check - ideally, you should never
+        # have specified the same set of coordinates.
+
+        # Target list elements for HTML content and plain text
+        html_address_coords = []
+        plaintext_address_coords = []
 
         for coords in coords_matching_latlon:
             latitude = coords["latitude"]
@@ -410,12 +389,39 @@ def generate_email_messages(
                     if aprs_latitude == latitude and aprs_longitude == longitude
                     else ""
                 )
-                msg = address_element_template
+
+                # Prepare the HTML part
+                msg = html_address_element_template
                 msg = msg.replace("REPLACE_LATITUDE", str(latitude))
                 msg = msg.replace("REPLACE_LONGITUDE", str(longitude))
                 msg = msg.replace("REPLACE_ADDRESS", address)
                 msg = msg.replace("REPLACE_APRS", aprs)
-                address_coords.append(msg)
+                html_address_coords.append(msg)
+
+                # Prepare the plain text message part
+                msg = plaintext_address_element_template
+                msg = msg.replace("REPLACE_LATITUDE", str(latitude))
+                msg = msg.replace("REPLACE_LONGITUDE", str(longitude))
+                msg = msg.replace("REPLACE_ADDRESS", address)
+                if aprs == "X":
+                    msg = msg + " (User's APRS Position)"
+                plaintext_address_coords.append(msg)
+
+                # Check if we have more than one element in our target list
+                # if yes, honor the OSM usage policy
+                if len(coords_matching_latlon) > 1:
+                    # https://operations.osmfoundation.org/policies/nominatim/ requires us
+                    # to obey to its usage policy. We need to make sure that between each
+                    # request to OSM that there will be a random sleep period between 1200
+                    # and 2000 msec
+                    sleep_time = random.uniform(1.2, 2)
+                    time.sleep(sleep_time)
+
+        # Use the generated list items in order to create the final content for the address info
+        html_list_of_addresses = "\n".join([str(elem) for elem in html_address_coords])
+        plaintext_list_of_addresses = "\n".join(
+            [str(elem) for elem in plaintext_address_coords]
+        )
 
         # Copy the mail template content to different variables
         plaintext_message = plaintext_template
@@ -430,6 +436,13 @@ def generate_email_messages(
         mail_subject_message = f"{msgtype.upper()} - {severity}: {mail_subject_message}"
 
         # Replace the template content
+        html_message = html_message.replace(
+            "REPLACE_HTML_ADDRESSES", html_list_of_addresses
+        )
+        plaintext_message = plaintext_message.replace(
+            "REPLACE_PLAINTEXT_ADDRESSES", plaintext_list_of_addresses
+        )
+
         html_message = html_message.replace("REPLACE_HEADLINE", headline)
         plaintext_message = plaintext_message.replace("REPLACE_HEADLINE", headline)
 
@@ -517,7 +530,7 @@ if __name__ == "__main__":
             "urgency": "Immediate",
             "severity": "Minor",
             "description": "Die Chlorung besteht weiterhin.",
-            "instruction": "Informieren Sie sich in den Medien, zum Beispiel im Lokalradio.<br/>Das Wasser muss nicht mehr abgekocht werden.",
+            "instruction": "Informieren Sie sich in den Medien, zum Beispiel im Lokalradio. Das Wasser muss nicht mehr abgekocht werden.",
             "sent": "2020-08-28T11:00:08+02:00",
             "msgtype": "Alert",
             "areas": ["Stadt Gersthofen, Gemeinde Gablingen"],
