@@ -24,6 +24,7 @@ import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
 from utils import remove_html_content
+from translate import translate_content
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -101,19 +102,29 @@ def process_mowas_data(
         "DISASTERS",
     ],
     enable_covid_messaging: bool = False,
+    target_language: str = None
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
     Parameters
     ==========
     coordinates : 'list'
-            List item, containing 0..n dictionaries with lat/lon coordinates that we are supposed to check
+        List item, containing 0..n dictionaries with lat/lon coordinates that we are supposed to check
     mowas_cache : 'ExpiringDict'
-            ExpiringDict which contains the "Alert" and "Update" messages from a previous run that were
-            sent to the user. "Cancel" messages are not included - they may only be sent out once.
+        ExpiringDict which contains the "Alert" and "Update" messages from a previous run that were
+        sent to the user. "Cancel" messages are not included - they may only be sent out once.
     minimal_mowas_severity : 'str'
-            Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
-            Program uses a ranking mechanism for its ">=" evaluation
+        Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
+        Program uses a ranking mechanism for its ">=" evaluation
+    mowas_dapnet_high_prio_level: 'str"
+        message category which is deemed of higher proirity. If that category threshold is breached,
+        DAPNET messages will be sent with a higher priority and the program may switch to emergency
+        mode, thus causing faster interval checks for the MOWAS data
+    mowas_active_categories: 'list'
+        List of active categories (from the program's config file)
+    target_language: 'str'
+        If not 'None', this is the language that we need to supply in addition to the German data
+
     Returns
     =======
     mowas_cache : 'ExpiringDict'
@@ -121,6 +132,12 @@ def process_mowas_data(
     mowas_messages_to_send: 'dict'
             Dictionary which contains the messages that we may need to send to the user
     """
+
+    supported_languages = ["bg","cs","da","el","en-gb","en-us","es","et","fi","fr","hu","it","ja","lt","lv","nl","pl","pt-br","pt-pt","ro","ru","sk","sl","sv","zh"]
+
+    # this should already have been checked but better be safe than sorry
+    if target_language:
+        assert target_language in supported_languages
 
     # Dictionary which may contain our outgoing messages (if present)
     mowas_messages_to_send = {}
