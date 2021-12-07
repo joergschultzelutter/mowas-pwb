@@ -341,11 +341,11 @@ REPLACE_HTML_ADDRESSES
 
     html_address_element_template = """\
 <tr>
-<td>REPLACE_LATITUDE</td>
-<td>REPLACE_LONGITUDE</td>
-<td>REPLACE_UTM</td>
-<td>REPLACE_MAIDENHEAD</td>
-<td>REPLACE_ADDRESS</td>
+<td><center>REPLACE_LATITUDE</center></td>
+<td><center>REPLACE_LONGITUDE</center></td>
+<td><center>REPLACE_UTM</center></td>
+<td><center>REPLACE_MAIDENHEAD</center></td>
+<td><center>REPLACE_ADDRESS</center></td>
 <td><center>REPLACE_APRS</center></td>
 </tr>
     """
