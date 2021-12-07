@@ -1,5 +1,5 @@
 #
-# Geopy address lookup based on lat/lon
+# Various geographic routines
 # Author: Joerg Schultze-Lutter, 2021
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,8 @@
 
 from geopy.geocoders import Nominatim
 import logging
-import requests
+import utm
+import maidenhead
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -116,6 +117,62 @@ def get_reverse_geopy_data(latitude: float, longitude: float, language: str = "d
     }
 
     return success, response_data
+
+
+def convert_latlon_to_utm(latitude: float, longitude: float):
+    """
+    Convert latitude / longitude coordinates to UTM
+    (Universal Transverse Mercator) coordinates
+    Parameters
+    ==========
+    latitude : 'float'
+        Latitude value
+    longitude : 'float'
+        Longitude value
+    Returns
+    =======
+    zone_number: 'int'
+        UTM zone number for the given set of lat/lon coordinates
+    zone_letter: 'str'
+        UTM zone letter for the given set of lat/lon coordinates
+    easting: 'int'
+        UTM easting coordinates for the given set of lat/lon coordinates
+    northing: 'int'
+        UTM northing coordinates for the given set of lat/lon coordinates
+    """
+
+    easting, northing, zone_number, zone_letter = utm.from_latlon(latitude, longitude)
+    easting: int = round(easting)
+    northing: int = round(northing)
+    return zone_number, zone_letter, easting, northing
+
+
+def convert_latlon_to_maidenhead(
+    latitude: float, longitude: float, output_precision: int = 4
+):
+    """
+    Convert latitude / longitude coordinates to Maidenhead coordinates
+    Parameters
+    ==========
+    latitude : 'float'
+        Latitude value
+    longitude : 'float'
+        Longitude value
+    output_precision: 'int'
+        Output precision for lat/lon
+    Returns
+    =======
+    maidenhead_coordinates: 'str'
+        Maidenhead coordinates for the given lat/lon with
+        the specified precision
+    """
+
+    maidenhead_coordinates = None
+    if abs(int(latitude)) <= 90 and abs(int(longitude)) <= 180:
+        maidenhead_coordinates = maidenhead.to_maiden(
+            latitude, longitude, precision=output_precision
+        )
+    return maidenhead_coordinates
 
 
 if __name__ == "__main__":

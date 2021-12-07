@@ -23,8 +23,8 @@ import requests
 import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
-from utils import remove_html_content
-from translate import translate_content
+from utils import remove_html_content, get_program_config_from_file
+from translate import translate_text_string, translate_text_list
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -102,7 +102,8 @@ def process_mowas_data(
         "DISASTERS",
     ],
     enable_covid_messaging: bool = False,
-    target_language: str = None
+    target_language: str = None,
+    deepl_api_key: str = None,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -124,6 +125,8 @@ def process_mowas_data(
         List of active categories (from the program's config file)
     target_language: 'str'
         If not 'None', this is the language that we need to supply in addition to the German data
+    deepl_api_key: 'str'
+        deepl.com API key
 
     Returns
     =======
@@ -133,9 +136,10 @@ def process_mowas_data(
             Dictionary which contains the messages that we may need to send to the user
     """
 
-    supported_languages = ["bg","cs","da","el","en-gb","en-us","es","et","fi","fr","hu","it","ja","lt","lv","nl","pl","pt-br","pt-pt","ro","ru","sk","sl","sv","zh"]
-
     # this should already have been checked but better be safe than sorry
+    # fmt:off
+    supported_languages = ["bg", "cs", "da", "el", "en-gb", "en-us", "es", "et", "fi", "fr", "hu", "it", "ja", "lt", "lv", "nl", "pl", "pt-br", "pt-pt", "ro", "ru", "sk", "sl", "sv", "zh"]
+    # fmt: on
     if target_language:
         assert target_language in supported_languages
 
@@ -307,6 +311,7 @@ def process_mowas_data(
                             mowas_headline = element["info"][0]["headline"]
                             mowas_urgency = element["info"][0]["urgency"]
                             mowas_severity = element["info"][0]["severity"]
+                            mowas_contact = element["info"][0]["contact"]
                             mowas_description = (
                                 element["info"][0]["description"]
                                 if "description" in element["info"][0]
@@ -317,6 +322,12 @@ def process_mowas_data(
                                 if "instruction" in element["info"][0]
                                 else None
                             )
+
+                            # remove any HTML content (if present)
+                            mowas_headline = remove_html_content(mowas_headline)
+                            mowas_instruction = remove_html_content(mowas_instruction)
+                            mowas_description = remove_html_content(mowas_description)
+                            mowas_contact = remove_html_content(mowas_contact)
 
                             # Extract the list of areas from the element
                             areas = element["info"][0]["area"]
@@ -329,7 +340,9 @@ def process_mowas_data(
                             # If we find a match then this list will contain all areas for
                             # which we found a match related to our lat/lon coordinates
                             areas_matching_latlon = []
-                            areas_matching_latlon_abbrev = []   # Abbreviated version for DAPNET as we only have 80 chars
+                            areas_matching_latlon_abbrev = (
+                                []
+                            )  # Abbreviated version for DAPNET as we only have 80 chars
                             geocodes_matching_latlon = []
                             coords_matching_latlon = []
 
@@ -378,7 +391,6 @@ def process_mowas_data(
                                         # Try to shorten the area names as this string is rather lengthy
                                         if area_desc not in areas_matching_latlon:
 
-
                                             area_desc_abbrev = area_desc.replace(
                                                 "Gemeinde/Stadt: ", "", 1
                                             )
@@ -401,7 +413,9 @@ def process_mowas_data(
                                                 "Land ", "", 1
                                             )
                                             areas_matching_latlon.append(area_desc)
-                                            areas_matching_latlon_abbrev.append(area_desc_abbrev)
+                                            areas_matching_latlon_abbrev.append(
+                                                area_desc_abbrev
+                                            )
 
                                         # Save the geocodes, too. This is our primary mean of identification
                                         # area_desc will only be used of the geocode cannot be found
@@ -417,7 +431,7 @@ def process_mowas_data(
                                         # Remember the set of coordinates which caused that match
                                         coordinates = {
                                             "latitude": latitude,
-                                            "longitude": longitude
+                                            "longitude": longitude,
                                         }
                                         if coordinates not in coords_matching_latlon:
                                             coords_matching_latlon.append(coordinates)
@@ -457,12 +471,12 @@ def process_mowas_data(
                                         ] = mowas_cache_payload
 
                                 # Create the outgoing message's payload ...
-                                mowas_messages_to_sent_payload = {
-                                    "headline": remove_html_content(message_string=mowas_headline),
+                                mowas_messages_to_send_payload = {
+                                    "headline": mowas_headline,
                                     "urgency": mowas_urgency,
                                     "severity": mowas_severity,
-                                    "description": remove_html_content(message_string=mowas_description),
-                                    "instruction": remove_html_content(message_string=mowas_instruction),
+                                    "description": mowas_description,
+                                    "instruction": mowas_instruction,
                                     "sent": mowas_sent,
                                     "msgtype": mowas_msgtype,
                                     "areas": areas_matching_latlon,
@@ -471,7 +485,50 @@ def process_mowas_data(
                                     "dapnet_high_prio": dapnet_high_prio_msg,
                                     "latlon_polygon": latlon_array,
                                     "coords_matching_latlon": coords_matching_latlon,
+                                    "contact": mowas_contact,
                                 }
+                                # If we have been asked to translate the content, then let's
+                                # first add the target language to the dictionary, translate
+                                # the content and then add the content to the dictionary
+                                if target_language:
+                                    mowas_messages_to_send_payload[
+                                        "lang"
+                                    ] = target_language
+
+                                    # prepare the content that we need to translate
+                                    content_list = [
+                                        mowas_headline,
+                                        mowas_description,
+                                        mowas_instruction,
+                                        mowas_contact,
+                                    ]
+
+                                    # translate the content
+                                    (
+                                        mowas_headline,
+                                        mowas_description,
+                                        mowas_instruction,
+                                        mowas_contact,
+                                    ) = translate_text_list(
+                                        deepl_api_key=deepl_api_key,
+                                        target_language=target_language,
+                                        original_text=content_list,
+                                    )
+
+                                    # and add the translated content to the dict as extra fields
+                                    mowas_messages_to_send_payload[
+                                        "lang_headline"
+                                    ] = mowas_headline
+                                    mowas_messages_to_send_payload[
+                                        "lang_description"
+                                    ] = mowas_description
+                                    mowas_messages_to_send_payload[
+                                        "lang_instruction"
+                                    ] = mowas_instruction
+                                    mowas_messages_to_send_payload[
+                                        "lang_contact"
+                                    ] = mowas_contact
+
                                 # ... and add it to our dictionary (or update an existing element)
                                 # This code assumes that MOWAS uses unique message identifiers across
                                 # its various categories
@@ -482,11 +539,15 @@ def process_mowas_data(
                                         # No - then let's add it
                                         mowas_messages_to_send[
                                             mowas_identifier
-                                        ] = mowas_messages_to_sent_payload
+                                        ] = mowas_messages_to_send_payload
                                     else:
                                         # Message is already present; we may need to update it
-                                        existing_message = mowas_messages_to_send[mowas_identifier]
-                                        existing_coords = existing_message["coords_matching_latlon"]
+                                        existing_message = mowas_messages_to_send[
+                                            mowas_identifier
+                                        ]
+                                        existing_coords = existing_message[
+                                            "coords_matching_latlon"
+                                        ]
 
                                         # amend the existing set of coordinates, if necessary
                                         for coord in coords_matching_latlon:
@@ -494,10 +555,14 @@ def process_mowas_data(
                                                 existing_coords.append(coord)
 
                                         # replace the entry in the dict element
-                                        existing_message["coords_matching_latlon"] = existing_coords
+                                        existing_message[
+                                            "coords_matching_latlon"
+                                        ] = existing_coords
 
                                         # Finally, update the amended entry
-                                        mowas_messages_to_send[mowas_identifier] = existing_message
+                                        mowas_messages_to_send[
+                                            mowas_identifier
+                                        ] = existing_message
 
                                 # Finally, check if the message is either "Alert" or
                                 # "Update". We need this info at a later point in time
@@ -510,6 +575,25 @@ def process_mowas_data(
 
 if __name__ == "__main__":
     mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=30 * 60)
+
+    (
+        success,
+        mowas_aprsdotfi_api_key,
+        mowas_dapnet_login_callsign,
+        mowas_dapnet_login_passcode,
+        mowas_watch_areas,
+        mowas_telegram_bot_token,
+        mowas_smtpimap_email_address,
+        mowas_smtpimap_email_password,
+        mowas_smtp_server_address,
+        mowas_smtp_server_port,
+        mowas_active_categories,
+        mowas_imap_server_address,
+        mowas_imap_server_port,
+        mowas_imap_mailbox_name,
+        mowas_imap_mail_retention_max_days,
+        mowas_deepldotcom_api_key,
+    ) = get_program_config_from_file()
 
     mowas_cache_payload = {
         "msgtype": "Update",
@@ -524,16 +608,15 @@ if __name__ == "__main__":
             48.4781,
             10.774,
         ],
-        [
-            48.4781,
-            10.773
-        ]
+        [48.4781, 10.773],
     ]
-    logger.info(
-        process_mowas_data(
-            coordinates=my_coordinates,
-            mowas_cache=mowas_message_cache,
-            minimal_mowas_severity="Minor",
-            mowas_dapnet_high_prio_level="Minor",
-        )
+
+    x = process_mowas_data(
+        coordinates=my_coordinates,
+        mowas_cache=mowas_message_cache,
+        minimal_mowas_severity="Minor",
+        mowas_dapnet_high_prio_level="Minor",
+        target_language="en-us",
+        deepl_api_key=mowas_deepldotcom_api_key,
     )
+    logger.info(json.dumps(x))

@@ -27,7 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def translate_content(
+def translate_text_string(
     deepl_api_key: str,
     target_language: str,
     original_text: str,
@@ -66,6 +66,45 @@ def translate_content(
     return response
 
 
+def translate_text_list(
+    deepl_api_key: str,
+    target_language: str,
+    original_text: list,
+    original_language: str = "de",
+):
+    """
+    Translates the input text via deepl.com API
+
+    Parameters
+    ==========
+    deepl_api_key : 'str'
+        deepl.com API access key
+    target_language : 'str'
+        iso639-1 target language code
+    original_text: 'list'
+        list of texts that are to be translated
+    original_language: 'str'
+       iso639-1 source language code
+
+    Returns
+    =======
+    response : 'list'
+            Translated texts (or original texts in case of errors)
+    """
+
+    try:
+        translator = deepl.Translator(deepl_api_key)
+        result = translator.translate_text(
+            original_text, target_lang=target_language, source_lang=original_language
+        )
+        response = [str(item) for item in result]
+    except:
+        response = original_text
+        logger.debug(msg="Cannot translate; deepl.com exception occurred")
+
+    return response
+
+
 if __name__ == "__main__":
     (
         success,
@@ -88,9 +127,9 @@ if __name__ == "__main__":
 
     if success:
         logger.info(
-            msg=translate_content(
+            msg=translate_text_list(
                 deepl_api_key=mowas_deepldotcom_api_key,
                 target_language="FR",
-                original_text="Hallo Welt",
+                original_text=["Hallo Welt", "Wie geht es Dir"],
             )
         )
