@@ -25,6 +25,12 @@ from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
 from utils import remove_html_content, get_program_config_from_file
 from translate import translate_text_string, translate_text_list
+from geodata import (
+    get_reverse_geopy_data,
+    convert_latlon_to_utm,
+    convert_latlon_to_maidenhead,
+)
+from staticmap import render_png_map
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -104,6 +110,8 @@ def process_mowas_data(
     enable_covid_messaging: bool = False,
     target_language: str = None,
     deepl_api_key: str = None,
+    aprs_latitude: float = None,
+    aprs_longitude: float = None,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -118,7 +126,7 @@ def process_mowas_data(
         Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
         Program uses a ranking mechanism for its ">=" evaluation
     mowas_dapnet_high_prio_level: 'str"
-        message category which is deemed of higher proirity. If that category threshold is breached,
+        message category which is deemed of higher priority. If that category threshold is breached,
         DAPNET messages will be sent with a higher priority and the program may switch to emergency
         mode, thus causing faster interval checks for the MOWAS data
     mowas_active_categories: 'list'
@@ -127,6 +135,10 @@ def process_mowas_data(
         If not 'None', this is the language that we need to supply in addition to the German data
     deepl_api_key: 'str'
         deepl.com API key
+    aprs_latitude: 'float'
+        optional APRS latitude
+    aprs_longitude: 'float'
+        optional aprs_longitude
 
     Returns
     =======
@@ -428,10 +440,41 @@ def process_mowas_data(
                                                 geocode_value
                                             )
 
+                                        # get the address details so that we don't need to retrieve it
+                                        # for each communication method, Note that the target language will
+                                        # always be "de" - we will not translate this content
+                                        success, response_data = get_reverse_geopy_data(
+                                            latitude=latitude, longitude=longitude
+                                        )
+                                        address = (
+                                            response_data["address"]
+                                            if success
+                                            else "Cannot determine address data"
+                                        )
+
+                                        # calculate the maidenhead coordinates
+                                        maidenhead = convert_latlon_to_maidenhead(
+                                            latitude=latitude, longitude=longitude
+                                        )
+
+                                        # calculate the UTM coordinates
+                                        (
+                                            zone_number,
+                                            zone_letter,
+                                            easting,
+                                            northing,
+                                        ) = convert_latlon_to_utm(
+                                            latitude=latitude, longitude=longitude
+                                        )
+                                        utm = f"{zone_number} {zone_letter} {easting} {northing}"
+
                                         # Remember the set of coordinates which caused that match
                                         coordinates = {
                                             "latitude": latitude,
                                             "longitude": longitude,
+                                            "address": address,
+                                            "maidenhead": maidenhead,
+                                            "utm": utm,
                                         }
                                         if coordinates not in coords_matching_latlon:
                                             coords_matching_latlon.append(coordinates)
@@ -569,6 +612,26 @@ def process_mowas_data(
                                 if mowas_msgtype in ("Alert", "Update"):
                                     got_alert_or_update = True
 
+    # finally, render any static images, if necessary
+    for mowas_identifier in mowas_messages_to_send:
+        existing_message = mowas_messages_to_send[mowas_identifier]
+
+        # get the polygon and the target coordinates
+        latlon_polygon = existing_message["latlon_polygon"]
+        coords_matching_latlon = existing_message["coords_matching_latlon"]
+
+        # render the image
+        image = render_png_map(
+            polygon_area=latlon_polygon,
+            monitoring_positions=coords_matching_latlon,
+            aprs_latitude=aprs_latitude,
+            aprs_longitude=aprs_longitude,
+        )
+
+        # and write it back to our dictionary
+        existing_message["static_image"] = image
+        mowas_messages_to_send[mowas_identifier] = existing_message
+
     # Return the expiring cache and our messages to the user
     return mowas_cache, mowas_messages_to_send, got_alert_or_update
 
@@ -618,5 +681,7 @@ if __name__ == "__main__":
         mowas_dapnet_high_prio_level="Minor",
         target_language="en-us",
         deepl_api_key=mowas_deepldotcom_api_key,
+        aprs_latitude=48.4781,
+        aprs_longitude=10.774,
     )
-    logger.info(json.dumps(x))
+    logger.info(x)
