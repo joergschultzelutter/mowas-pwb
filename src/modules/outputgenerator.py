@@ -317,7 +317,7 @@ REPLACE_HTML_ADDRESSES
 <td><strong>Latitude</strong></td>
 <td><strong>Longitude</strong></td>
 <td><strong>UTM</strong></td>
-<td><strong>Maidenhead</strong></td>
+<td><strong>Grid</strong></td>
 <td><strong>Address</strong></td>
 <td><strong>APRS</strong></td>
 </tr>
@@ -352,7 +352,7 @@ REPLACE_HTML_ADDRESSES
 </tr>
     """
 
-    plaintext_address_element_template = "Lat/Lon: REPLACE_LATITUDE/REPLACE_LONGITUDE. UTM: REPLACE_UTM. Maidenhead: REPLACE_MAIDENHEAD. Address: REPLACE_ADDRESS"
+    plaintext_address_element_template = "Lat/Lon: REPLACE_LATITUDE/REPLACE_LONGITUDE. UTM: REPLACE_UTM. Grid: REPLACE_MAIDENHEAD. Address: REPLACE_ADDRESS"
 
     # Email template - mail subject
     mail_subject_template = (
