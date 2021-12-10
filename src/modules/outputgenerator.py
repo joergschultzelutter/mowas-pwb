@@ -164,6 +164,9 @@ def generate_telegram_messages(
 
     logger.debug(msg="Starting Telegram message processing")
 
+    # We want multi-line HTML messages in Telegram. <br> does NOT work
+    newline = "\n"
+
     for mowas_message_id in mowas_messages_to_send:
         headline = mowas_messages_to_send[mowas_message_id]["headline"]
         urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
@@ -176,35 +179,88 @@ def generate_telegram_messages(
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
         dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
-        if "lang" in mowas_messages_to_send[mowas_message_id]:
-            lang_headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
-            lang_description = mowas_messages_to_send[mowas_message_id][
-                "lang_description"
-            ]
-            lang_instruction = mowas_messages_to_send[mowas_message_id][
-                "lang_instruction"
-            ]
-            lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
-        else:
-            lang_headline = lang_instruction = lang_contact = lang_description = None
+        coords_matching_latlon = mowas_messages_to_send[mowas_message_id][
+            "coords_matching_latlon"
+        ]
 
-        newline = "\n"
+        # get the rendered image (output value will be 'None' in case it cannot be rendered)
+        html_image = mowas_messages_to_send[mowas_message_id]["static_image"]
+
+        # did the user request translated content?
+        if "lang" in mowas_messages_to_send[mowas_message_id]:
+            # yes; get the translated content
+            # fmt: off
+            lang_headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
+            lang_description = mowas_messages_to_send[mowas_message_id]["lang_description"]
+            lang_instruction = mowas_messages_to_send[mowas_message_id]["lang_instruction"]
+            lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
+            # fmt: on
+
+            # and amend out target fields
+            headline = f"{lang_headline} (<i>{headline}</i>)"
+            description = f"{lang_description} (<i>{description}</i>)"
+            instruction = f"{lang_instruction} (<i>{instruction}</i>)"
+            contact = f"{lang_contact} (<i>{contact}</i>)"
+
+        # Create the message timestamp
+        utc_create_time = datetime.utcnow()
+        msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
         # Generate the message as HTML content
-        telegram_message = f"<b>mowas-pwb notification</b>: "
-        telegram_message = telegram_message + f"<b>{headline}</b>" + newline + newline
         telegram_message = (
-            telegram_message + f"<b>Message Type:<\b> {msgtype}" + newline
+            f"<i><u>mowas-pwb Notification</u></i> (generated at {msg_string})"
+            + newline
+            + newline
         )
-        telegram_message = telegram_message + f"<b>Urgency:<\b> {urgency}" + newline
-        telegram_message = telegram_message + f"<b>Severity:<\b> {severity}" + newline
+
+        telegram_message = telegram_message + "<u><i>Address details</i></u>" + newline
+
+        for coords in coords_matching_latlon:
+            latitude = coords["latitude"]
+            longitude = coords["longitude"]
+            address = coords["address"]
+            utm = coords["utm"]
+            maidenhead = coords["maidenhead"]
+            aprs = coords["aprs_coordinates"]
+
+            telegram_message = (
+                telegram_message
+                + f"<b>Lat / Lon:</b> <pre>{latitude}</pre> / <pre>{longitude}</pre>"
+            )
+            if aprs:
+                telegram_message = (
+                    telegram_message
+                    + f" (<i>This is the user's latest APRS position</i>)"
+                )
+            telegram_message = telegram_message + newline
+            telegram_message = (
+                telegram_message + f"<b>UTM:</b> <pre>{utm}</pre>" + newline
+            )
+            telegram_message = (
+                telegram_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
+            )
+            telegram_message = (
+                telegram_message + f"<b>Address:</b> {address}" + newline + newline
+            )
+
+        telegram_message = telegram_message + "<u><i>Message details</i></u>" + newline
+
+        telegram_message = telegram_message + f"{headline}" + newline + newline
         telegram_message = (
-            telegram_message + f"<b>Timestamp:<\b> {sent}" + newline + newline
+            telegram_message + f"<b>Message Type:</b> {msgtype}" + newline
+        )
+        telegram_message = telegram_message + f"<b>Urgency:</b> {urgency}" + newline
+        telegram_message = telegram_message + f"<b>Severity:</b> {severity}" + newline
+        telegram_message = (
+            telegram_message + f"<b>Timestamp:</b> {sent}" + newline + newline
         )
         telegram_message = (
-            telegram_message + f"<b>Description:<\b> {description}" + newline + newline
+            telegram_message + f"<b>Description:</b> {description}" + newline + newline
         )
-        telegram_message = telegram_message + f"<b>Instructions:<\b> {instruction}"
+        telegram_message = (
+            telegram_message + f"<b>Instructions:</b> {instruction}" + newline + newline
+        )
+        telegram_message = telegram_message + f"<b>Contact:</b> {contact}"
 
         # Ultimately, send this particular message to Telegram and then loop to the next one
         send_telegram_message(
@@ -212,6 +268,7 @@ def generate_telegram_messages(
             user_id=telegram_target_id,
             message=telegram_message,
             is_html_content=True,
+            static_image=html_image,
         )
 
     logger.debug(msg="Finished Telegram message processing")
@@ -225,8 +282,6 @@ def generate_email_messages(
     smtp_server_address: str,
     smtp_server_port: int,
     mail_recipient: str,
-    aprs_latitude: float = None,
-    aprs_longitude: float = None,
 ):
     """
     Generates Email messages and triggers transmission to the user
@@ -414,10 +469,11 @@ REPLACE_HTML_ADDRESSES
             address = coords["address"]
             utm = coords["utm"]
             maidenhead = coords["maidenhead"]
+            aprs_c = coords["aprs_coordinates"]
 
-            aprs = (
-                "X" if aprs_latitude == latitude and aprs_longitude == longitude else ""
-            )
+            # set a marker if these are coordinates originating from
+            # the user's APRS position
+            aprs = "X" if aprs_c else ""
 
             # Prepare the HTML part
             msg = html_address_element_template
@@ -594,21 +650,39 @@ if __name__ == "__main__":
         mowas_cache=mowas_message_cache,
         minimal_mowas_severity="Minor",
         mowas_dapnet_high_prio_level="Minor",
-        target_language="en-us",
+        #        target_language="en-us",
         deepl_api_key=mowas_deepldotcom_api_key,
         aprs_latitude=48.4781,
         aprs_longitude=10.774,
     )
 
-    # fmt: on
-    generate_email_messages(
-        mowas_messages_to_send=mowas_messages_to_send,
-        warncell_data=warncell_data,
-        smtpimap_email_address=mowas_smtpimap_email_address,
-        smtpimap_email_password=mowas_smtpimap_email_password,
-        mail_recipient="joerg.schultze.lutter@gmail.com",
-        smtp_server_address=mowas_smtp_server_address,
-        smtp_server_port=mowas_smtp_server_port,
-        aprs_latitude=48.4781,
-        aprs_longitude=10.773,
-    )
+    testmethod = "email"
+
+    if testmethod == "email":
+        # fmt: on
+        generate_email_messages(
+            mowas_messages_to_send=mowas_messages_to_send,
+            warncell_data=warncell_data,
+            smtpimap_email_address=mowas_smtpimap_email_address,
+            smtpimap_email_password=mowas_smtpimap_email_password,
+            mail_recipient="joerg.schultze.lutter@gmail.com",
+            smtp_server_address=mowas_smtp_server_address,
+            smtp_server_port=mowas_smtp_server_port,
+        )
+
+    if testmethod == "telegram":
+        generate_telegram_messages(
+            mowas_messages_to_send=mowas_messages_to_send,
+            warncell_data=warncell_data,
+            mowas_telegram_bot_token=mowas_telegram_bot_token,
+            telegram_target_id=140582719,
+        )
+
+    if testmethod == "dapnet":
+        generate_dapnet_messages(
+            mowas_messages_to_send=mowas_messages_to_send,
+            warncell_data=warncell_data,
+            mowas_dapnet_destination_callsign="DF1JSL",
+            mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
+            mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
+        )
