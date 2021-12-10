@@ -530,7 +530,7 @@ def get_command_line_params():
 
 
 def remove_html_content(message_string: str):
-    return re.sub("<[^<]+?>", "", message_string)
+    return re.sub("<[^<]+?>", " ", message_string)
 
 
 if __name__ == "__main__":

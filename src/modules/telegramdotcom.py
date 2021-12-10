@@ -33,6 +33,7 @@ def send_telegram_message(
     message: str,
     is_html_content: bool = False,
     simulate_send: bool = False,
+    static_image: bytes = None,
 ):
     """
     Send content to the Telegram API
@@ -52,6 +53,9 @@ def send_telegram_message(
     simulate_send: 'bool'
         Set to True if you want to simulate sending
         content to the Telegram API
+    static_image: bytes
+        contains the encoded PNG static image
+        (None if image could not get generated)
 
     Returns
     =======
@@ -61,14 +65,20 @@ def send_telegram_message(
         mybot = Bot(token=bot_token)
         try:
             if is_html_content:
+                # send our message
                 mybot.sendMessage(
                     chat_id=user_id,
                     text=message,
-                    parseMode=ParseMode.HTML,
+                    parse_mode=ParseMode.HTML,
                     disable_web_page_preview=False,
                 )
             else:
                 mybot.sendMessage(chat_id=user_id, text=message)
+
+            # Image present? Then send it, too
+            if static_image:
+                mybot.send_photo(chat_id=user_id, photo=static_image)
+
         except error.Unauthorized:
             logger.info(
                 msg="Cannot send the message to your Telegram account (reason:unauthorized)!"
@@ -76,6 +86,9 @@ def send_telegram_message(
             logger.info(
                 msg="Check your configured credentials. Ensure to have established an INITIAL connection between your destination account and your bot account!"
             )
+        except:
+            logger.info(msg="Unknown error occurred while sending data to Telegram")
+
     else:
         logger.info(msg=f"Simulating Telegram message 'Send'; message='{message}'")
 

@@ -468,6 +468,14 @@ def process_mowas_data(
                                         )
                                         utm = f"{zone_number} {zone_letter} {easting} {northing}"
 
+                                        # check if these coordinates are identical to the user's current APRS coordinates
+                                        aprs = (
+                                            True
+                                            if latitude == aprs_latitude
+                                            and longitude == aprs_longitude
+                                            else False
+                                        )
+
                                         # Remember the set of coordinates which caused that match
                                         coordinates = {
                                             "latitude": latitude,
@@ -475,6 +483,7 @@ def process_mowas_data(
                                             "address": address,
                                             "maidenhead": maidenhead,
                                             "utm": utm,
+                                            "aprs_coordinates": aprs,
                                         }
                                         if coordinates not in coords_matching_latlon:
                                             coords_matching_latlon.append(coordinates)
