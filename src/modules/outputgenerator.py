@@ -208,10 +208,31 @@ def generate_telegram_messages(
 
         # Generate the message as HTML content
         telegram_message = (
-            f"<i><u>mowas-pwb Notification</u></i> (generated at {msg_string})"
+            f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>"
             + newline
             + newline
         )
+
+        telegram_message = telegram_message + f"<b>Message headline:</b>{headline}" + newline + newline
+
+        telegram_message = telegram_message + "<u><i>Message details</i></u>" + newline
+
+        telegram_message = (
+            telegram_message + f"<b>Description:</b> {description}" + newline
+        )
+        telegram_message = (
+            telegram_message + f"<b>Instructions:</b> {instruction}" + newline
+        )
+        telegram_message = (
+            telegram_message + f"<b>Contact:</b> {contact}" + newline
+        )
+
+        telegram_message = (
+            telegram_message + f"<b>Message Type:</b> {msgtype}" + newline
+        )
+        telegram_message = telegram_message + f"<b>Urgency:</b> {urgency}" + newline
+        telegram_message = telegram_message + f"<b>Severity:</b> {severity}" + newline
+        telegram_message = telegram_message + f"<b>Timestamp:</b> {sent}" + newline + newline
 
         telegram_message = telegram_message + "<u><i>Address details</i></u>" + newline
 
@@ -240,27 +261,8 @@ def generate_telegram_messages(
                 telegram_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
             )
             telegram_message = (
-                telegram_message + f"<b>Address:</b> {address}" + newline + newline
+                telegram_message + f"<b>Address:</b> {address}" + newline+newline
             )
-
-        telegram_message = telegram_message + "<u><i>Message details</i></u>" + newline
-
-        telegram_message = telegram_message + f"{headline}" + newline + newline
-        telegram_message = (
-            telegram_message + f"<b>Message Type:</b> {msgtype}" + newline
-        )
-        telegram_message = telegram_message + f"<b>Urgency:</b> {urgency}" + newline
-        telegram_message = telegram_message + f"<b>Severity:</b> {severity}" + newline
-        telegram_message = (
-            telegram_message + f"<b>Timestamp:</b> {sent}" + newline + newline
-        )
-        telegram_message = (
-            telegram_message + f"<b>Description:</b> {description}" + newline + newline
-        )
-        telegram_message = (
-            telegram_message + f"<b>Instructions:</b> {instruction}" + newline + newline
-        )
-        telegram_message = telegram_message + f"<b>Contact:</b> {contact}"
 
         # Ultimately, send this particular message to Telegram and then loop to the next one
         send_telegram_message(
@@ -650,13 +652,13 @@ if __name__ == "__main__":
         mowas_cache=mowas_message_cache,
         minimal_mowas_severity="Minor",
         mowas_dapnet_high_prio_level="Minor",
-        #        target_language="en-us",
+    #    target_language="en-us",
         deepl_api_key=mowas_deepldotcom_api_key,
         aprs_latitude=48.4781,
         aprs_longitude=10.774,
     )
 
-    testmethod = "email"
+    testmethod = "telegram"
 
     if testmethod == "email":
         # fmt: on
