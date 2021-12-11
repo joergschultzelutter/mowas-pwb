@@ -19,7 +19,6 @@
 #
 import json
 import logging
-import requests
 import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict

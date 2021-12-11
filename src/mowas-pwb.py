@@ -19,28 +19,28 @@
 #
 import logging
 import signal
-from modules.mowas import process_mowas_data
-from modules.warncell import read_warncell_info
-from modules.utils import (
+from mowas import process_mowas_data
+from warncell import read_warncell_info
+from utils import (
     get_program_config_from_file,
     signal_term_handler,
     get_command_line_params,
 )
-from modules.outputgenerator import (
+from outputgenerator import (
     generate_dapnet_messages,
     generate_email_messages,
     generate_telegram_messages,
 )
-from modules.aprsdotfi import get_position_on_aprsfi
-from modules.telegramdotcom import send_telegram_message
-from modules.dapnet import send_dapnet_message
-from modules.mail import send_email_message
-from modules.staticmap import render_png_map
+from aprsdotfi import get_position_on_aprsfi
+from telegramdotcom import send_telegram_message
+from dapnet import send_dapnet_message
+from mail import send_email_message
+from staticmap import render_png_map
 from expiringdict import ExpiringDict
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 import apscheduler.schedulers.base
-from modules.mail import imap_garbage_collector
+from mail import imap_garbage_collector
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -71,8 +71,6 @@ if __name__ == "__main__":
         mowas_target_language,
     ) = get_command_line_params()
 
-    mowas_telegram_destination_id = 1234
-
     # User wants to disable both DAPNET and Telegram?
     if mowas_disable_dapnet and mowas_disable_telegram and mowas_disable_email:
         logger.info(
@@ -86,7 +84,7 @@ if __name__ == "__main__":
         mowas_aprsdotfi_api_key,
         mowas_dapnet_login_callsign,
         mowas_dapnet_login_passcode,
-        mowas_watch_areas,
+        mowas_watch_areas_config,
         mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,

@@ -105,4 +105,4 @@ def read_warncell_info(
 
 
 if __name__ == "__main__":
-    logger.info(read_warncell_info())
+    pass

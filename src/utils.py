@@ -473,7 +473,7 @@ def get_command_line_params():
         "--translate-to",
         default=None,
         type=language_check,
-        dest=target_language,
+        dest="target_language",
         help="ISO639-1 target language for MOWAS messages (will not be invoked for DAPNET messages)",
     )
 

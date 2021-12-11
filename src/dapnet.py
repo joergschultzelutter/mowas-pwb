@@ -19,7 +19,7 @@
 #
 import logging
 import json
-from utils import get_program_config_from_file, make_pretty_dapnet_messages
+from utils import make_pretty_dapnet_messages
 import requests
 from requests.auth import HTTPBasicAuth
 import time
@@ -131,31 +131,4 @@ def send_dapnet_message(
 
 
 if __name__ == "__main__":
-    (
-        success,
-        mowas_aprsdotfi_api_key,
-        mowas_dapnet_login_callsign,
-        mowas_dapnet_login_passcode,
-        mowas_watch_areas,
-        mowas_telegram_bot_token,
-        mowas_smtpimap_email_address,
-        mowas_smtpimap_email_password,
-        mowas_smtp_server_address,
-        mowas_smtp_server_port,
-        mowas_active_categories,
-        mowas_imap_server_address,
-        mowas_imap_server_port,
-        mowas_imap_mailbox_name,
-        mowas_imap_mail_retention_max_days,
-        mowas_deepldotcom_api_key,
-    ) = get_program_config_from_file("mowas-pwb.cfg")
-    if success:
-        logger.info(
-            send_dapnet_message(
-                to_callsign="DF1JSL-8",
-                message="Die Besten der Besten der Besten, Sir",
-                dapnet_login_callsign=mowas_dapnet_login_callsign,
-                dapnet_login_passcode=mowas_dapnet_login_passcode,
-                dapnet_high_priority_message=False,
-            )
-        )
+    pass

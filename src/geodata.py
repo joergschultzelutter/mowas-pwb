@@ -176,4 +176,4 @@ def convert_latlon_to_maidenhead(
 
 
 if __name__ == "__main__":
-    logger.info(get_reverse_geopy_data(latitude=37.7790262, longitude=-122.4199061))
+    pass
