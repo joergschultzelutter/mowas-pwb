@@ -332,12 +332,12 @@ Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL
 <table border="1">
 <thead>
 <tr style="background-color: #bbbbbb;">
-<td><strong>Latitude</strong></td>
-<td><strong>Longitude</strong></td>
-<td><strong>UTM</strong></td>
-<td><strong>Maidenhead</strong></td>
-<td><strong>Address</strong></td>
-<td><strong>APRS</strong></td>
+<th>Latitude</td>
+<th>Longitude</td>
+<th>UTM</strong></td>
+<th>Grid</td>
+<th>Address</td>
+<th>APRS</td>
 </tr>
 </thead>
 <tbody>
@@ -367,12 +367,12 @@ REPLACE_HTML_ADDRESSES
 <table border="1">
 <thead>
 <tr style="background-color: #bbbbbb;">
-<td><strong>Latitude</strong></td>
-<td><strong>Longitude</strong></td>
-<td><strong>UTM</strong></td>
-<td><strong>Grid</strong></td>
-<td><strong>Address</strong></td>
-<td><strong>APRS</strong></td>
+<th>Latitude</td>
+<th>Longitude</td>
+<th>UTM</strong></td>
+<th>Grid</td>
+<th>Address</td>
+<th>APRS</td>
 </tr>
 </thead>
 <tbody>
