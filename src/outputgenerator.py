@@ -389,7 +389,7 @@ REPLACE_HTML_ADDRESSES
 <li><strong>&nbsp;Instructions</strong>&nbsp;:&nbsp;REPLACE_INSTRUCTIONS</li>
 <li><strong>&nbsp;Contact</strong>&nbsp;:&nbsp;REPLACE_CONTACT</li>
 <hr />
-<p><img src="cid:{image_cid}" /></p>
+<p><center><img src="cid:{image_cid}" /></center></p>
 <hr />
 <p>This report was processed by <a href="https://www.github.com/joergschultzelutter/mowas-pwb" target="_blank" rel="noopener">mowas-pwb</a>. Generated at <strong>REPLACE_DATETIME_CREATED</strong>. Proudly made in the district of Holzminden, Lower Saxony, Germany. 73 de DF1JSL</p>    
     """
@@ -658,9 +658,9 @@ if __name__ == "__main__":
         aprs_longitude=10.774,
     )
 
-    #    mowas_messages_to_send = generate_test_data()
+    #mowas_messages_to_send = generate_test_data()
 
-    testmethod = "telegram"
+    testmethod = "email"
 
     if testmethod == "email":
         # fmt: on
