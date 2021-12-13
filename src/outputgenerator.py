@@ -28,15 +28,9 @@ from telegramdotcom import send_telegram_message
 from dapnet import send_dapnet_message
 from mail import send_email_message
 from datetime import datetime
-from geodata import (
-    get_reverse_geopy_data,
-    convert_latlon_to_utm,
-    convert_latlon_to_maidenhead,
-)
-import random
-import time
 from mowas import process_mowas_data
 from expiringdict import ExpiringDict
+from test_data_generator import generate_test_data
 
 
 # Set up the global logger variable
@@ -213,7 +207,9 @@ def generate_telegram_messages(
             + newline
         )
 
-        telegram_message = telegram_message + f"<b>Message headline:</b>{headline}" + newline + newline
+        telegram_message = (
+            telegram_message + f"<b>Message headline:</b>{headline}" + newline + newline
+        )
 
         telegram_message = telegram_message + "<u><i>Message details</i></u>" + newline
 
@@ -223,16 +219,16 @@ def generate_telegram_messages(
         telegram_message = (
             telegram_message + f"<b>Instructions:</b> {instruction}" + newline
         )
-        telegram_message = (
-            telegram_message + f"<b>Contact:</b> {contact}" + newline
-        )
+        telegram_message = telegram_message + f"<b>Contact:</b> {contact}" + newline
 
         telegram_message = (
             telegram_message + f"<b>Message Type:</b> {msgtype}" + newline
         )
         telegram_message = telegram_message + f"<b>Urgency:</b> {urgency}" + newline
         telegram_message = telegram_message + f"<b>Severity:</b> {severity}" + newline
-        telegram_message = telegram_message + f"<b>Timestamp:</b> {sent}" + newline + newline
+        telegram_message = (
+            telegram_message + f"<b>Timestamp:</b> {sent}" + newline + newline
+        )
 
         telegram_message = telegram_message + "<u><i>Address details</i></u>" + newline
 
@@ -251,7 +247,7 @@ def generate_telegram_messages(
             if aprs:
                 telegram_message = (
                     telegram_message
-                    + f" (<i>This is the user's latest APRS position</i>)"
+                    + f" (<i>This is the user's latest APRS position; see green pin on map</i>)"
                 )
             telegram_message = telegram_message + newline
             telegram_message = (
@@ -261,7 +257,7 @@ def generate_telegram_messages(
                 telegram_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
             )
             telegram_message = (
-                telegram_message + f"<b>Address:</b> {address}" + newline+newline
+                telegram_message + f"<b>Address:</b> {address}" + newline + newline
             )
 
         # Ultimately, send this particular message to Telegram and then loop to the next one
@@ -404,7 +400,7 @@ REPLACE_HTML_ADDRESSES
 <td><center>REPLACE_LONGITUDE</center></td>
 <td><center>REPLACE_UTM</center></td>
 <td><center>REPLACE_MAIDENHEAD</center></td>
-<td><center>REPLACE_ADDRESS</center></td>
+<td>REPLACE_ADDRESS</td>
 <td><center>REPLACE_APRS</center></td>
 </tr>
     """
@@ -475,7 +471,11 @@ REPLACE_HTML_ADDRESSES
 
             # set a marker if these are coordinates originating from
             # the user's APRS position
-            aprs = "X" if aprs_c else ""
+            aprs = (
+                '<span style="background-color:#00FF00">&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;</span>'
+                if aprs_c
+                else '<span style="background-color:#FF0000">&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;&nbsp;&nbsp;&nbsp;</span>'
+            )
 
             # Prepare the HTML part
             msg = html_address_element_template
@@ -652,11 +652,13 @@ if __name__ == "__main__":
         mowas_cache=mowas_message_cache,
         minimal_mowas_severity="Minor",
         mowas_dapnet_high_prio_level="Minor",
-    #    target_language="en-us",
+        #    target_language="en-us",
         deepl_api_key=mowas_deepldotcom_api_key,
         aprs_latitude=48.4781,
         aprs_longitude=10.774,
     )
+
+    #    mowas_messages_to_send = generate_test_data()
 
     testmethod = "telegram"
 
