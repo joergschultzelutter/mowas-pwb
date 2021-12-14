@@ -19,11 +19,12 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source Cousin_.
 
 - Supports messaging to Telegram, Email and DAPNET accounts
 - Monitors 1..n static lat/lon coordinates for MOWAS events
-- In addition, licenced ham Radio amateurs can track their current _dynamic_ APRS position, too
-- Users can specify a minimal warning level which needs to be met by a MOWAS event.
-- For DAPNET, users can specify a specific high priority message level which will push the messages to the user with with higher priority
-- International users: ``mowas-pwb`` supports auto-translation of the German MOWAS content to your native language
-- In addition to 'normal' run intervals, ``mowas-pwb`` can switch to 'emergency' run intervals which enable the user to get updated every e.g. 10 mins. See [processing logic](docs/ADDITIONAL_INFO.md) for further details
+- Licensed ham Radio amateurs can track their current APRS position, too (_dynamic_ coordinates monitoring)
+- Users can specify a minimal warning level which needs to be met by a MOWAS event for triggering alerts.
+- Emergency alerts can be sent to DAPNET users with high priority settings.
+- In case of an emergency, ``mowas-pwb`` automatically switches to shorter 'emergency' run intervals. See [processing logic](docs/ADDITIONAL_INFO.md) for further details
+
+International users: ``mowas-pwb`` supports auto-translation of the German MOWAS content to your native language
 
 ## Supported MOWAS features
 
