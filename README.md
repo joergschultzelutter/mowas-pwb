@@ -4,7 +4,7 @@
 
 ## MOWAS Personal Warning Beacon
 
-_Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source Cousin_.
+_Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_.
 
 ![Demo](docs/img/map.jpg)
 
