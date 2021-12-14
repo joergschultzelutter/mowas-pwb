@@ -1,7 +1,10 @@
 # Installation
 ## General instructions
 DAPNET, Telegram and/or email account  access credentials are required.
+
 For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
+
+For automated translations, a free deepl.com API license key is required.
 
 - Download the repo
 - ``pip install -r dependencies.txt``
