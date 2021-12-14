@@ -10,11 +10,6 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_.
 
 ``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to [DAPNET](https://www.hampager.de), [Telegram](https://www.telegram.org/) and email accounts. You can install this program on platforms such as the Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
 
-## Output examples
-
-- [mowas-pwb Telegram message](docs/img/telegram.jpg)
-- [mowas-pwb Mail message](docs/img/mail.jpg)
-
 ## Feature set
 
 - Supports messaging to Telegram, Email and DAPNET accounts
@@ -31,6 +26,11 @@ International users: ``mowas-pwb`` supports auto-translation of the German MOWAS
 - Supports all current MOWAS categories (tempest, flood, wildfire, earthquake, emergency announcements)
 - All MOWAS categories can be enabled or disabled in the program's configuration file
 - You can easily add new MOWAS categories if they are made available through the official government feeds.
+
+## Output examples
+
+- [mowas-pwb Telegram message](docs/img/telegram.jpg)
+- [mowas-pwb Mail message](docs/img/mail.jpg)
 
 ## Program details
 
