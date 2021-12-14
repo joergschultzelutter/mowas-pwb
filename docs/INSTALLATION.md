@@ -1,11 +1,11 @@
 # Installation
+
+## Requirements
+- DAPNET, Telegram and/or email account  access credentials are required.
+- For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
+- For automated translations, a free deepl.com API license key is required.
+
 ## General instructions
-DAPNET, Telegram and/or email account  access credentials are required.
-
-For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
-
-For automated translations, a free deepl.com API license key is required.
-
 - Download the repo
 - ``pip install -r dependencies.txt``
 - Create a copy of the ``mowas-pwb.cfg.TEMPLATE`` file and rename it to ``mowas-pwb.cfg``. This is the default filename - if you want to use a different config filename, you need to specify it when running the program. Once you've copied the file, apply the following changes:
