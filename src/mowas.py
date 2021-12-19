@@ -295,43 +295,29 @@ def process_mowas_data(
 
                             # Loop to the next element in case our current message's
                             # severity level is too low (based on the user's input parameters)
-                            if typedef_mowas_severity.index(
-                                mowas_severity
-                            ) < typedef_mowas_severity.index(minimal_mowas_severity):
+                            # fmt: off
+                            if typedef_mowas_severity.index(mowas_severity) < typedef_mowas_severity.index(minimal_mowas_severity):
                                 continue
+                            #fmt: on
 
                             # Check the priority level of the future message to DAPNET and bump it up if necessary
                             # but lower its priority if we deal with a "Cancel" message
+                            # fmt: off
                             if mowas_msgtype != "Cancel":
-                                dapnet_high_prio_msg = (
-                                    True
-                                    if typedef_mowas_severity.index(
-                                        mowas_dapnet_high_prio_level
-                                    )
-                                    >= typedef_mowas_severity.index(mowas_severity)
-                                    else False
-                                )
+                                dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
                             else:
                                 dapnet_high_prio_msg = False
+                            #fmt: on
 
                             # Now let's extract the remaining information before we take a look at the message's geometric structure
-                            mowas_headline = element["info"][0]["headline"]
-                            mowas_urgency = element["info"][0]["urgency"]
-                            mowas_severity = element["info"][0]["severity"]
-                            if "contact" in element["info"][0]:
-                                mowas_contact = element["info"][0]["contact"]
-                            else:
-                                mowas_contact = "nicht vorhanden"
-                            mowas_description = (
-                                element["info"][0]["description"]
-                                if "description" in element["info"][0]
-                                else None
-                            )
-                            mowas_instruction = mowas_instruction = (
-                                element["info"][0]["instruction"]
-                                if "instruction" in element["info"][0]
-                                else None
-                            )
+                            #fmt: off
+                            mowas_headline = element["info"][0]["headline"] if "headline" in element["info"][0] else None
+                            mowas_urgency = element["info"][0]["urgency"] if "urgency" in element["info"][0] else None
+                            mowas_severity = element["info"][0]["severity"] if "severity" in element["info"][0] else None
+                            mowas_contact = element["info"][0]["contact"] if "contact" in element["info"][0] else None
+                            mowas_description = element["info"][0]["description"] if "description" in element["info"][0] else None
+                            mowas_instruction = element["info"][0]["instruction"] if "instruction" in element["info"][0] else None
+                            # fmt:on
 
                             # remove any HTML content (if present)
                             mowas_headline = remove_html_content(mowas_headline)
