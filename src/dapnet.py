@@ -86,6 +86,7 @@ def send_dapnet_message(
         )
 
         # Send the message(s)
+        logger.info(msg=f"Sending multipart message to DAPNET, consisting of {len(destination_list)} separate messages")
         for destination_message in destination_list:
 
             dapnet_payload = {
@@ -96,7 +97,7 @@ def send_dapnet_message(
             }
             dapnet_payload_json = json.dumps(dapnet_payload)
             if not simulate_send:
-                logger.debug(msg="Sending content to DAPNET server")
+                logger.debug(msg=f"Sending content to DAPNET server: {destination_message}")
                 response = requests.post(
                     url=dapnet_api_server,
                     data=dapnet_payload_json,
@@ -111,12 +112,14 @@ def send_dapnet_message(
                     )
                     return success
                 logger.info(
-                    msg=f"Successfully sent message {destination_list.index(destination_message)} of {len(destination_list)-1} to DAPNET"
+                    msg=f"Successfully sent message {destination_list.index(destination_message)+1} of {len(destination_list)} to DAPNET"
                 )
+                # do not spam the DAPNET API; wait a few secs before sending out the next message
                 if (
                     destination_list.index(destination_message)
                     < len(destination_list) - 1
                 ):
+                    logger.debug(msg="Sleep")
                     time.sleep(10.0)
             else:
                 logger.info(
