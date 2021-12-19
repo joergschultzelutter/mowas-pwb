@@ -17,19 +17,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-import json
 import logging
 import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
 from utils import remove_html_content, get_program_config_from_file
-from translate import translate_text_string, translate_text_list
+from translate import translate_text_list
 from geodata import (
     get_reverse_geopy_data,
     convert_latlon_to_utm,
     convert_latlon_to_maidenhead,
 )
 from staticmap import render_png_map
+import requests
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -55,42 +55,32 @@ def download_mowas_data(base_url: str, url_path: str):
             Dictionary which contains the corresponding JSON object
     """
 
-    with open("gefahr06.txt", "r") as f:
-        if f.mode == "r":
-            json_response = json.load(f)
-            return True, json_response
-    """
-	logger.info("Hier sollten wir nicht hinkommen")
-	exit(0)
+    url = f"{base_url}{url_path}"
+    json_response = None
 
+    try:
+        resp = requests.get(url)
+    except:
+        resp = None
+    if resp:
+        if resp.status_code == 200:
+            # Crude yet effective check. MOWAS does perform redirects and the
+            # requests library's "history" flag does not seem to be set for these
+            # cases, thus preventing us to tell whether the requested site did
+            # experience a redirect or not. We simply check if we did receive
+            # something (allegedly) useful and try to convert the content to JSON
+            if resp.text.startswith("[") and resp.text.endswith("]"):
+                try:
+                    json_response = resp.json()
+                except:
+                    json_response = None
+            else:
+                json_response = None
+        else:
+            json_response = None
 
-	url=f"{base_url}{url_path}"
-	json_response=None
-
-	try:
-		resp = requests.get(url)
-	except:
-		resp = None
-	if resp:
-		if resp.status_code == 200:
-			# Crude yet effective check. MOWAS does perform redirects and the
-			# requests library's "history" flag does not seem to be set for these
-			# cases, thus preventing us to tell whether the requested site did
-			# experience a redirect or not. We simply check if we did receive
-			# something (allegedly) useful and try to convert the content to JSON
-			if resp.text.startswith("[") and resp.text.endswith("]"):
-				try:
-					json_response = resp.json()
-				except:
-					json_response = None
-			else:
-				json_response = None
-		else:
-			json_response = None
-
-	success = True if json_response else False
-	return success, json_response
-	"""
+    success = True if json_response else False
+    return success, json_response
 
 
 def process_mowas_data(
@@ -98,14 +88,7 @@ def process_mowas_data(
     mowas_cache: ExpiringDict,
     minimal_mowas_severity: str = "Minor",
     mowas_dapnet_high_prio_level: str = "Minor",
-    mowas_active_categories: list = [
-        "TEMPEST",
-        "FLOOD",
-        "FLOOD_OLD",
-        "WILDFIRE",
-        "EARTHQUAKE",
-        "DISASTERS",
-    ],
+    mowas_active_categories: list = None,
     enable_covid_messaging: bool = False,
     target_language: str = None,
     deepl_api_key: str = None,
@@ -130,6 +113,9 @@ def process_mowas_data(
         mode, thus causing faster interval checks for the MOWAS data
     mowas_active_categories: 'list'
         List of active categories (from the program's config file)
+    enable_covid_messaging: 'bool'
+
+
     target_language: 'str'
         If not 'None', this is the language that we need to supply in addition to the German data
     deepl_api_key: 'str'
@@ -146,6 +132,16 @@ def process_mowas_data(
     mowas_messages_to_send: 'dict'
             Dictionary which contains the messages that we may need to send to the user
     """
+
+    if mowas_active_categories == None:
+        mowas_active_categories = [
+            "TEMPEST",
+            "FLOOD",
+            "FLOOD_OLD",
+            "WILDFIRE",
+            "EARTHQUAKE",
+            "DISASTERS",
+        ]
 
     # this should already have been checked but better be safe than sorry
     # fmt:off
@@ -322,7 +318,10 @@ def process_mowas_data(
                             mowas_headline = element["info"][0]["headline"]
                             mowas_urgency = element["info"][0]["urgency"]
                             mowas_severity = element["info"][0]["severity"]
-                            mowas_contact = element["info"][0]["contact"]
+                            if "contact" in element["info"][0]:
+                                mowas_contact = element["info"][0]["contact"]
+                            else:
+                                mowas_contact = "nicht vorhanden"
                             mowas_description = (
                                 element["info"][0]["description"]
                                 if "description" in element["info"][0]
@@ -356,6 +355,7 @@ def process_mowas_data(
                             )  # Abbreviated version for DAPNET as we only have 80 chars
                             geocodes_matching_latlon = []
                             coords_matching_latlon = []
+                            latlon_array = []
 
                             for area in areas:
                                 polygon = area["polygon"]
@@ -392,6 +392,7 @@ def process_mowas_data(
                                     # if we have found something for the current area, then
                                     # let's remember the area for which we had a match
                                     if area_match:
+                                        geocode_value = None
                                         area_desc = area["areaDesc"]
                                         if "geocode" in area:
                                             geocodes = area["geocode"]
@@ -501,12 +502,10 @@ def process_mowas_data(
                                         mowas_description.lower(),
                                         mowas_instruction.lower(),
                                     ]
-                                    if any(
-                                        "covid" in s
-                                        for s in content or "corona" in s
-                                        for s in content
-                                    ):
+                                    # fmt: off
+                                    if any("covid" in s for s in content) or any("corona" in s for s in content):
                                         add_data = False
+                                    # fmt: on
 
                                 # Add to the expiring dict unless it is a "Cancel" msg
                                 if mowas_msgtype != "Cancel":
