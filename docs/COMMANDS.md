@@ -2,6 +2,13 @@
 
 The following section describes the command line parameters which can be used to influence the program's behavior. In addition to these parameters, settings such as the watch area(s) are configured in the program's config file - see separate section.
 
+    usage: mowas-pwb.py [-h] [--configfile CONFIGFILE] [--disable-dapnet] [--disable-telegram] [--disable-email] [--generate-test-message]
+                        [--standard-run-interval STANDARD_RUN_INTERVAL] [--emergency-run-interval EMERGENCY_RUN_INTERVAL] [--ttl TIME_TO_LIVE]
+                        [--dapnet-destination-callsign DAPNET_DESTINATION_CALLSIGN] [--telegram-destination-id TELEGRAM_DESTINATION_ID]
+                        [--follow-the-ham FOLLOW_THE_HAM] [--warning-level {MODERATE,MINOR,EXTREME,SEVERE}]
+                        [--dapnet-high-prio-level {MODERATE,MINOR,EXTREME,SEVERE}] [--email-recipient EMAIL_RECIPIENT] [--enable-covid-content]
+                        [--translate-to TARGET_LANGUAGE]
+
 ## Optional command line parameters
 
 - ``configfile`` Specifies the program's config file name. Default is '__mowas-pwb.cfg__'
