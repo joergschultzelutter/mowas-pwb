@@ -59,7 +59,11 @@ def send_telegram_message(
 
     Returns
     =======
+    success: 'bool'
+        True if process was successful
     """
+
+    success = True
     if not simulate_send:
         logger.info(msg="Sending Message to Telegram API")
         mybot = Bot(token=bot_token)
@@ -86,11 +90,15 @@ def send_telegram_message(
             logger.info(
                 msg="Check your configured credentials. Ensure to have established an INITIAL connection between your destination account and your bot account!"
             )
+            success = False
         except:
             logger.info(msg="Unknown error occurred while sending data to Telegram")
+            success = False
 
     else:
         logger.info(msg=f"Simulating Telegram message 'Send'; message='{message}'")
+        success = True
+    return success
 
 
 if __name__ == "__main__":

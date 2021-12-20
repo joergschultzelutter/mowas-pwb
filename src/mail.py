@@ -86,8 +86,8 @@ def send_email_message(
         smtp_server_address=smtp_server_address,
         smtp_server_port=smtp_server_port,
     )
-    output_list = [output_message]
-    return output_list
+    # output_list = [output_message]
+    return success
 
 
 def imap_garbage_collector(
@@ -127,7 +127,7 @@ def imap_garbage_collector(
 
     # Check if the garbage collector has been disabled and
     # abort the process if necessary
-    if mowas_imap_mail_retention_max_days == 0:
+    if imap_mail_retention_max_days == 0:
         return
 
     regex_string = r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"

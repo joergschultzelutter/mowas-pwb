@@ -20,7 +20,6 @@
 import logging
 from utils import (
     convert_text_to_plain_ascii,
-    remove_html_content,
     get_program_config_from_file,
 )
 from warncell import read_warncell_info
@@ -28,7 +27,8 @@ from telegramdotcom import send_telegram_message
 from dapnet import send_dapnet_message
 from mail import send_email_message
 from datetime import datetime
-from mowas import process_mowas_data
+
+# from mowas import process_mowas_data
 from expiringdict import ExpiringDict
 from test_data_generator import generate_test_data
 
@@ -65,9 +65,13 @@ def generate_dapnet_messages(
         This is the SENDER's DAPNET User passcode
     Returns
     =======
+    success: 'bool'
+        True if operation was successful
     """
 
     logger.debug(msg="Starting DAPNET message processing")
+
+    success = False
 
     # Iterate through our list of messages
     # Get all of the information that is associated with our message
@@ -83,6 +87,24 @@ def generate_dapnet_messages(
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
         dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
 
+        # Check if we have translated information in our object
+        if "lang" in mowas_messages_to_send[mowas_message_id]:
+            lang = mowas_messages_to_send[mowas_message_id]["lang"]
+
+            # As DAPNET cannot cope with Unicode characters, accept the content
+            # only if the target language is English
+            if lang in ["en-us", "en-gb"]:
+                # overwrite the existing fields with the translated content
+                # DAPNET messages will only support one language
+                headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
+                description = mowas_messages_to_send[mowas_message_id][
+                    "lang_description"
+                ]
+                instruction = mowas_messages_to_send[mowas_message_id][
+                    "lang_instruction"
+                ]
+                contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
+
         # Construct the outgoing message
         #
         # Everything needs to be converted to plain ASCII 7-bit
@@ -91,10 +113,10 @@ def generate_dapnet_messages(
         msg = f"{msgtype[0:1]}:"
 
         # Remove potential HTML content from msg headline, convert it to ASCII and add it to the message
-        msg = msg + convert_text_to_plain_ascii(remove_html_content(headline)) + " "
+        msg = msg + convert_text_to_plain_ascii(headline) + " "
 
         # Remove potential HTML content from msg instructions, convert it to ASCII and add it to the message
-        msg = msg + convert_text_to_plain_ascii(remove_html_content(instruction)) + " "
+        msg = msg + convert_text_to_plain_ascii(instruction) + " "
 
         # retrieve the affected geocode(s), get the area data and add the short name for that area to the message
         for geocode in geocodes:
@@ -109,18 +131,14 @@ def generate_dapnet_messages(
                 # geocode's index, we know the position of the full-blown text
                 idx = geocodes.index(geocode)
                 if len(areas) <= idx + 1:
-                    msg = (
-                        msg
-                        + convert_text_to_plain_ascii(remove_html_content(areas[idx]))
-                        + " "
-                    )
+                    msg = msg + convert_text_to_plain_ascii(areas[idx]) + " "
 
         # Remove any trailing blanks
         msg = msg.rstrip()
 
         # Finally, send this particular message to DAPNET and then loop to the next message
         logger.debug(msg="Sending message to DAPNET")
-        send_dapnet_message(
+        success = send_dapnet_message(
             message=msg,
             to_callsign=mowas_dapnet_destination_callsign,
             dapnet_login_callsign=mowas_dapnet_login_callsign,
@@ -129,6 +147,7 @@ def generate_dapnet_messages(
         )
 
     logger.debug(msg="Finished DAPNET message processing")
+    return success
 
 
 def generate_telegram_messages(
@@ -147,14 +166,19 @@ def generate_telegram_messages(
         dictionary, containing all messages that are to be sent to the end user
     warncell_data: 'dict'
         warncell data; these are references to German municipal areas, cities etc
-    mowas_telegram_bot_token: str
+    mowas_telegram_bot_token: 'str'
         This is the SENDER's bot token ID
-    telegram_target_id: str
+    telegram_target_id: 'str'
         This is the RECIPIENT's telegram ID in NUMERIC format. Use the Telegram
         Bot 'UserInfoBot' to get this data for your accout
     Returns
     =======
+    success: 'bool'
+        True if successful
     """
+
+    # predefine the output value
+    success = False
 
     logger.debug(msg="Starting Telegram message processing")
 
@@ -208,7 +232,10 @@ def generate_telegram_messages(
         )
 
         telegram_message = (
-            telegram_message + f"<b>Message headline:</b>{headline}" + newline + newline
+            telegram_message
+            + f"<b>Message headline:</b> {headline}"
+            + newline
+            + newline
         )
 
         telegram_message = telegram_message + "<u><i>Message details</i></u>" + newline
@@ -261,7 +288,7 @@ def generate_telegram_messages(
             )
 
         # Ultimately, send this particular message to Telegram and then loop to the next one
-        send_telegram_message(
+        success = send_telegram_message(
             bot_token=mowas_telegram_bot_token,
             user_id=telegram_target_id,
             message=telegram_message,
@@ -270,6 +297,7 @@ def generate_telegram_messages(
         )
 
     logger.debug(msg="Finished Telegram message processing")
+    return success
 
 
 def generate_email_messages(
@@ -298,7 +326,12 @@ def generate_email_messages(
         This is the RECIPIENT's email address
     Returns
     =======
+    success: 'bool'
+        True if operation was successful
     """
+
+    # Set a default status
+    success = False
 
     # Email template (plain text)
     plaintext_template = """\
@@ -428,18 +461,14 @@ REPLACE_HTML_ADDRESSES
         latlon_polygon = mowas_messages_to_send[mowas_message_id]["latlon_polygon"]
         # fmt: off
         coords_matching_latlon = mowas_messages_to_send[mowas_message_id]["coords_matching_latlon"]
-        # fmt: on
         if "lang" in mowas_messages_to_send[mowas_message_id]:
             lang_headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
-            lang_description = mowas_messages_to_send[mowas_message_id][
-                "lang_description"
-            ]
-            lang_instruction = mowas_messages_to_send[mowas_message_id][
-                "lang_instruction"
-            ]
+            lang_description = mowas_messages_to_send[mowas_message_id]["lang_description"]
+            lang_instruction = mowas_messages_to_send[mowas_message_id]["lang_instruction"]
             lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
         else:
             lang_headline = lang_instruction = lang_contact = lang_description = None
+        # fmt: on
 
         # get the rendered image (output value will be 'None' in case it cannot be rendered)
         html_image = mowas_messages_to_send[mowas_message_id]["static_image"]
@@ -585,7 +614,7 @@ REPLACE_HTML_ADDRESSES
             "REPLACE_DATETIME_CREATED", msg_string
         )
         # Ultimately, send this particular message via Email and then loop to the next one
-        send_email_message(
+        success = send_email_message(
             plaintext_message=plaintext_message,
             html_message=html_message,
             subject_message=mail_subject_message,
@@ -598,6 +627,7 @@ REPLACE_HTML_ADDRESSES
         )
 
     logger.debug(msg="Finished Email message processing")
+    return success
 
 
 if __name__ == "__main__":
@@ -647,46 +677,41 @@ if __name__ == "__main__":
         [48.4781, 10.773],
     ]
 
-    mowas_cache, mowas_messages_to_send, got_alert_or_update = process_mowas_data(
-        coordinates=my_coordinates,
-        mowas_cache=mowas_message_cache,
-        minimal_mowas_severity="Minor",
-        mowas_dapnet_high_prio_level="Minor",
-        #    target_language="en-us",
-        deepl_api_key=mowas_deepldotcom_api_key,
-        aprs_latitude=48.4781,
-        aprs_longitude=10.774,
-    )
+    mowas_messages_to_send = generate_test_data()
 
-    #mowas_messages_to_send = generate_test_data()
-
-    testmethod = "email"
+    testmethod = "telegram"
 
     if testmethod == "email":
         # fmt: on
-        generate_email_messages(
-            mowas_messages_to_send=mowas_messages_to_send,
-            warncell_data=warncell_data,
-            smtpimap_email_address=mowas_smtpimap_email_address,
-            smtpimap_email_password=mowas_smtpimap_email_password,
-            mail_recipient="joerg.schultze.lutter@gmail.com",
-            smtp_server_address=mowas_smtp_server_address,
-            smtp_server_port=mowas_smtp_server_port,
+        logger.info(
+            generate_email_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                smtpimap_email_address=mowas_smtpimap_email_address,
+                smtpimap_email_password=mowas_smtpimap_email_password,
+                mail_recipient="joerg.schultze.lutter@gmail.com",
+                smtp_server_address=mowas_smtp_server_address,
+                smtp_server_port=mowas_smtp_server_port,
+            )
         )
 
     if testmethod == "telegram":
-        generate_telegram_messages(
-            mowas_messages_to_send=mowas_messages_to_send,
-            warncell_data=warncell_data,
-            mowas_telegram_bot_token=mowas_telegram_bot_token,
-            telegram_target_id=140582719,
+        logger.info(
+            generate_telegram_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                mowas_telegram_bot_token=mowas_telegram_bot_token,
+                telegram_target_id=140582719,
+            )
         )
 
     if testmethod == "dapnet":
-        generate_dapnet_messages(
-            mowas_messages_to_send=mowas_messages_to_send,
-            warncell_data=warncell_data,
-            mowas_dapnet_destination_callsign="DF1JSL",
-            mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
-            mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
+        logger.info(
+            generate_dapnet_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                mowas_dapnet_destination_callsign="DF1JSL",
+                mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
+                mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
+            )
         )

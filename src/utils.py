@@ -336,12 +336,12 @@ def emergency_run_interval_check(interval_value):
     return interval_value
 
 
-def language_check(langage_value):
+def language_check(language_value):
     # fmt:off
     supported_languages = ["bg","cs","da","el","en-gb","en-us","es","et","fi","fr","hu","it","ja","lt","lv","nl","pl","pt-br","pt-pt","ro","ru","sk","sl","sv","zh"]
     # fmt:on
     if language_value:
-        language_value = langage_value.lower()
+        language_value = language_value.lower()
         if language_value not in supported_languages:
             raise argparse.ArgumentTypeError(
                 f"Unsupported target language {language_value}; supported: {supported_languages}"

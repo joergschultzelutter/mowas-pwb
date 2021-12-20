@@ -41,6 +41,7 @@ import time
 from apscheduler.schedulers.background import BackgroundScheduler
 import apscheduler.schedulers.base
 from mail import imap_garbage_collector
+from test_data_generator import generate_test_data
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -182,50 +183,53 @@ if __name__ == "__main__":
     # If we have just been asked to generate a test message then
     # let's do so and exit the program afterwards
     if mowas_generate_test_message:
-        message = (
-            "mowas-pwb is properly configured if you were able to receive this message"
-        )
+        logger.info(msg="Configuration test enabled")
+        # generate our fixed test data
+        mowas_messages_to_send = generate_test_data()
+
+        # Send to DAPNET if enabled
         if mowas_dapnet_enabled:
             logger.info(
                 msg=f"Sending mowas-pwb test message to DAPNET account {mowas_dapnet_destination_callsign}"
             )
-            success = send_dapnet_message(
-                to_callsign=mowas_dapnet_destination_callsign,
-                message=message,
-                message_status="Alert",
-                dapnet_login_callsign=mowas_dapnet_login_callsign,
-                dapnet_login_passcode=mowas_dapnet_login_passcode,
-                simulate_send=True,
+            success = generate_dapnet_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                mowas_dapnet_destination_callsign=mowas_dapnet_destination_callsign,
+                mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
+                mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
             )
-            logger.info(msg=f"DAPNET message status: {success}")
+            logger.info(msg=f"DAPNET message success: {success}")
+
+        # Send to Telegram if enabled
         if mowas_telegram_enabled:
             logger.info(
                 msg=f"Sending mowas-pwb test message to Telegram account {mowas_telegram_destination_id}"
             )
-            success = send_telegram_message(
-                bot_token=mowas_telegram_bot_token,
-                user_id=mowas_telegram_destination_id,
-                message=message,
-                simulate_send=True,
+            success = generate_telegram_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                mowas_telegram_bot_token=mowas_telegram_bot_token,
+                telegram_target_id=mowas_telegram_destination_id,
             )
-            logger.info(msg=f"Telegram message status: {success}")
+            logger.info(msg=f"Telegram message success: {success}")
+
+        # Send to mail account if enabled
         if mowas_email_enabled:
             logger.info(
                 msg=f"Sending mowas-pwb test message to Email account {mowas_email_recipient}"
             )
-            plaintext_message = "If you have received this email, then your account has been properly configured"
-            html_message = f"<b>{plaintext_message}</b>"
-            send_email_message(
-                plaintext_message=plaintext_message,
-                html_message=html_message,
-                subject_message="mowas-pwb setup check",
+            success = generate_email_messages(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
                 smtpimap_email_address=mowas_smtpimap_email_address,
                 smtpimap_email_password=mowas_smtpimap_email_password,
-                mail_recipient=mowas_email_recipient,
-                smtp_server_address=mowas_smtp_server_address,
                 smtp_server_port=mowas_smtp_server_port,
+                smtp_server_address=mowas_smtp_server_address,
+                mail_recipient=mowas_email_recipient,
             )
-        logger.info(msg="Test message cycle complete; exiting")
+            logger.info(msg=f"Email message success: {success}")
+        logger.info(msg="Configuration test cycle complete; exiting")
         exit(0)
 
     # If we reach this point, then we are supposed to do some real work
@@ -329,35 +333,37 @@ if __name__ == "__main__":
                 # Check if we need to send something to DAPNET
                 if mowas_dapnet_enabled:
                     logger.info(msg="Generating DAPNET notifications")
-                    generate_dapnet_messages(
+                    success = generate_dapnet_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         mowas_dapnet_destination_callsign=mowas_dapnet_destination_callsign,
                         mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
                         mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
                     )
+                    logger.info(msg=f"Telegram message success: {success}")
 
                 # Check if we need to send something to Telegram
                 if mowas_telegram_enabled:
                     logger.info(msg="Generating Telegram notifications")
-                    generate_telegram_messages(
+                    success = generate_telegram_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         mowas_telegram_bot_token=mowas_telegram_bot_token,
                         telegram_target_id=mowas_telegram_destination_id,
                     )
+                    logger.info(msg=f"Telegram message success: {success}")
 
                 # Finally, check if we need to send something via Email
                 if mowas_email_enabled:
                     logger.info(msg="Preparing Email notifications")
-                    generate_email_messages(
+                    success = generate_email_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         smtpimap_email_address=mowas_smtpimap_email_address,
                         smtpimap_email_password=mowas_smtpimap_email_password,
                         mail_recipient=mowas_email_recipient,
                     )
-
+                    logger.info(msg=f"Email message success: {success}")
             else:
                 logger.debug(msg="No new messages found")
 
