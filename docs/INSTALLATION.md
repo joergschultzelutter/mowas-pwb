@@ -57,6 +57,14 @@ NOT_CONFIGURED
 
 will automatically ___disable___ the program option that is associated with this value
 
+### IMAP garbage collector
+
+:bangbang::bangbang::bangbang: Potential loss of IMAP data :bangbang::bangbang::bangbang:
+
+The use of a separate email account for generating messages is __strongly__ recommended, __especially__ if you activate the IMAP garbage collector by specifying a value for ``imap_mail_retention_max_days`` that is different to zero. When activated, the garbage collector will delete ALL of your mails in your 'Sent' mailbox, __regardless of who created them__. If you don't care about the generated emails in your account, keep the garbage collector's default setting of ```0``` days which will deactivate the GC process.
+
+### Config file template
+
 ```python
 [mowas_config]
 
