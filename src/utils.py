@@ -80,7 +80,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         )
         try:
             mowas_imap_mail_retention_max_days = int(mowas_imap_mail_retention_max_days)
-        except:
+        except Exception as ex:
             mowas_imap_mail_retention_max_days = 0
         mowas_acs = config.get("mowas_config", "mowas_active_categories")
 
@@ -106,7 +106,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
                 raise ValueError("Error in config file")
 
         success = True
-    except:
+    except Exception as ex:
         logger.info(
             msg="Error in configuration file; Check if your config format is correct."
         )

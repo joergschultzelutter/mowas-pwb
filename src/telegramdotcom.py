@@ -91,7 +91,7 @@ def send_telegram_message(
                 msg="Check your configured credentials. Ensure to have established an INITIAL connection between your destination account and your bot account!"
             )
             success = False
-        except:
+        except Exception as ex:
             logger.info(msg="Unknown error occurred while sending data to Telegram")
             success = False
 

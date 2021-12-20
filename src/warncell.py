@@ -58,7 +58,7 @@ def read_warncell_info(
     # Download the Warncell data from the web site and retain the string if successful
     try:
         resp = requests.get(url=url, headers=request_headers)
-    except:
+    except Exception as ex:
         resp = None
     if resp:
         if resp.status_code == 200:

@@ -65,7 +65,7 @@ def get_reverse_geopy_data(latitude: float, longitude: float, language: str = "d
             addressdetails=True,
             exactly_one=True,
         )
-    except:
+    except Exception as ex:
         location = None
     if location:
         address = location.address

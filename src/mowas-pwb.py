@@ -384,7 +384,7 @@ if __name__ == "__main__":
                 if mail_gc_scheduler.state != apscheduler.schedulers.base.STATE_STOPPED:
                     try:
                         mail_gc_scheduler.shutdown()
-                    except:
+                    except Exception as ex:
                         logger.info(
                             msg="Exception occurred during shutdown SystemExit loop"
                         )

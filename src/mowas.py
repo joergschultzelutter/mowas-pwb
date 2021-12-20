@@ -60,7 +60,7 @@ def download_mowas_data(base_url: str, url_path: str):
 
     try:
         resp = requests.get(url)
-    except:
+    except Exception as ex:
         resp = None
     if resp:
         if resp.status_code == 200:
@@ -72,7 +72,7 @@ def download_mowas_data(base_url: str, url_path: str):
             if resp.text.startswith("[") and resp.text.endswith("]"):
                 try:
                     json_response = resp.json()
-                except:
+                except Exception as ex:
                     json_response = None
             else:
                 json_response = None

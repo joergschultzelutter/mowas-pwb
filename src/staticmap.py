@@ -106,7 +106,7 @@ def render_png_map(
 
         # get the buffer value and return it
         view = iobuffer.getvalue()
-    except:
+    except Exception as ex:
         view = None
 
     return view

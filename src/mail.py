@@ -234,7 +234,7 @@ def send_message_via_snmp(
             if code in [235, 503]:
                 try:
                     smtp.send_message(msg=message_to_send)
-                except:
+                except Exception as ex:
                     output_message = "Connected to SMTP but Cannot send email"
                     logger.info(msg=output_message)
                     return False, output_message

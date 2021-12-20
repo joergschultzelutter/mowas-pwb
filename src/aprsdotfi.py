@@ -71,13 +71,13 @@ def get_position_on_aprsfi(aprsfi_callsign: str, aprsdotfi_api_key: str):
             url=f"https://api.aprs.fi/api/get?name={aprsfi_callsign}&what=loc&apikey={aprsdotfi_api_key}&format=json",
             headers=headers,
         )
-    except:
+    except Exception as ex:
         resp = None
     if resp:
         if resp.status_code == 200:
             try:
                 json_content = resp.json()
-            except:
+            except Exception as ex:
                 json_content = {}
             # extract web service result. Can either be 'ok' or 'fail'
             if "result" in json_content:

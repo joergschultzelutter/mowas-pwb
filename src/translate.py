@@ -58,7 +58,7 @@ def translate_text_string(
             original_text, target_lang=target_language, source_lang=original_language
         )
         response = result.text
-    except:
+    except Exception as ex:
         response = original_text
         logger.debug(msg="Cannot translate; deepl.com exception occurred")
 
@@ -97,7 +97,7 @@ def translate_text_list(
             original_text, target_lang=target_language, source_lang=original_language
         )
         response = [str(item) for item in result]
-    except:
+    except Exception as ex:
         response = original_text
         logger.debug(msg="Cannot translate; deepl.com exception occurred")
 
