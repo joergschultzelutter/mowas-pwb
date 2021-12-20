@@ -117,13 +117,13 @@ if __name__ == "__main__":
         logger.info(msg="Valid Telegram destination ID is missing; disabling Telegram")
         mowas_telegram_enabled = False
 
-    if mowas_dapnet_enabled and mowas_dapnet_destination_callsign == None:
+    if mowas_dapnet_enabled and mowas_dapnet_destination_callsign is None:
         logger.info(
             msg="Valid DAPNET destination call sign is missing; disabling DAPNET"
         )
         mowas_dapnet_enabled = False
 
-    if mowas_email_enabled and mowas_email_recipient == None:
+    if mowas_email_enabled and mowas_email_recipient is None:
         logger.info(msg="Valid destination email is missing; disabling Email")
         mowas_email_enabled = False
 
