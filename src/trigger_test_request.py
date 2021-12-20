@@ -20,7 +20,11 @@
 import logging
 from utils import get_program_config_from_file, get_command_line_params
 from warncell import read_warncell_info
-from outputgenerator import generate_email_messages, generate_dapnet_messages, generate_telegram_messages
+from outputgenerator import (
+    generate_email_messages,
+    generate_dapnet_messages,
+    generate_telegram_messages,
+)
 from test_data_generator import generate_test_data
 
 
