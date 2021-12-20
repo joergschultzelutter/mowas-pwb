@@ -113,7 +113,10 @@ def generate_dapnet_messages(
         msg = f"{msgtype[0:1]}:"
 
         # Remove potential HTML content from msg headline, convert it to ASCII and add it to the message
-        msg = msg + convert_text_to_plain_ascii(headline) + " "
+        msg = msg + convert_text_to_plain_ascii(headline) + "."
+
+        # Remove potential HTML content from msg instructions, convert it to ASCII and add it to the message
+        msg = msg + convert_text_to_plain_ascii(description) + "."
 
         # Remove potential HTML content from msg instructions, convert it to ASCII and add it to the message
         msg = msg + convert_text_to_plain_ascii(instruction) + " "
