@@ -4,22 +4,24 @@
 
 ## MOWAS Personal Warning Beacon
 
-_Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_.
+_Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_
 
 ![Demo](docs/img/map.jpg)
 
 ``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) Personal Warning Beacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to [DAPNET](https://www.hampager.de), [Telegram](https://www.telegram.org/) and email accounts. You can install this program on platforms such as the Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
 
+``mowas-pwb`` has been created to complement the existing programs [KATWARN](https://de.wikipedia.org/wiki/Katwarn), [Nina](https://de.wikipedia.org/wiki/NINA_(App)) and [BIWAPP](https://de.wikipedia.org/wiki/BIWAPP) in order to enable additional communication channels such as mail, pager or Telegram messenger.
+
 ## Feature set
 
-- Supports messaging to Telegram, Email and DAPNET accounts
+- Supports messaging to [Telegram](https://www.telegram.org/), Email and [DAPNET](https://www.hampager.de) accounts
 - Monitors 1..n static lat/lon coordinates for MOWAS events
-- Licensed ham Radio amateurs can track their current APRS position, too (_dynamic_ coordinates monitoring)
+- Licensed ham radio amateurs can track their current [APRS](http://www.aprs.org/) position, too (_dynamic_ position monitoring)
 - Users can specify a minimal warning level which needs to be met by a MOWAS event for triggering alerts.
-- Emergency alerts can be sent to DAPNET users with high priority settings.
+- Emergency alerts can be sent to [DAPNET](https://www.hampager.de) users with high priority settings.
 - In case of an emergency, ``mowas-pwb`` automatically switches to shorter 'emergency' run intervals. See [processing logic](docs/ADDITIONAL_INFO.md) for further details
 
-International users: ``mowas-pwb`` supports auto-translation of the German MOWAS content to your native language
+:de: International users: ``mowas-pwb`` supports automatic translation of German MOWAS content into your native language.
 
 ## Supported MOWAS features
 
