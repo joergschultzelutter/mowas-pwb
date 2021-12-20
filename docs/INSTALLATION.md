@@ -2,9 +2,11 @@
 
 ## Requirements
 
-- DAPNET, Telegram and/or email account  access credentials are required.
-- For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required
-- For automated translations, a free deepl.com API license key is required.
+- DAPNET, Telegram and/or email account access credentials are required.
+  - DAPNET: [https://hampager.de/dokuwiki/doku.php](https://hampager.de/dokuwiki/doku.php)
+  - Telegram: create your own bot. See e.g. [https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html)
+- For APRS tracking (``follow-the-ham`` option), a valid aprs.fi access key is required. Get it here: [https://aprs.fi/page/api](https://aprs.fi/page/api)
+- For automated translations, a free deepl.com API license key is required which can be obtained here: [https://www.deepl.com/pro-api?cta=header-pro-api](https://www.deepl.com/pro-api?cta=header-pro-api)
 
 ## General instructions
 
@@ -59,9 +61,11 @@ will automatically ___disable___ the program option that is associated with this
 
 ### IMAP garbage collector
 
-:bangbang::bangbang::bangbang: Potential loss of IMAP data :bangbang::bangbang::bangbang:
+:bangbang::bangbang::bangbang: __Potential loss of IMAP data - READ THIS CAREFULLY__ :bangbang::bangbang::bangbang:
 
-The use of a separate email account for generating messages is __strongly__ recommended, __especially__ if you activate the IMAP garbage collector by specifying a value for ``imap_mail_retention_max_days`` that is different to zero. When activated, the garbage collector will delete ALL of your mails in your 'Sent' mailbox, __regardless of who created them__. If you don't care about the generated emails in your account, keep the garbage collector's default setting of ```0``` days which will deactivate the GC process.
+The use of a separate email account for generating messages is __strongly__ recommended, __especially__ if you activate the IMAP garbage collector by specifying a value for ``imap_mail_retention_max_days`` that is different to zero.
+
+When activated, the garbage collector will delete ALL of your mails in your 'Sent' mailbox, __regardless of who created them__. If you don't care about the generated emails in your account, keep the garbage collector's default setting of ```0``` days which will deactivate the GC process.
 
 ### Config file template
 
