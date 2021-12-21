@@ -13,7 +13,7 @@
 - Download the repo. Then install the packages.
 
 ```bash
-    user@phost:~/mowas-pwb $ pip install -r dependencies.txt
+    user@phost:~/mowas-pwb $ pip install -r requirements.txt
 ```
 
 - Dependent on your OS' flavor, you may be required to install the following additional packages:
