@@ -33,6 +33,7 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_
 
 - [mowas-pwb Telegram message](docs/img/telegram.jpg)
 - [mowas-pwb Mail message](docs/img/mail.jpg)
+- [mowas-pwb DAPNET message](docs/img/pager.jpg)
 
 ## Program details
 

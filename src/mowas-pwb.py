@@ -304,7 +304,7 @@ if __name__ == "__main__":
                     msg=f"Unable to retrieve coordinates on aprs.fi; user's coordinates will not be watched ..."
                 )
 
-        logger.info(mowas_watch_areas)
+        logger.debug(msg=f"Monitoring coordinates: {mowas_watch_areas}")
 
         try:
             logger.debug(msg=f"Processing MOWAS data ...")
