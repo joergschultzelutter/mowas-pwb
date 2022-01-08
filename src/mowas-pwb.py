@@ -270,13 +270,13 @@ if __name__ == "__main__":
         mail_gc_scheduler.start()
         logger.info(msg="IMAP garbage collector has been activated")
 
-    logger.info(msg="Entering processing loop...")
+    logger.debug(msg="Entering processing loop...")
     while True:
 
         # Set the program's run interval to default settings
         mowas_run_interval = mowas_standard_run_interval
 
-        # use a copy of the watch areas as we may need to amend
+        # use a deep copy of the watch areas as we may need to amend
         # this static information my adding the user's APRS
         # position data to it
         mowas_watch_areas = copy.deepcopy(mowas_watch_areas_config)
@@ -300,13 +300,11 @@ if __name__ == "__main__":
                 )
                 latlon = [latitude, longitude]
                 mowas_watch_areas.append(latlon)
+                logger.debug(msg=f"Amended watchlist: {mowas_watch_areas}")
             else:
                 logger.debug(
                     msg=f"Unable to retrieve coordinates on aprs.fi; user's coordinates will not be watched ..."
                 )
-
-        logger.debug(msg=f"Monitoring coordinates: {mowas_watch_areas}")
-
         try:
             logger.debug(msg=f"Processing MOWAS data ...")
             (
@@ -369,9 +367,9 @@ if __name__ == "__main__":
                 logger.debug(msg="No new messages found")
 
             # Finally, go to sleep
-            logger.info(msg=f"Entering sleep mode for {mowas_run_interval} mins...")
+            logger.debug(msg=f"Entering sleep mode for {mowas_run_interval} mins...")
             time.sleep(mowas_run_interval * 60)
-            logger.info(msg="Recovered from sleep mode ...")
+            logger.debug(msg="Recovered from sleep mode ...")
         except (KeyboardInterrupt, SystemExit):
             logger.info(
                 msg="Received KeyboardInterrupt or SystemExit in progress; shutting down ..."

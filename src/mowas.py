@@ -368,14 +368,18 @@ def process_mowas_data(
                                         p = Point(latitude, longitude)
                                     except Exception as ex:
                                         exc_type, exc_value, exc_tb = sys.exc_info()
-                                        logger.info(msg=f"Exception occurred: {exc_value}")
+                                        logger.info(
+                                            msg=f"Exception occurred: {exc_value}"
+                                        )
                                         if exc_tb is not None:
                                             prev = exc_tb
                                             curr = exc_tb.tb_next
                                             while curr is not None:
                                                 prev = curr
                                                 curr = curr.tb_next
-                                            logger.info(msg=pformat(prev.tb_frame.f_locals))
+                                            logger.info(
+                                                msg=pformat(prev.tb_frame.f_locals)
+                                            )
                                             logger.info(msg=pformat(locals()))
                                             sys.exit(0)
 
