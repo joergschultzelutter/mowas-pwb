@@ -42,6 +42,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import apscheduler.schedulers.base
 from mail import imap_garbage_collector
 from test_data_generator import generate_test_data
+import copy
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -278,7 +279,7 @@ if __name__ == "__main__":
         # use a copy of the watch areas as we may need to amend
         # this static information my adding the user's APRS
         # position data to it
-        mowas_watch_areas = mowas_watch_areas_config.copy()
+        mowas_watch_areas = copy.deepcopy(mowas_watch_areas_config)
 
         # Do we need to track the user's config on aprs.fi?
         if mowas_follow_the_ham:

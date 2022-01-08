@@ -30,6 +30,8 @@ from geodata import (
 )
 from staticmap import render_png_map
 import requests
+import sys
+from pprint import pformat
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -362,7 +364,20 @@ def process_mowas_data(
                                     longitude = coord[1]
 
                                     # Let's create our coordinate that we want to check
-                                    p = Point(latitude, longitude)
+                                    try:
+                                        p = Point(latitude, longitude)
+                                    except Exception as ex:
+                                        exc_type, exc_value, exc_tb = sys.exc_info()
+                                        logger.info(msg=f"Exception occurred: {exc_value}")
+                                        if exc_tb is not None:
+                                            prev = exc_tb
+                                            curr = exc_tb.tb_next
+                                            while curr is not None:
+                                                prev = curr
+                                                curr = curr.tb_next
+                                            logger.info(msg=pformat(prev.tb_frame.f_locals))
+                                            logger.info(msg=pformat(locals()))
+                                            sys.exit(0)
 
                                     # Check if we are either inside of the polygon or
                                     # touch its borders
