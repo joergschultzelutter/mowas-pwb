@@ -482,7 +482,7 @@ def process_mowas_data(
                                         )
 
                                         # Remember the set of coordinates which caused that match
-                                        coordinates = {
+                                        mowas_coordinates = {
                                             "latitude": latitude,
                                             "longitude": longitude,
                                             "address": address,
@@ -490,8 +490,8 @@ def process_mowas_data(
                                             "utm": utm,
                                             "aprs_coordinates": aprs,
                                         }
-                                        if coordinates not in coords_matching_latlon:
-                                            coords_matching_latlon.append(coordinates)
+                                        if mowas_coordinates not in coords_matching_latlon:
+                                            coords_matching_latlon.append(mowas_coordinates)
 
                             # We went through all areas - now let's see of we found something
                             if area_matches_with_user_latlon:
