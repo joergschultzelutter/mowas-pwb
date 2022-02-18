@@ -455,7 +455,9 @@ REPLACE_HTML_ADDRESSES
         severity = mowas_messages_to_send[mowas_message_id]["severity"]
         description = mowas_messages_to_send[mowas_message_id]["description"]
         instruction = mowas_messages_to_send[mowas_message_id]["instruction"]
+        instruction = "" if not instruction else instruction
         contact = mowas_messages_to_send[mowas_message_id]["contact"]
+        contact = "" if not contact else contact
         sent = mowas_messages_to_send[mowas_message_id]["sent"]
         msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
@@ -468,6 +470,7 @@ REPLACE_HTML_ADDRESSES
             lang_headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
             lang_description = mowas_messages_to_send[mowas_message_id]["lang_description"]
             lang_instruction = mowas_messages_to_send[mowas_message_id]["lang_instruction"]
+            lang_instruction = "" if not lang_instruction else lang_instruction
             lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
         else:
             lang_headline = lang_instruction = lang_contact = lang_description = None
@@ -616,6 +619,10 @@ REPLACE_HTML_ADDRESSES
         mail_subject_message = mail_subject_message.replace(
             "REPLACE_DATETIME_CREATED", msg_string
         )
+        logger.info(
+            msg=f"Sending Email Message to {smtp_server_address}:{smtp_server_port}"
+        )
+
         # Ultimately, send this particular message via Email and then loop to the next one
         success = send_email_message(
             plaintext_message=plaintext_message,

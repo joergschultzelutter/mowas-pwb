@@ -26,6 +26,7 @@ import logging
 import sys
 import argparse
 import string
+import os.path
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -477,11 +478,19 @@ def get_command_line_params():
         help="ISO639-1 target language for MOWAS messages (will not be invoked for DAPNET messages)",
     )
 
+    parser.add_argument(
+        "--localfile",
+        default=None,
+        type=str,
+        help="local MOWAS JSON file (for testing purposes only)",
+    )
+
     parser.set_defaults(add_example_data=False)
 
     args = parser.parse_args()
 
     mowas_configfile = args.configfile.name
+    mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
     mowas_dapnet_destination_callsign = args.dapnet_destination_callsign
@@ -497,6 +506,14 @@ def get_command_line_params():
     mowas_email_recipient = args.email_recipient
     mowas_enable_covid_content = args.enable_covid_content
     mowas_target_language = args.target_language
+
+    # Did the user specify an optional JSON file for testing?
+    # if yes, check if that file exists
+    if mowas_localfile:
+        if not os.path.isfile(mowas_localfile):
+            raise ValueError(
+                f"Local MOWAS test file '{mowas_localfile}' does not exist"
+            )
 
     # Convert requested call sign to upper case whereas present
     if mowas_follow_the_ham:
@@ -526,6 +543,7 @@ def get_command_line_params():
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,
+        mowas_localfile,
     )
 
 

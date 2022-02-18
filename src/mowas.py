@@ -21,7 +21,7 @@ import logging
 import numpy as np
 from shapely.geometry import Point, Polygon
 from expiringdict import ExpiringDict
-from utils import remove_html_content, get_program_config_from_file
+from utils import remove_html_content
 from translate import translate_text_list
 from geodata import (
     get_reverse_geopy_data,
@@ -32,6 +32,7 @@ from staticmap import render_png_map
 import requests
 import sys
 from pprint import pformat
+import json
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -96,6 +97,7 @@ def process_mowas_data(
     deepl_api_key: str = None,
     aprs_latitude: float = None,
     aprs_longitude: float = None,
+    local_file_name: str = None,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -116,8 +118,10 @@ def process_mowas_data(
     mowas_active_categories: 'list'
         List of active categories (from the program's config file)
     enable_covid_messaging: 'bool'
-
-
+        Enables Covid messages (usually, they get suppressed)
+    local_file_name: 'str"
+        For local testing; digests local file instead of online content
+        (if filename has been supplied)
     target_language: 'str'
         If not 'None', this is the language that we need to supply in addition to the German data
     deepl_api_key: 'str'
@@ -186,17 +190,39 @@ def process_mowas_data(
     # Alert or Update message
     got_alert_or_update = False
 
+    # Boolean marker for quick-and-dirty file handler
+    processed_our_file = False
+
     # For each of our own categories, try to download the MOWAS data
     for mowas_category in mowas_dictionary:
         # Only process this category if it is set as "active"
         # in the program config file
         if mowas_category in mowas_active_categories:
-            # OK, let's try to get that data from the government server
-            success, json_data = download_mowas_data(
-                base_url="https://warnung.bund.de",
-                url_path=mowas_dictionary[mowas_category],
-            )
-            logger.debug(msg=f"Processing mowas_category {mowas_category}: {success}")
+            # Check if we have a local file name for testing
+            if local_file_name:
+                # VERY quick and dirty handler - needs refactoring :)
+                # did we already get through this loop?
+                # yes => exit loop
+                if processed_our_file:
+                    break
+                logger.info(
+                    msg=f"Entering local file test mode; file '{local_file_name}'"
+                )
+                with open(f"{local_file_name}", "r") as f:
+                    if f.mode == "r":
+                        json_data = json.load(f)
+                processed_our_file = True
+                success = True
+            else:
+                # do the real thing
+                # OK, let's try to get that data from the government server
+                success, json_data = download_mowas_data(
+                    base_url="https://warnung.bund.de",
+                    url_path=mowas_dictionary[mowas_category],
+                )
+                logger.debug(
+                    msg=f"Processing mowas_category {mowas_category}: {success}"
+                )
             if success:
                 for element in json_data:
                     # general marker which tells us whether we should send this message
@@ -364,8 +390,16 @@ def process_mowas_data(
                                     longitude = coord[1]
 
                                     # Let's create our coordinate that we want to check
+                                    area_match = False
                                     try:
                                         p = Point(latitude, longitude)
+
+                                        # Check if we are either inside of the polygon or
+                                        # touch its borders
+                                        area_match = p.within(poly) or p.intersects(
+                                            poly
+                                        )
+
                                     except Exception as ex:
                                         exc_type, exc_value, exc_tb = sys.exc_info()
                                         logger.info(
@@ -382,10 +416,6 @@ def process_mowas_data(
                                             )
                                             logger.info(msg=pformat(locals()))
                                             sys.exit(0)
-
-                                    # Check if we are either inside of the polygon or
-                                    # touch its borders
-                                    area_match = p.within(poly) or p.intersects(poly)
 
                                     # and set our global marker if we have found something
                                     area_matches_with_user_latlon = (
@@ -490,8 +520,13 @@ def process_mowas_data(
                                             "utm": utm,
                                             "aprs_coordinates": aprs,
                                         }
-                                        if mowas_coordinates not in coords_matching_latlon:
-                                            coords_matching_latlon.append(mowas_coordinates)
+                                        if (
+                                            mowas_coordinates
+                                            not in coords_matching_latlon
+                                        ):
+                                            coords_matching_latlon.append(
+                                                mowas_coordinates
+                                            )
 
                             # We went through all areas - now let's see of we found something
                             if area_matches_with_user_latlon:
@@ -502,15 +537,33 @@ def process_mowas_data(
                                 # Check if the message contains Covid content and flag the
                                 # message as "not to be added" if related content has been found
                                 if not enable_covid_messaging:
+                                    # some of these field values can have None data type
+                                    # We only use this data temporarily so if the field value is None,
+                                    # we replace this value with "" for our quick check
+                                    _headline = (
+                                        mowas_headline.lower() if mowas_headline else ""
+                                    )
+                                    _description = (
+                                        mowas_description.lower()
+                                        if mowas_description
+                                        else ""
+                                    )
+                                    _instruction = (
+                                        mowas_instruction.lower()
+                                        if mowas_instruction
+                                        else ""
+                                    )
                                     content = [
-                                        mowas_headline.lower(),
-                                        mowas_description.lower(),
-                                        mowas_instruction.lower(),
+                                        _headline,
+                                        _description,
+                                        _instruction,
                                     ]
-                                    # fmt: off
-                                    if any("covid" in s for s in content) or any("corona" in s for s in content):
+                                    if (
+                                        any("covid" in s for s in content)
+                                        or any("corona" in s for s in content)
+                                        or any("impfung" in s for s in content)
+                                    ):
                                         add_data = False
-                                    # fmt: on
 
                                 # Add to the expiring dict unless it is a "Cancel" msg
                                 if mowas_msgtype != "Cancel":

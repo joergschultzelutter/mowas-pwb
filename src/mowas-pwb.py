@@ -71,6 +71,7 @@ if __name__ == "__main__":
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,
+        mowas_localfile,
     ) = get_command_line_params()
 
     # User wants to disable both DAPNET and Telegram?
@@ -318,6 +319,7 @@ if __name__ == "__main__":
                 mowas_dapnet_high_prio_level=mowas_dapnet_high_prio_level,
                 mowas_active_categories=mowas_active_categories,
                 enable_covid_messaging=mowas_enable_covid_content,
+                local_file_name=mowas_localfile,
             )
 
             # Did we find some new message updates that we need to send to the user?
@@ -354,17 +356,23 @@ if __name__ == "__main__":
 
                 # Finally, check if we need to send something via Email
                 if mowas_email_enabled:
-                    logger.info(msg="Preparing Email notifications")
+                    logger.info(msg="Generating Email notifications")
                     success = generate_email_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         smtpimap_email_address=mowas_smtpimap_email_address,
                         smtpimap_email_password=mowas_smtpimap_email_password,
                         mail_recipient=mowas_email_recipient,
+                        smtp_server_address=mowas_smtp_server_address,
+                        smtp_server_port=mowas_smtp_server_port,
                     )
                     logger.info(msg=f"Email message success: {success}")
             else:
                 logger.debug(msg="No new messages found")
+
+            # Exit the loop if we were testing with a local file
+            if mowas_localfile:
+                break
 
             # Finally, go to sleep
             logger.debug(msg=f"Entering sleep mode for {mowas_run_interval} mins...")
