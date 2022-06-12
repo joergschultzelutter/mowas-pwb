@@ -213,7 +213,7 @@ def make_pretty_dapnet_messages(
     # or a reference to a list item has not been specified at all
     # In this case, create an empty list
     if not destination_list:
-        destination_list = [""]
+        destination_list = []
 
     # replace non-permitted APRS characters from the
     # message text
@@ -253,16 +253,19 @@ def make_pretty_dapnet_messages(
                 for msg in string_list:
                     destination_list.append(msg)
     else:  # try to insert
-        # Get very last element from list
-        string_from_list = destination_list[-1]
+        if len(destination_list) > 0:
+            # Get very last element from list
+            string_from_list = destination_list[-1]
 
-        # element + new string > max len? no: add to existing string, else create new element in list
-        if len(string_from_list) + len(message_to_add) + 1 <= max_len:
-            delimiter = ""
-            if len(string_from_list) > 0 and add_sep:
-                delimiter = separator_char
-            string_from_list = string_from_list + delimiter + message_to_add
-            destination_list[-1] = string_from_list
+            # element + new string > max len? no: add to existing string, else create new element in list
+            if len(string_from_list) + len(message_to_add) + 1 <= max_len:
+                delimiter = ""
+                if len(string_from_list) > 0 and add_sep:
+                    delimiter = separator_char
+                string_from_list = string_from_list + delimiter + message_to_add
+                destination_list[-1] = string_from_list
+            else:
+                destination_list.append(message_to_add)
         else:
             destination_list.append(message_to_add)
 
