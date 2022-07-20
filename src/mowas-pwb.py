@@ -241,7 +241,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_term_handler)
 
     # Set up the ExpiringDict for our entries
-    mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=mowas_time_to_live)
+    # User has specified target value in minutes but we need seconds
+    # so let's multiply by 60
+    mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=mowas_time_to_live * 60)
 
     # Check if we need to install/activate the Email garbage collector
     mail_gc_scheduler = None
