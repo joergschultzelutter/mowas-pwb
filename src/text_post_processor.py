@@ -1,5 +1,5 @@
 #
-# mowas-pwb: Text summarizer
+# mowas-pwb: Text post processor
 # Author: Joerg Schultze-Lutter, 2023
 #
 # This program is free software; you can redistribute it and/or modify
@@ -21,36 +21,25 @@
 # text as much as possible, thus rendering the output text to a format that is
 # more compatible with e.g. SMS devices.
 #
-# uses https://github.com/dmmiller612/bert-extractive-summarizer
-#
-from summarizer import Summarizer
+# This module tries to shorten the given input text whereas possible. It
+# acts as a decision tree on which post processor is about to get called.
+# The actual post processiing is done in the various sub sections
+
+from text_summarizer import input_text_summarize
+
+available_processors = {
+    "summarizer": input_text_summarize,
+}
 
 
-def input_text_summarize(input_text: str, **kwargs):
-    """
-    Summarize and abbreviate text
-    ==========
-    input_text: 'str'
-        The text that we want to shorten and
-        abbreviate
-    Returns
-    =======
-    response: 'str'
-        Our abbreviated text
-    """
-
-    # Abbreviate and shorten our text
-    model = Summarizer(reduce_option="max")
-    result = model(input_text)
-    response = "".join(result)
-
-    # failsafe in case no content was returned
-    response = input_text if len(response) == 0 else response
-
-    return response
+def create_text_summary(input_text: str, post_processor: str):
+    if post_processor in available_processors:
+        return available_processors[post_processor](input_text=input_text)
 
 
-# You can run this module if you want to initiate the one-time
-# download of the summarizer modules
 if __name__ == "__main__":
-    print(input_text_summarize("This is a very long text"))
+    print(
+        create_text_summary(
+            input_text="This is a very long text", post_processor="summarizer"
+        )
+    )

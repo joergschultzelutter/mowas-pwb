@@ -11,3 +11,4 @@ geopy>=2.2.0
 maidenhead>=1.6.0
 utm>=0.7.0
 bert-extractive-summarizer>=0.10.1
+torch
