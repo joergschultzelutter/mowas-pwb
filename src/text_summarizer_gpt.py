@@ -23,20 +23,35 @@
 #
 import openai
 from openai import OpenAI
+import logging
 
-# Set your OpenAI API key
-my_api_key = 'YOUR_API_KEY'
+# Set up the global logger variable
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
+)
+logger = logging.getLogger(__name__)
 
-def summarize_text(input_file_path):
-    # Read the text from the input file
-    with open(input_file_path, 'r', encoding='utf-8') as file:
-        input_text = file.read()
 
-    client = OpenAI(
-        # This is the default and can be omitted
-        api_key=my_api_key
-    )
+def text_summarizer_gpt(input_text: str, api_key: str, **kwargs):
+    """
+    Summarize and abbreviate text via OpenAI
+    ==========
+    input_text: 'str'
+        The text that we want to shorten and
+        abbreviate
+    api_key: 'str'
+        OpenAI API Key
+
+    Returns
+    =======
+    response: 'str'
+        Our abbreviated text
+    """
+
+    client = OpenAI(api_key=api_key)
+
     summary = None
+
     try:
         summary = client.chat.completions.create(
             messages=[
@@ -48,20 +63,15 @@ def summarize_text(input_file_path):
             model="gpt-3.5-turbo",
         )
     except openai.APIConnectionError as e:
-        print("The server could not be reached")
-        print(e.__cause__)  # an underlying Exception, likely raised within httpx.
+        logger.error(msg="Unable to connect to OpenAI server")
+        logger.error(e.__cause__)
     except openai.RateLimitError as e:
-        print("A 429 status code was received; we should back off a bit.")
+        logger.error(msg="We have hit the API rate limit")
     except openai.APIStatusError as e:
-        print("Another non-200-range status code was received")
-        print(e.status_code)
-        print(e.response)
+        logger.error(msg=f"HTTP{e.status_code}: {e.response}")
+
     return summary
 
-if __name__ == "__main__":
-    input_file_path = 'your_input_file.txt'  # Replace with the path to your input file
-    output_summary = summarize_text(input_file_path)
 
-    # Print the generated summary
-    print("Generated Summary:")
-    print(output_summary)
+if __name__ == "__main__":
+    pass
