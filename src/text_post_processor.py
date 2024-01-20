@@ -25,21 +25,29 @@
 # acts as a decision tree on which post processor is about to get called.
 # The actual post processiing is done in the various sub sections
 
-from text_summarizer import input_text_summarize
+from text_summarizer_generic import text_summarizer_generic
+from text_summarizer_openai import text_summarizer_openai
+from text_summarizer_palm import text_summarizer_palm
 
 available_processors = {
-    "summarizer": input_text_summarize,
+    "generic": text_summarizer_generic,
+    "openai": text_summarizer_openai,
+    "palm": text_summarizer_palm,
 }
 
 
-def create_text_summary(input_text: str, post_processor: str):
+def create_text_summary(input_text: str, post_processor: str, api_key: str):
     if post_processor in available_processors:
-        return available_processors[post_processor](input_text=input_text)
+        return available_processors[post_processor](
+            input_text=input_text, api_key=api_key
+        )
 
 
 if __name__ == "__main__":
     print(
         create_text_summary(
-            input_text="This is a very long text", post_processor="summarizer"
+            input_text="This is a very long text",
+            post_processor="generic",
+            api_key="MUSS_ICH_NOCH_REINSTELLEN",
         )
     )

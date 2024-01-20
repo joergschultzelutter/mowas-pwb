@@ -1,5 +1,5 @@
 #
-# mowas-pwb: Text summarizer (ChatGPT module)
+# mowas-pwb: Text summarizer (OpenAI / ChatGPT module)
 # Author: Joerg Schultze-Lutter, 2023
 #
 # This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def text_summarizer_gpt(input_text: str, api_key: str, **kwargs):
+def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
     """
     Summarize and abbreviate text via OpenAI
     ==========

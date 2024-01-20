@@ -1,5 +1,5 @@
 #
-# mowas-pwb: Text summarizer
+# mowas-pwb: Generic text summarizer
 # Author: Joerg Schultze-Lutter, 2023
 #
 # This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 from summarizer import Summarizer
 
 
-def input_text_summarize(input_text: str, **kwargs):
+def text_summarizer_generic(input_text: str, **kwargs):
     """
     Summarize and abbreviate text
     ==========
@@ -53,4 +53,4 @@ def input_text_summarize(input_text: str, **kwargs):
 # You can run this module if you want to initiate the one-time
 # download of the summarizer modules
 if __name__ == "__main__":
-    print(input_text_summarize("This is a very long text"))
+    print(text_summarizer_generic("This is a very long text"))
