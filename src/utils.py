@@ -367,14 +367,14 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--generic-full-msg",
+        "--generic-full-msg-config-file",
         default=None,
         type=str,
         help="Config file name for generic full-content messages",
     )
 
     parser.add_argument(
-        "--generic-short-msg",
+        "--generic-short-msg-config-file",
         default=None,
         type=str,
         help="Config file name for generic short content messages",
@@ -507,8 +507,8 @@ def get_command_line_params():
     args = parser.parse_args()
 
     mowas_configfile = args.configfile.name
-    mowas_full_msg_configfile = args.generic_full_msg
-    mowas_short_msg_configfile = args.generic_short_msg
+    mowas_full_msg_configfile = args.generic_full_msg_config_file
+    mowas_short_msg_configfile = args.generic_short_msg_config_file
     mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
