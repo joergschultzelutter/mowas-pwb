@@ -72,6 +72,8 @@ if __name__ == "__main__":
         mowas_enable_covid_content,
         mowas_target_language,
         mowas_localfile,
+        mowas_full_msg_configfile,
+        mowas_short_msg_configfile,
     ) = get_command_line_params()
 
     # User wants to disable both DAPNET and Telegram?
@@ -243,7 +245,9 @@ if __name__ == "__main__":
     # Set up the ExpiringDict for our entries
     # User has specified target value in minutes but we need seconds
     # so let's multiply by 60
-    mowas_message_cache = ExpiringDict(max_len=1000, max_age_seconds=mowas_time_to_live * 60)
+    mowas_message_cache = ExpiringDict(
+        max_len=1000, max_age_seconds=mowas_time_to_live * 60
+    )
 
     # Check if we need to install/activate the Email garbage collector
     mail_gc_scheduler = None
@@ -275,7 +279,6 @@ if __name__ == "__main__":
 
     logger.debug(msg="Entering processing loop...")
     while True:
-
         # Set the program's run interval to default settings
         mowas_run_interval = mowas_standard_run_interval
 

@@ -367,6 +367,20 @@ def get_command_line_params():
     )
 
     parser.add_argument(
+        "--generic-full-msg",
+        default=None,
+        type=str,
+        help="Config file name for generic full-content messages",
+    )
+
+    parser.add_argument(
+        "--generic-short-msg",
+        default=None,
+        type=str,
+        help="Config file name for generic short content messages",
+    )
+
+    parser.add_argument(
         "--disable-dapnet",
         dest="disable_dapnet",
         action="store_true",
@@ -493,6 +507,8 @@ def get_command_line_params():
     args = parser.parse_args()
 
     mowas_configfile = args.configfile.name
+    mowas_full_msg_configfile = args.generic_full_msg
+    mowas_short_msg_configfile = args.generic_short_msg
     mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
@@ -516,6 +532,22 @@ def get_command_line_params():
         if not os.path.isfile(mowas_localfile):
             raise ValueError(
                 f"Local MOWAS test file '{mowas_localfile}' does not exist"
+            )
+
+    # Did the user specify an optional generic full message file?
+    # if yes, check if that file exists
+    if mowas_full_msg_configfile:
+        if not os.path.isfile(mowas_full_msg_configfile):
+            raise ValueError(
+                f"Provided MOWAS full message config file '{mowas_full_msg_configfile}' does not exist"
+            )
+
+    # Did the user specify an optional generic short message file?
+    # if yes, check if that file exists
+    if mowas_short_msg_configfile:
+        if not os.path.isfile(mowas_short_msg_configfile):
+            raise ValueError(
+                f"Provided MOWAS short message config file '{mowas_short_msg_configfile}' does not exist"
             )
 
     # Convert requested call sign to upper case whereas present
@@ -547,6 +579,8 @@ def get_command_line_params():
         mowas_enable_covid_content,
         mowas_target_language,
         mowas_localfile,
+        mowas_full_msg_configfile,
+        mowas_short_msg_configfile,
     )
 
 
