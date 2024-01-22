@@ -55,6 +55,9 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_deepldotcom_api_key = config.get("mowas_config", "deepldotcom_api_key")
         mowas_telegram_bot_token = config.get("mowas_config", "telegram_bot_token")
 
+        mowas_openai_api_key = config.get("mowas_config", "openai_api_key")
+        mowas_palm_api_key = config.get("mowas_config", "palm_api_key")
+
         mowas_smtpimap_email_address = config.get(
             "mowas_config", "smtpimap_email_address"
         )
@@ -119,6 +122,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_smtp_server_port = 0
         mowas_smtp_server_address = mowas_imap_server_address = None
         mowas_imap_mailbox_name = mowas_deepldotcom_api_key = None
+        mowas_openai_api_key = mowas_palm_api_key = None
         success = False
 
     return (
@@ -138,6 +142,8 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         mowas_imap_mailbox_name,
         mowas_imap_mail_retention_max_days,
         mowas_deepldotcom_api_key,
+        mowas_openai_api_key,
+        mowas_palm_api_key,
     )
 
 
@@ -473,6 +479,14 @@ def get_command_line_params():
     )
 
     parser.add_argument(
+        "-text-summarizer",
+        choices={"generic", "openai", "palm"},
+        default="generic",
+        type=str.lower,
+        help="Text summarizer post processor",
+    )
+
+    parser.add_argument(
         "--email-recipient",
         default=None,
         dest="email_recipient",
@@ -525,6 +539,7 @@ def get_command_line_params():
     mowas_email_recipient = args.email_recipient
     mowas_enable_covid_content = args.enable_covid_content
     mowas_target_language = args.target_language
+    mowas_text_summarizer = args.text_summarizer
 
     # Did the user specify an optional JSON file for testing?
     # if yes, check if that file exists
@@ -581,6 +596,7 @@ def get_command_line_params():
         mowas_localfile,
         mowas_full_msg_configfile,
         mowas_short_msg_configfile,
+        mowas_text_summarizer,
     )
 
 

@@ -74,6 +74,7 @@ if __name__ == "__main__":
         mowas_localfile,
         mowas_full_msg_configfile,
         mowas_short_msg_configfile,
+        mowas_text_summarizer,
     ) = get_command_line_params()
 
     # User wants to disable both DAPNET and Telegram?
@@ -101,6 +102,8 @@ if __name__ == "__main__":
         mowas_imap_mailbox_name,
         mowas_imap_mail_retention_max_days,
         mowas_deepldotcom_api_key,
+        mowas_openai_api_key,
+        mowas_palm_api_key,
     ) = get_program_config_from_file(config_filename=mowas_configfile)
     if not success:
         logger.info(msg="Error while parsing the program config file; exiting...")
@@ -108,6 +111,8 @@ if __name__ == "__main__":
 
     # Define some boolean hints on what is enabled and what is not
     # fmt: off
+    mowas_openai_enabled = False if mowas_openai_api_key == "NOT_CONFIGURED" else True
+    mowas_palm_enabled = False if mowas_palm_api_key == "NOT_CONFIGURED" else True
     mowas_aprsdotfi_enabled = False if mowas_aprsdotfi_api_key == "NOT_CONFIGURED" else True
     mowas_dapnet_enabled = False if mowas_dapnet_login_callsign == "NOT_CONFIGURED" else True
     mowas_telegram_enabled = False if mowas_telegram_bot_token == "NOT_CONFIGURED" else True
@@ -178,6 +183,20 @@ if __name__ == "__main__":
     success, warncell_data = read_warncell_info()
     if not success:
         logger.info("Cannot read Warncell data from the DWD site; cannot continue")
+        exit(0)
+
+    # Check if the user wants to use OpenAI as port processor: do we have an API key?
+    if mowas_text_summarizer == "openai" and not mowas_openai_enabled:
+        logger.info(
+            msg="If you want to use the OpenAI post processor, then you need to specify an API key in the config file. Exiting."
+        )
+        exit(0)
+
+    # Check if the user wants to use Google PaLM as port processor: do we have an API key?
+    if mowas_text_summarizer == "palm" and not mowas_palm_enabled:
+        logger.info(
+            msg="If you want to use the Google PaLM post processor, then you need to specify an API key in the config file. Exiting."
+        )
         exit(0)
 
     #

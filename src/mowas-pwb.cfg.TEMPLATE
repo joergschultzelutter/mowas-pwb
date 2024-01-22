@@ -62,3 +62,13 @@ mowas_active_categories = TEMPEST,FLOOD,FLOOD_OLD,WILDFIRE,EARTHQUAKE,DISASTERS
 # You can register for a free API access key here:
 # https://www.deepl.com/pro-api?cta=header-pro-api
 deepldotcom_api_key = NOT_CONFIGURED
+
+# OpenAI ChatGPT access key. Required if you want mowas-pwb to send messages
+# via an abbreviated Apprise message config file with text summarizer
+# option "openai", otherwise optional
+openai_api_key = NOT_CONFIGURED
+
+# OpenAI ChatGPT access key. Required if you want mowas-pwb to send messages
+# via an abbreviated Apprise message config file with text summarizer
+# option "palm", otherwise optional
+palm_api_key = NOT_CONFIGURED
