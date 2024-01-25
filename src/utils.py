@@ -168,6 +168,22 @@ def signal_term_handler(signal_number, frame):
     sys.exit(0)
 
 
+def does_file_exist(file_name: str):
+    """
+    Checks if the given file exists. Returns True/False.
+
+    Parameters
+    ==========
+    file_name: str
+                    our file name
+    Returns
+    =======
+    status: bool
+        True /False
+    """
+    return os.path.isfile(file_name)
+
+
 def make_pretty_dapnet_messages(
     message_to_add: str,
     destination_list: list = None,
@@ -544,7 +560,7 @@ def get_command_line_params():
     # Did the user specify an optional JSON file for testing?
     # if yes, check if that file exists
     if mowas_localfile:
-        if not os.path.isfile(mowas_localfile):
+        if not does_file_exist(mowas_localfile):
             raise ValueError(
                 f"Local MOWAS test file '{mowas_localfile}' does not exist"
             )
@@ -552,7 +568,7 @@ def get_command_line_params():
     # Did the user specify an optional generic full message file?
     # if yes, check if that file exists
     if mowas_full_msg_configfile:
-        if not os.path.isfile(mowas_full_msg_configfile):
+        if not does_file_exist(mowas_full_msg_configfile):
             raise ValueError(
                 f"Provided MOWAS full message config file '{mowas_full_msg_configfile}' does not exist"
             )
@@ -560,7 +576,7 @@ def get_command_line_params():
     # Did the user specify an optional generic short message file?
     # if yes, check if that file exists
     if mowas_short_msg_configfile:
-        if not os.path.isfile(mowas_short_msg_configfile):
+        if not does_file_exist(mowas_short_msg_configfile):
             raise ValueError(
                 f"Provided MOWAS short message config file '{mowas_short_msg_configfile}' does not exist"
             )

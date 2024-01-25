@@ -21,6 +21,7 @@ import logging
 from utils import (
     convert_text_to_plain_ascii,
     get_program_config_from_file,
+    does_file_exist,
 )
 from warncell import read_warncell_info
 from telegramdotcom import send_telegram_message
@@ -159,7 +160,6 @@ def generate_telegram_messages(
     mowas_telegram_bot_token: str,
     telegram_target_id: int,
 ):
-
     """
     Generates Telegram messages and triggers transmission to the user
 
@@ -637,6 +637,22 @@ REPLACE_HTML_ADDRESSES
         )
 
     logger.debug(msg="Finished Email message processing")
+    return success
+
+
+def generate_generic_apprise_message(
+    mowas_messages_to_send: dict,
+    warncell_data: dict,
+    apprise_config_file: str,
+):
+    success = True
+
+    if not does_file_exist(apprise_config_file):
+        logger.error(
+            msg=f"Apprise config file {apprise_config_file} does not exist; aborting"
+        )
+        return False
+
     return success
 
 

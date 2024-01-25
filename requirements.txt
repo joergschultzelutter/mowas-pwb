@@ -14,3 +14,4 @@ bert-extractive-summarizer>=0.10.1
 torch
 openai
 google.generativeai
+apprise>=1.7.1
