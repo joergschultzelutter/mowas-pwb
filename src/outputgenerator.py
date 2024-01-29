@@ -32,7 +32,7 @@ from datetime import datetime
 # from mowas import process_mowas_data
 from expiringdict import ExpiringDict
 from test_data_generator import generate_test_data
-
+import apprise
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -652,6 +652,36 @@ def generate_generic_apprise_message(
             msg=f"Apprise config file {apprise_config_file} does not exist; aborting"
         )
         return False
+
+    # Create the Apprise instance
+    apobj = apprise.Apprise()
+
+    # Create an Config instance
+    config = apprise.AppriseConfig()
+
+    # Add a configuration source:
+    config.add(apprise_config_file)
+
+    # Make sure to add our config into our apprise object
+    apobj.add(config)
+
+    # Create the message timestamp
+    utc_create_time = datetime.utcnow()
+    msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
+
+    # Generate the message as HTML content
+    apprise_header = (
+        f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>"
+        + newline
+        + newline
+    )
+
+    # Send the notification
+    apobj.notify(
+        body="Hello World",
+        title=apprise_header,
+        tag="all",
+    )
 
     return success
 
