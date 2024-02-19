@@ -403,27 +403,6 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--disable-dapnet",
-        dest="disable_dapnet",
-        action="store_true",
-        help="Disables any messages to be sent out to DAPNET even if the config file contains proper credentials",
-    )
-
-    parser.add_argument(
-        "--disable-telegram",
-        dest="disable_telegram",
-        action="store_true",
-        help="Disables any messages to be sent out to Telegram even if the config file contains proper credentials",
-    )
-
-    parser.add_argument(
-        "--disable-email",
-        dest="disable_email",
-        action="store_true",
-        help="Disables any messages to be sent out to the given email even if the config file contains proper credentials",
-    )
-
-    parser.add_argument(
         "--generate-test-message",
         dest="generate_test_message",
         action="store_true",
@@ -544,9 +523,6 @@ def get_command_line_params():
     mowas_emergency_run_interval = args.emergency_run_interval
     mowas_dapnet_destination_callsign = args.dapnet_destination_callsign
     mowas_telegram_destination_id = args.telegram_destination_id
-    mowas_disable_telegram = args.disable_telegram
-    mowas_disable_dapnet = args.disable_dapnet
-    mowas_disable_email = args.disable_email
     mowas_follow_the_ham = args.follow_the_ham
     mowas_generate_test_message = args.generate_test_message
     mowas_warning_level = args.warning_level
@@ -598,14 +574,11 @@ def get_command_line_params():
         mowas_emergency_run_interval,
         mowas_dapnet_destination_callsign,
         mowas_telegram_destination_id,
-        mowas_disable_telegram,
-        mowas_disable_dapnet,
         mowas_follow_the_ham,
         mowas_generate_test_message,
         mowas_warning_level,
         mowas_time_to_live,
         mowas_dapnet_high_prio_level,
-        mowas_disable_email,
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,

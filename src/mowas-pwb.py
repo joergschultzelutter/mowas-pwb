@@ -60,14 +60,11 @@ if __name__ == "__main__":
         mowas_emergency_run_interval,
         mowas_dapnet_destination_callsign,
         mowas_telegram_destination_id,
-        mowas_disable_telegram,
-        mowas_disable_dapnet,
         mowas_follow_the_ham,
         mowas_generate_test_message,
         mowas_warning_level,
         mowas_time_to_live,
         mowas_dapnet_high_prio_level,
-        mowas_disable_email,
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,
@@ -77,11 +74,15 @@ if __name__ == "__main__":
         mowas_text_summarizer,
     ) = get_command_line_params()
 
-    # User wants to disable both DAPNET and Telegram?
-    if mowas_disable_dapnet and mowas_disable_telegram and mowas_disable_email:
-        logger.info(
-            msg="User has disabled all output options (DAPNET, email and Telegram); exiting..."
-        )
+    # Check if the user has specified ANY messaging configuration
+    if (
+        mowas_email_recipient == None
+        and mowas_dapnet_destination_callsign == None
+        and mowas_telegram_destination_id == 0
+        and mowas_short_msg_configfile == None
+        and mowas_full_msg_configfile == None
+    ):
+        logger.info(msg="User has disabled all output options; exiting...")
         exit(0)
 
     # get our configuration data from the external configuration file
