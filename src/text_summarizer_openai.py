@@ -24,6 +24,7 @@
 import openai
 from openai import OpenAI
 import logging
+import json
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -56,12 +57,21 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
         summary = client.chat.completions.create(
             messages=[
                 {
+                    "role": "system",
+                    "content": "Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist, eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen. Die Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. Deine Aufgabe ist es, den Text soweit eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen, HTLML-Tags zu entfernen und nur diese Stichpunkte zurückzugeben. Der ausgehende Text wird später an Pager und Mobiltelefone übertragen; es ist somit von großem Intereesse, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird und andererseits alle für den Empfänger relevanten Daten beinhaltet.",
+                },
+                {
                     "role": "user",
-                    "content": f"Summarize this: {input_text}",
-                }
+                    "content": f"Hier kommt die Nachricht: {input_text}. Fasse diese bitte wie beschrieben so kurz wie irgend möglich zusammen.",
+                },
             ],
             model="gpt-3.5-turbo",
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            max_tokens=2000,
         )
+        response_json = summary.choices[0].message.content
+        data = json.loads(response_json)
     except openai.APIConnectionError as e:
         logger.error(msg="Unable to connect to OpenAI server")
         logger.error(e.__cause__)
