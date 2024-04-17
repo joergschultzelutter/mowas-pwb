@@ -28,8 +28,10 @@
 from text_summarizer_generic import text_summarizer_generic
 from text_summarizer_openai import text_summarizer_openai
 from text_summarizer_palm import text_summarizer_palm
+from text_summarizer_internal import text_summarizer_internal
 
 available_processors = {
+    "internal": text_summarizer_internal,
     "generic": text_summarizer_generic,
     "openai": text_summarizer_openai,
     "palm": text_summarizer_palm,

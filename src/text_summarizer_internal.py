@@ -1,5 +1,5 @@
 #
-# mowas-pwb: Generic text summarizer
+# mowas-pwb: Internal text summarizer
 # Author: Joerg Schultze-Lutter, 2023
 #
 # This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,9 @@
 # text as much as possible, thus rendering the output text to a format that is
 # more compatible with e.g. SMS devices.
 #
-# uses https://github.com/dmmiller612/bert-extractive-summarizer
-#
-from summarizer import Summarizer
 
 
-def text_summarizer_generic(input_text: str, **kwargs):
+def text_summarizer_internal(input_text: str, **kwargs):
     """
     Summarize and abbreviate text
     ==========
@@ -39,16 +36,8 @@ def text_summarizer_generic(input_text: str, **kwargs):
         Our abbreviated text
     """
 
-    # Abbreviate and shorten our text
-    model = Summarizer(reduce_option="max")
-    result = model(input_text)
-    response = "".join(result)
-
-    # failsafe in case no content was returned
-    response = input_text if len(response) == 0 else response
-
-    return response
+    return input_text
 
 
 if __name__ == "__main__":
-    print(text_summarizer_generic("This is a very long text"))
+    print(text_summarizer_internal("This is a very long text"))
