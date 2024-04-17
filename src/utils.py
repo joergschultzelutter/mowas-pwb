@@ -476,7 +476,7 @@ def get_command_line_params():
     parser.add_argument(
         "-text-summarizer",
         choices={"generic", "internal", "openai", "palm"},
-        default="generic",
+        default="internal",
         type=str.lower,
         help="Text summarizer post processor - shortens the text for mobile devices. Choose from these options: internal, generic, openai, palm",
     )

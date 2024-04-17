@@ -141,9 +141,11 @@ if __name__ == "__main__":
         not mowas_dapnet_enabled
         and not mowas_telegram_enabled
         and not mowas_email_enabled
+        and not mowas_full_msg_configfile
+        and not mowas_short_msg_configfile
     ):
         logger.info(
-            msg="No target credentials (DAPNET, Email or Telegram) configured or no messaging destinations specified; exiting ..."
+            msg="No target credentials (DAPNET, Email, Telegram, or Apprise full/short msg) configured or no messaging destinations specified; exiting ..."
         )
         exit(0)
 

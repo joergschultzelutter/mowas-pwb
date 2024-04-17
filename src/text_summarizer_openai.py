@@ -51,36 +51,53 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
 
     client = OpenAI(api_key=api_key)
 
-    summary = None
+    system_role_description = """Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist,  
+    eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen. Die 
+    Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten 
+    in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. 
+    Deine Aufgabe ist es, den Text soweit eingehenden Text soweit wie möglich idealerweise bis 
+    auf Stichpunktebene zu verkürzen, HTLML-Tags sowie -Links zu entfernen und nur diese Stichpunkte 
+    zurückzugeben. Der ausgehende Text wird später an Pager und Mobiltelefone übertragen; es ist somit 
+    von großer Wichtigkeit, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird 
+    und andererseits alle für den Empfänger relevanten Daten beinhaltet."""
+
+    user_content = f"""Hier kommt die Nachricht:\r\n----\r\n{input_text}\r\n----"""
+
+    result = None
 
     try:
         summary = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": "Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist, eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen. Die Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. Deine Aufgabe ist es, den Text soweit eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen, HTLML-Tags zu entfernen und nur diese Stichpunkte zurückzugeben. Der ausgehende Text wird später an Pager und Mobiltelefone übertragen; es ist somit von großem Intereesse, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird und andererseits alle für den Empfänger relevanten Daten beinhaltet.",
+                    "content": system_role_description,
                 },
                 {
                     "role": "user",
-                    "content": f"Hier kommt die Nachricht: {input_text}. Fasse diese bitte wie beschrieben so kurz wie irgend möglich zusammen.",
+                    "content": user_content,
                 },
             ],
             model="gpt-3.5-turbo",
-            response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=2000,
+            max_tokens=2048,
         )
-        response_json = summary.choices[0].message.content
-        data = json.loads(response_json)
+        result = summary.choices[0].message.content
     except openai.APIConnectionError as e:
         logger.error(msg="Unable to connect to OpenAI server")
         logger.error(e.__cause__)
+        result = None
     except openai.RateLimitError as e:
         logger.error(msg="We have hit the API rate limit")
+        result = None
     except openai.APIStatusError as e:
         logger.error(msg=f"HTTP{e.status_code}: {e.response}")
+        result = None
+    except Exception as e:
+        logger.error(msg="Other exception occurred")
+        logger.error(e.__cause__)
+        result = None
 
-    return summary
+    return result
 
 
 if __name__ == "__main__":
