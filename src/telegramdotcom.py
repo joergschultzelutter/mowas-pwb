@@ -19,7 +19,9 @@
 #
 
 import logging
-from telegram import ParseMode, Bot, error
+from telegram import Bot, error
+from telegram.constants import ParseMode
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -83,9 +85,9 @@ def send_telegram_message(
             if static_image:
                 mybot.send_photo(chat_id=user_id, photo=static_image)
 
-        except error.Unauthorized:
+        except error.Forbidden:
             logger.info(
-                msg="Cannot send the message to your Telegram account (reason:unauthorized)!"
+                msg="Cannot send the message to your Telegram account (reason:forbidden)!"
             )
             logger.info(
                 msg="Check your configured credentials. Ensure to have established an INITIAL connection between your destination account and your bot account!"
@@ -93,6 +95,7 @@ def send_telegram_message(
             success = False
         except Exception as ex:
             logger.info(msg="Unknown error occurred while sending data to Telegram")
+            logger.info(msg=ex.__cause__)
             success = False
 
     else:
