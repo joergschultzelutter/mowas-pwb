@@ -671,9 +671,7 @@ def generate_generic_apprise_message(
 
     # Generate the message as HTML content
     apprise_header = (
-        f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>"
-        + newline
-        + newline
+        f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
     )
 
     # Send the notification

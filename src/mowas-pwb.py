@@ -30,6 +30,7 @@ from outputgenerator import (
     generate_dapnet_messages,
     generate_email_messages,
     generate_telegram_messages,
+    generate_generic_apprise_message,
 )
 from aprsdotfi import get_position_on_aprsfi
 from telegramdotcom import send_telegram_message
@@ -43,6 +44,7 @@ import apscheduler.schedulers.base
 from mail import imap_garbage_collector
 from test_data_generator import generate_test_data
 import copy
+import asyncio
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -255,6 +257,29 @@ if __name__ == "__main__":
                 mail_recipient=mowas_email_recipient,
             )
             logger.info(msg=f"Email message success: {success}")
+
+        if mowas_full_msg_configfile:
+            logger.info(
+                msg=f"Sending mowas-pwb test message to MOWAS 'Full message' config file {mowas_full_msg_configfile}"
+            )
+            success = generate_generic_apprise_message(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                apprise_config_file=mowas_full_msg_configfile,
+            )
+            logger.info(msg=f"Full message success: {success}")
+
+        if mowas_short_msg_configfile:
+            logger.info(
+                msg=f"Sending mowas-pwb test message to MOWAS 'Short message' config file {mowas_short_msg_configfile}"
+            )
+            success = generate_generic_apprise_message(
+                mowas_messages_to_send=mowas_messages_to_send,
+                warncell_data=warncell_data,
+                apprise_config_file=mowas_short_msg_configfile,
+            )
+            logger.info(msg=f"Short message success: {success}")
+
         logger.info(msg="Configuration test cycle complete; exiting")
         exit(0)
 

@@ -134,3 +134,5 @@ venv
 mowas-pwb.cfg
 /src/modules/gefahr06.txt
 *.png
+full_msg.yml
+short_msg.yml
