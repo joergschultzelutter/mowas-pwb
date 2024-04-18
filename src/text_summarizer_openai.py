@@ -79,7 +79,7 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
             ],
             model="gpt-3.5-turbo",
             temperature=0.7,
-            max_tokens=2048,
+            max_tokens=1000,
         )
         result = summary.choices[0].message.content
     except openai.APIConnectionError as e:
