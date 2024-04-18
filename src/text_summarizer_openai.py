@@ -51,7 +51,7 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
 
     client = OpenAI(api_key=api_key)
 
-    system_role_description = """Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist,  
+    objective = """Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist,  
     eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen. Die 
     Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten 
     in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. 
@@ -61,7 +61,7 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
     von großer Wichtigkeit, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird 
     und andererseits alle für den Empfänger relevanten Daten beinhaltet."""
 
-    user_content = f"""Hier kommt die Nachricht:\r\n----\r\n{input_text}\r\n----"""
+    user_content = f"Hier kommt die Nachricht:\r\n----\r\n{input_text}\r\n----"
 
     result = None
 
@@ -70,7 +70,7 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
             messages=[
                 {
                     "role": "system",
-                    "content": system_role_description,
+                    "content": objective,
                 },
                 {
                     "role": "user",

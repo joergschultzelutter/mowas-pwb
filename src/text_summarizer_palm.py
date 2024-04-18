@@ -30,13 +30,13 @@ def _summarize_text(
 ):
     palm.configure(api_key=api_key)
 
-    result = palm.generate_text(
+    response = palm.generate_text(
         model=model,
         prompt=content,
         temperature=temp,
         max_output_tokens=max_output_tokens,
     )
-    return result
+    return response.result
 
 
 def text_summarizer_palm(input_text: str, api_key: str, **kwargs):
@@ -55,14 +55,25 @@ def text_summarizer_palm(input_text: str, api_key: str, **kwargs):
         Our abbreviated text
     """
 
-    temp = 0.6
-    max_output_tokens = 600
+    temp = 0.7
+    max_output_tokens = 1000
     model = "models/text-bison-001"
-    objective = "Summarize text: "
+
+    objective = """Du bist ein hilfreicher AI-Assistent, der darauf spezialisiert ist,  
+    eingehenden Text soweit wie möglich idealerweise bis auf Stichpunktebene zu verkürzen. Die 
+    Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten 
+    in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. 
+    Deine Aufgabe ist es, den Text soweit eingehenden Text soweit wie möglich idealerweise bis 
+    auf Stichpunktebene zu verkürzen, HTLML-Tags sowie -Links zu entfernen und nur diese Stichpunkte 
+    zurückzugeben. Der ausgehende Text wird später an Pager und Mobiltelefone übertragen; es ist somit 
+    von großer Wichtigkeit, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird 
+    und andererseits alle für den Empfänger relevanten Daten beinhaltet."""
+
+    user_content = f"Hier kommt die Nachricht:\r\n----\r\n{input_text}\r\n----"
 
     response = _summarize_text(
         model=model,
-        content=f"{objective} {input_text}",
+        content=f"{objective} {user_content}",
         temp=temp,
         max_output_tokens=max_output_tokens,
         api_key=api_key,
