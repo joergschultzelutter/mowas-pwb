@@ -645,13 +645,133 @@ def generate_generic_apprise_message(
     warncell_data: dict,
     apprise_config_file: str,
 ):
-    success = True
+    """
+    Generates Apprise messages and triggers transmission to the user
+
+    Parameters
+    ==========
+    mowas_messages_to_send : 'dict'
+        dictionary, containing all messages that are to be sent to the end user
+    warncell_data: 'dict'
+        warncell data; these are references to German municipal areas, cities etc
+    apprise_config_file: 'str'
+        Apprise Yaml configuration file
+    Returns
+    =======
+    success: 'bool'
+        True if successful
+    """
+
+    # predefine the output value
+    success = False
+
+    logger.debug(msg="Starting Apprise message processing")
 
     if not does_file_exist(apprise_config_file):
         logger.error(
             msg=f"Apprise config file {apprise_config_file} does not exist; aborting"
         )
         return False
+
+    # We want multi-line HTML messages in Telegram. <br> does NOT work
+    newline = "\n"
+
+    for mowas_message_id in mowas_messages_to_send:
+        headline = mowas_messages_to_send[mowas_message_id]["headline"]
+        urgency = mowas_messages_to_send[mowas_message_id]["urgency"]
+        severity = mowas_messages_to_send[mowas_message_id]["severity"]
+        description = mowas_messages_to_send[mowas_message_id]["description"]
+        contact = mowas_messages_to_send[mowas_message_id]["contact"]
+        instruction = mowas_messages_to_send[mowas_message_id]["instruction"]
+        sent = mowas_messages_to_send[mowas_message_id]["sent"]
+        msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
+        areas = mowas_messages_to_send[mowas_message_id]["areas"]
+        geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
+        dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
+        coords_matching_latlon = mowas_messages_to_send[mowas_message_id][
+            "coords_matching_latlon"
+        ]
+
+        # get the rendered image (output value will be 'None' in case it cannot be rendered)
+        html_image = mowas_messages_to_send[mowas_message_id]["static_image"]
+
+        # did the user request translated content?
+        if "lang" in mowas_messages_to_send[mowas_message_id]:
+            # yes; get the translated content
+            # fmt: off
+            lang_headline = mowas_messages_to_send[mowas_message_id]["lang_headline"]
+            lang_description = mowas_messages_to_send[mowas_message_id]["lang_description"]
+            lang_instruction = mowas_messages_to_send[mowas_message_id]["lang_instruction"]
+            lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
+            # fmt: on
+
+            # and amend out target fields
+            headline = f"{lang_headline} (<i>{headline}</i>)"
+            description = f"{lang_description} (<i>{description}</i>)"
+            instruction = f"{lang_instruction} (<i>{instruction}</i>)"
+            contact = f"{lang_contact} (<i>{contact}</i>)"
+
+        # Create the message timestamp
+        utc_create_time = datetime.utcnow()
+        msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
+
+        # Generate the message as HTML content
+        apprise_message = (
+            f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>"
+            + newline
+            + newline
+        )
+
+        apprise_message = (
+            apprise_message + f"<b>Message headline:</b> {headline}" + newline + newline
+        )
+
+        apprise_message = apprise_message + "<u><i>Message details</i></u>" + newline
+
+        apprise_message = (
+            apprise_message + f"<b>Description:</b> {description}" + newline
+        )
+        apprise_message = (
+            apprise_message + f"<b>Instructions:</b> {instruction}" + newline
+        )
+        apprise_message = apprise_message + f"<b>Contact:</b> {contact}" + newline
+
+        apprise_message = apprise_message + f"<b>Message Type:</b> {msgtype}" + newline
+        apprise_message = apprise_message + f"<b>Urgency:</b> {urgency}" + newline
+        apprise_message = apprise_message + f"<b>Severity:</b> {severity}" + newline
+        apprise_message = (
+            apprise_message + f"<b>Timestamp:</b> {sent}" + newline + newline
+        )
+
+        apprise_message = apprise_message + "<u><i>Address details</i></u>" + newline
+
+        for coords in coords_matching_latlon:
+            latitude = coords["latitude"]
+            longitude = coords["longitude"]
+            address = coords["address"]
+            utm = coords["utm"]
+            maidenhead = coords["maidenhead"]
+            aprs = coords["aprs_coordinates"]
+
+            apprise_message = (
+                apprise_message
+                + f"<b>Lat / Lon:</b> <pre>{latitude}</pre> / <pre>{longitude}</pre>"
+            )
+            if aprs:
+                apprise_message = (
+                    apprise_message
+                    + f" (<i>This is the user's latest APRS position; see green pin on map</i>)"
+                )
+            apprise_message = apprise_message + newline
+            apprise_message = (
+                apprise_message + f"<b>UTM:</b> <pre>{utm}</pre>" + newline
+            )
+            apprise_message = (
+                apprise_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
+            )
+            apprise_message = (
+                apprise_message + f"<b>Address:</b> {address}" + newline + newline
+            )
 
     # Create the Apprise instance
     apobj = apprise.Apprise()
@@ -675,12 +795,9 @@ def generate_generic_apprise_message(
     )
 
     # Send the notification
-    apobj.notify(
-        body="Hello World",
-        title=apprise_header,
-        tag="all",
-    )
+    apobj.notify(body="Hello World", title=apprise_header, tag="all", attach=html_image)
 
+    logger.debug(msg="Finished Apprise message processing")
     return success
 
 
