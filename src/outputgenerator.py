@@ -24,8 +24,6 @@ from utils import (
     does_file_exist,
 )
 from warncell import read_warncell_info
-from telegramdotcom import send_telegram_message
-from dapnet import send_dapnet_message
 from mail import send_email_message
 from datetime import datetime
 
@@ -200,7 +198,7 @@ REPLACE_HTML_ADDRESSES
         msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
-        dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
+        high_prio = mowas_messages_to_send[mowas_message_id]["high_prio"]
         latlon_polygon = mowas_messages_to_send[mowas_message_id]["latlon_polygon"]
         # fmt: off
         coords_matching_latlon = mowas_messages_to_send[mowas_message_id]["coords_matching_latlon"]
@@ -411,7 +409,7 @@ def generate_generic_apprise_message(
         )
         return False
 
-    # We want multi-line HTML messages in Telegram. <br> does NOT work
+    # We want multi-line HTML messages. <br> does not work in e.g. Telegram
     newline = "\n"
 
     # Create the Apprise instance
@@ -438,7 +436,7 @@ def generate_generic_apprise_message(
         msgtype = mowas_messages_to_send[mowas_message_id]["msgtype"]
         areas = mowas_messages_to_send[mowas_message_id]["areas"]
         geocodes = mowas_messages_to_send[mowas_message_id]["geocodes"]
-        dapnet_high_prio = mowas_messages_to_send[mowas_message_id]["dapnet_high_prio"]
+        high_prio = mowas_messages_to_send[mowas_message_id]["high_prio"]
         coords_matching_latlon = mowas_messages_to_send[mowas_message_id][
             "coords_matching_latlon"
         ]
@@ -525,9 +523,18 @@ def generate_generic_apprise_message(
                 f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
             )
 
+            # Set Apprise's notify icon based on the message's priority
+            notify_type = (
+                apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
+            )
+
             # Send the notification
             apobj.notify(
-                body=apprise_message, title=apprise_header, tag="all", attach=html_image
+                body=apprise_message,
+                title=apprise_header,
+                tag="all",
+                attach=html_image,
+                notify_type=notify_type,
             )
 
     logger.debug(msg="Finished Apprise message processing")

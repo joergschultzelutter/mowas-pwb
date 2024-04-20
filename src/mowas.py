@@ -365,7 +365,7 @@ def process_mowas_data(
                             areas_matching_latlon = []
                             areas_matching_latlon_abbrev = (
                                 []
-                            )  # Abbreviated version for DAPNET as we only have 80 chars
+                            )  # Abbreviated version for SMS-type messages
                             geocodes_matching_latlon = []
                             coords_matching_latlon = []
                             latlon_array = []
