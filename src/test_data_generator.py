@@ -231,13 +231,13 @@ def generate_test_data():
     ]
 
     # render the image
-    image = render_png_map(
+    image_file_name = render_png_map(
         polygon_area=latlon_polygon,
         monitoring_positions=coords_matching_latlon,
         aprs_latitude=51.81901,
         aprs_longitude=9.5139941,
     )
-    target_dict["MOWAS-BEISPIEL-MELDUNG"]["static_image"] = image
+    target_dict["MOWAS-BEISPIEL-MELDUNG"]["static_image"] = image_file_name
     return target_dict
 
 

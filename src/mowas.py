@@ -314,7 +314,6 @@ def process_mowas_data(
                         # Future program versions may also need to process elements 2..n
                         # in case they are present.
                         if len(element["info"]) > 0:
-
                             # Get the Severity
                             mowas_severity = element["info"][0]["severity"]
 
@@ -437,7 +436,6 @@ def process_mowas_data(
                                         # We have a match? Then let's remember what we have
                                         # Try to shorten the area names as this string is rather lengthy
                                         if area_desc not in areas_matching_latlon:
-
                                             area_desc_abbrev = area_desc.replace(
                                                 "Gemeinde/Stadt: ", "", 1
                                             )
@@ -641,7 +639,6 @@ def process_mowas_data(
                                 # This code assumes that MOWAS uses unique message identifiers across
                                 # its various categories
                                 if add_data:
-
                                     # Check if we have already received this message
                                     if mowas_identifier not in mowas_messages_to_send:
                                         # No - then let's add it
@@ -686,7 +683,7 @@ def process_mowas_data(
         coords_matching_latlon = existing_message["coords_matching_latlon"]
 
         # render the image
-        image = render_png_map(
+        image_file_name = render_png_map(
             polygon_area=latlon_polygon,
             monitoring_positions=coords_matching_latlon,
             aprs_latitude=aprs_latitude,
@@ -694,7 +691,7 @@ def process_mowas_data(
         )
 
         # and write it back to our dictionary
-        existing_message["static_image"] = image
+        existing_message["static_image"] = image_file_name
         mowas_messages_to_send[mowas_identifier] = existing_message
 
     # Return the expiring cache and our messages to the user
