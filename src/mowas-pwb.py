@@ -78,16 +78,16 @@ if __name__ == "__main__":
         mowas_enable_covid_content,
         mowas_target_language,
         mowas_localfile,
-        mowas_full_msg_configfile,
-        mowas_short_msg_configfile,
+        mowas_messenger_configfile,
+        mowas_sms_messenger_configfile,
         mowas_text_summarizer,
     ) = get_command_line_params()
 
     # Check if the user has specified ANY messaging configuration
     if (
         mowas_email_recipient == None
-        and mowas_short_msg_configfile == None
-        and mowas_full_msg_configfile == None
+        and mowas_sms_messenger_configfile == None
+        and mowas_messenger_configfile == None
     ):
         logger.info(msg="User has disabled all output options; exiting...")
         exit(0)
@@ -130,8 +130,8 @@ if __name__ == "__main__":
 
     if (
         mowas_email_enabled
-        and not mowas_full_msg_configfile
-        and not mowas_short_msg_configfile
+        and not mowas_sms_messenger_configfile
+        and not mowas_messenger_configfile
     ):
         logger.info(
             msg="No messenger target credentials configured or no messaging destinations specified; exiting ..."
@@ -218,27 +218,27 @@ if __name__ == "__main__":
             )
             logger.info(msg=f"Email message success: {success}")
 
-        if mowas_full_msg_configfile:
+        if mowas_messenger_configfile:
             logger.info(
-                msg=f"Sending mowas-pwb test message to MOWAS 'Full message' config file {mowas_full_msg_configfile}"
+                msg=f"Sending mowas-pwb test message to MOWAS 'regular' config file {mowas_messenger_configfile}"
             )
             success = generate_generic_apprise_message(
                 mowas_messages_to_send=mowas_messages_to_send,
                 warncell_data=warncell_data,
-                apprise_config_file=mowas_full_msg_configfile,
+                apprise_config_file=mowas_messenger_configfile,
             )
             logger.info(msg=f"Full message success: {success}")
 
-        if mowas_short_msg_configfile:
+        if mowas_sms_messenger_configfile:
             logger.info(
-                msg=f"Sending mowas-pwb test message to MOWAS 'Short message' config file {mowas_short_msg_configfile}"
+                msg=f"Sending mowas-pwb test message to MOWAS 'SMS' config file {mowas_sms_messenger_configfile}"
             )
             success = generate_generic_apprise_message(
                 mowas_messages_to_send=mowas_messages_to_send,
                 warncell_data=warncell_data,
-                apprise_config_file=mowas_short_msg_configfile,
+                apprise_config_file=mowas_sms_messenger_configfile,
             )
-            logger.info(msg=f"Short message success: {success}")
+            logger.info(msg=f"SMS message success: {success}")
 
         # Remove all local image files
         image_garbage_collector(mowas_messages_to_send=mowas_messages_to_send)
@@ -361,24 +361,24 @@ if __name__ == "__main__":
                     logger.debug(msg=f"Email message success: {success}")
 
                 # Check if we need to send something via Apprise 'full msg' config
-                if mowas_full_msg_configfile:
+                if mowas_messenger_configfile:
                     logger.debug(msg="Generating Apprise 'full msg' notifications")
                     success = generate_generic_apprise_message(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
-                        apprise_config_file=mowas_full_msg_configfile,
+                        apprise_config_file=mowas_messenger_configfile,
                     )
                     logger.info(msg=f"Apprise 'full msg' success: {success}")
 
-                # Check if we need to send something via Apprise 'short msg' config
-                if mowas_short_msg_configfile:
-                    logger.debug(msg="Generating Apprise 'short msg' notifications")
+                # Check if we need to send something via Apprise 'SMS msg' config
+                if mowas_sms_messenger_configfile:
+                    logger.debug(msg="Generating Apprise 'SMS msg' notifications")
                     success = generate_generic_apprise_message(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
-                        apprise_config_file=mowas_short_msg_configfile,
+                        apprise_config_file=mowas_sms_messenger_configfile,
                     )
-                    logger.info(msg=f"Apprise 'full msg' success: {success}")
+                    logger.info(msg=f"Apprise 'SMS msg' success: {success}")
 
                 # Remove all local image files
                 image_garbage_collector(mowas_messages_to_send=mowas_messages_to_send)

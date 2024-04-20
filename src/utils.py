@@ -490,7 +490,7 @@ def get_command_line_params():
 
     mowas_configfile = args.configfile.name
     mowas_messenger_configfile = args.messenger_config_file
-    mowas_sms_messenger_configfile = args.sms_messenger_configfile
+    mowas_sms_messenger_configfile = args.sms_messenger_config_file
     mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
