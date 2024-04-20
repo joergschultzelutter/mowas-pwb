@@ -41,19 +41,12 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
     try:
         config.read(config_filename)
         mowas_aprsdotfi_api_key = config.get("mowas_config", "aprsdotfi_api_key")
-        mowas_dapnet_login_callsign = config.get(
-            "mowas_config", "dapnet_login_callsign"
-        )
-        mowas_dapnet_login_passcode = config.get(
-            "mowas_config", "dapnet_login_passcode"
-        )
         mowas_watch_areas_string = config.get("mowas_config", "mowas_watch_areas")
         a = [point.split(",") for point in mowas_watch_areas_string.split(" ")]
         b = np.array(a, dtype=np.float64)
         mowas_watch_areas = b.tolist()
 
         mowas_deepldotcom_api_key = config.get("mowas_config", "deepldotcom_api_key")
-        mowas_telegram_bot_token = config.get("mowas_config", "telegram_bot_token")
 
         mowas_openai_api_key = config.get("mowas_config", "openai_api_key")
         mowas_palm_api_key = config.get("mowas_config", "palm_api_key")
@@ -114,8 +107,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
         logger.info(
             msg="Error in configuration file; Check if your config format is correct."
         )
-        mowas_aprsdotfi_api_key = mowas_dapnet_login_callsign = None
-        mowas_dapnet_login_passcode = mowas_telegram_bot_token = None
+        mowas_aprsdotfi_api_key = None
         mowas_smtpimap_email_address = mowas_smtpimap_email_password = None
         mowas_watch_areas = mowas_active_categories = []
         mowas_imap_mail_retention_max_days = mowas_imap_server_port = 0
@@ -128,10 +120,7 @@ def get_program_config_from_file(config_filename: str = "mowas-pwb.cfg"):
     return (
         success,
         mowas_aprsdotfi_api_key,
-        mowas_dapnet_login_callsign,
-        mowas_dapnet_login_passcode,
         mowas_watch_areas,
-        mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
         mowas_smtp_server_address,
@@ -184,17 +173,17 @@ def does_file_exist(file_name: str):
     return os.path.isfile(file_name)
 
 
-def make_pretty_dapnet_messages(
+def make_pretty_sms_messages(
     message_to_add: str,
     destination_list: list = None,
-    max_len: int = 80,
+    max_len: int = 67,
     separator_char: str = " ",
     add_sep: bool = True,
     force_outgoing_unicode_messages: bool = False,
 ):
     """
-    Pretty Printer for DAPNET messages. As DAPNET messages are likely to be split
-    up (due to the 80 chars message len limitation), this function prevents
+    Pretty Printer for SMS-type messages. As SMS-type messages are likely to be split
+    up (due to their message len limitations), this function prevents
     'hard cuts'. Any information that is to be injected into message
     destination list is going to be checked wrt its length. If
     len(current content) + len(message_to_add) exceeds the max_len value,
@@ -205,12 +194,12 @@ def make_pretty_dapnet_messages(
     ==========
     message_to_add: 'str'
                     message string that is to be added to the list in a pretty way
-                    If string is longer than 80 chars, we will truncate the information
+                    If string is longer than 'max_len' chars, we will truncate the information
     destination_list: 'list'
                     List with string elements which will be enriched with the
                     'mesage_to_add' string. Default: empty list aka user wants new list
     max_len: 'int':
-                    Max length of the list's string len. 80 for DAPNET messages
+                    Max length of the list's string len. Default: 67 (APRS)
     separator_char: 'str'
                     Separator that is going to be used for dividing the single
                     elements that the user is going to add
@@ -259,7 +248,7 @@ def make_pretty_dapnet_messages(
             # if string is short enough then add it by calling ourself
             # with the smaller text chunk
             if len(split) < max_len:
-                destination_list = make_pretty_dapnet_messages(
+                destination_list = make_pretty_sms_messages(
                     message_to_add=split,
                     destination_list=destination_list,
                     max_len=max_len,
@@ -406,7 +395,7 @@ def get_command_line_params():
         "--generate-test-message",
         dest="generate_test_message",
         action="store_true",
-        help="Generates a DAPNET / Telegram test message (whereas this config is enabled) and exits the program",
+        help="Generates a generic test message (whereas this config is enabled) and exits the program",
     )
 
     parser.add_argument(
@@ -434,22 +423,6 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--dapnet-destination-callsign",
-        default=None,
-        dest="dapnet_destination_callsign",
-        type=str,
-        help="DAPNET destination call sign which will receive the MOWAS messages",
-    )
-
-    parser.add_argument(
-        "--telegram-destination-id",
-        default=0,
-        dest="telegram_destination_id",
-        type=int,
-        help="Telegram user ID which will receive the MOWAS messages (use bot 'UserInfoBot')",
-    )
-
-    parser.add_argument(
         "--follow-the-ham",
         default=None,
         dest="follow_the_ham",
@@ -466,11 +439,11 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--dapnet-high-prio-level",
+        "--high-prio-level",
         choices={"MINOR", "MODERATE", "SEVERE", "EXTREME"},
         default="SEVERE",
         type=str.upper,
-        help="Defines the minimal level at which DAPNET messages will be sent out with high priority (rather than using standard settings)",
+        help="Defines the minimal level at which messages will be sent out with high priority (rather than using standard settings)",
     )
 
     parser.add_argument(
@@ -501,7 +474,7 @@ def get_command_line_params():
         default=None,
         type=language_check,
         dest="target_language",
-        help="ISO639-1 target language for MOWAS messages (will not be invoked for DAPNET messages)",
+        help="ISO639-1 target language for MOWAS messages (will not be invoked for SMS-type messages)",
     )
 
     parser.add_argument(
@@ -521,13 +494,11 @@ def get_command_line_params():
     mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
-    mowas_dapnet_destination_callsign = args.dapnet_destination_callsign
-    mowas_telegram_destination_id = args.telegram_destination_id
     mowas_follow_the_ham = args.follow_the_ham
     mowas_generate_test_message = args.generate_test_message
     mowas_warning_level = args.warning_level
     mowas_time_to_live = args.time_to_live
-    mowas_dapnet_high_prio_level = args.dapnet_high_prio_level
+    mowas_high_prio_level = args.high_prio_level
     mowas_email_recipient = args.email_recipient
     mowas_enable_covid_content = args.enable_covid_content
     mowas_target_language = args.target_language
@@ -566,19 +537,17 @@ def get_command_line_params():
     # Convert the MOWAS Warning Level to the MOWAS-Native format:
     # First character = Uppercase, remainder is lowercase
     mowas_warning_level = string.capwords(mowas_warning_level)
-    mowas_dapnet_high_prio_level = string.capwords(mowas_dapnet_high_prio_level)
+    mowas_high_prio_level = string.capwords(mowas_high_prio_level)
 
     return (
         mowas_configfile,
         mowas_standard_run_interval,
         mowas_emergency_run_interval,
-        mowas_dapnet_destination_callsign,
-        mowas_telegram_destination_id,
         mowas_follow_the_ham,
         mowas_generate_test_message,
         mowas_warning_level,
         mowas_time_to_live,
-        mowas_dapnet_high_prio_level,
+        mowas_high_prio_level,
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,

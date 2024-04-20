@@ -27,14 +27,10 @@ from utils import (
     get_command_line_params,
 )
 from outputgenerator import (
-    generate_dapnet_messages,
     generate_email_messages,
-    generate_telegram_messages,
     generate_generic_apprise_message,
 )
 from aprsdotfi import get_position_on_aprsfi
-from telegramdotcom import send_telegram_message
-from dapnet import send_dapnet_message
 from mail import send_email_message
 from staticmap import render_png_map
 from expiringdict import ExpiringDict
@@ -45,12 +41,25 @@ from mail import imap_garbage_collector
 from test_data_generator import generate_test_data
 import copy
 import asyncio
+import os
 
 # Set up the global logger variable
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def image_garbage_collector(mowas_messages_to_send: dict):
+    logger.debug(msg="Starting image files garbage collector")
+
+    for mowas_message_id in mowas_messages_to_send:
+        file_name = mowas_messages_to_send[mowas_message_id]["static_image"]
+        if os.path.isfile(file_name):
+            os.remove(file_name)
+
+    logger.debug(msg="Finishing image files garbage collector")
+
 
 if __name__ == "__main__":
     logger.info(msg="Startup ...")
@@ -60,13 +69,11 @@ if __name__ == "__main__":
         mowas_configfile,
         mowas_standard_run_interval,
         mowas_emergency_run_interval,
-        mowas_dapnet_destination_callsign,
-        mowas_telegram_destination_id,
         mowas_follow_the_ham,
         mowas_generate_test_message,
         mowas_warning_level,
         mowas_time_to_live,
-        mowas_dapnet_high_prio_level,
+        mowas_high_prio_level,
         mowas_email_recipient,
         mowas_enable_covid_content,
         mowas_target_language,
@@ -79,8 +86,6 @@ if __name__ == "__main__":
     # Check if the user has specified ANY messaging configuration
     if (
         mowas_email_recipient == None
-        and mowas_dapnet_destination_callsign == None
-        and mowas_telegram_destination_id == 0
         and mowas_short_msg_configfile == None
         and mowas_full_msg_configfile == None
     ):
@@ -91,10 +96,7 @@ if __name__ == "__main__":
     (
         success,
         mowas_aprsdotfi_api_key,
-        mowas_dapnet_login_callsign,
-        mowas_dapnet_login_passcode,
         mowas_watch_areas_config,
-        mowas_telegram_bot_token,
         mowas_smtpimap_email_address,
         mowas_smtpimap_email_password,
         mowas_smtp_server_address,
@@ -117,37 +119,22 @@ if __name__ == "__main__":
     mowas_openai_enabled = False if mowas_openai_api_key == "NOT_CONFIGURED" else True
     mowas_palm_enabled = False if mowas_palm_api_key == "NOT_CONFIGURED" else True
     mowas_aprsdotfi_enabled = False if mowas_aprsdotfi_api_key == "NOT_CONFIGURED" else True
-    mowas_dapnet_enabled = False if mowas_dapnet_login_callsign == "NOT_CONFIGURED" else True
-    mowas_telegram_enabled = False if mowas_telegram_bot_token == "NOT_CONFIGURED" else True
     mowas_email_enabled = False if (mowas_smtpimap_email_address == "NOT_CONFIGURED" or mowas_smtpimap_email_password == "NOT_CONFIGURED") else True
     mowas_imap_gc_enabled = False if (mowas_imap_server_port == 0 or mowas_imap_server_address == "NOT_CONFIGURED" or mowas_imap_mail_retention_max_days == 0 or not mowas_email_enabled) else True
     # fmt: on
 
     # some basic checks on whether the user wants us to do the impossible :-)
-
-    if mowas_telegram_enabled and mowas_telegram_destination_id == 0:
-        logger.info(msg="Valid Telegram destination ID is missing; disabling Telegram")
-        mowas_telegram_enabled = False
-
-    if mowas_dapnet_enabled and mowas_dapnet_destination_callsign is None:
-        logger.info(
-            msg="Valid DAPNET destination call sign is missing; disabling DAPNET"
-        )
-        mowas_dapnet_enabled = False
-
     if mowas_email_enabled and mowas_email_recipient is None:
         logger.info(msg="Valid destination email is missing; disabling Email")
         mowas_email_enabled = False
 
     if (
-        not mowas_dapnet_enabled
-        and not mowas_telegram_enabled
-        and not mowas_email_enabled
+        mowas_email_enabled
         and not mowas_full_msg_configfile
         and not mowas_short_msg_configfile
     ):
         logger.info(
-            msg="No target credentials (DAPNET, Email, Telegram, or Apprise full/short msg) configured or no messaging destinations specified; exiting ..."
+            msg="No messenger target credentials configured or no messaging destinations specified; exiting ..."
         )
         exit(0)
 
@@ -214,33 +201,6 @@ if __name__ == "__main__":
         logger.info(msg="Configuration test enabled")
         # generate our fixed test data
         mowas_messages_to_send = generate_test_data()
-
-        # Send to DAPNET if enabled
-        if mowas_dapnet_enabled:
-            logger.info(
-                msg=f"Sending mowas-pwb test message to DAPNET account {mowas_dapnet_destination_callsign}"
-            )
-            success = generate_dapnet_messages(
-                mowas_messages_to_send=mowas_messages_to_send,
-                warncell_data=warncell_data,
-                mowas_dapnet_destination_callsign=mowas_dapnet_destination_callsign,
-                mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
-                mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
-            )
-            logger.info(msg=f"DAPNET message success: {success}")
-
-        # Send to Telegram if enabled
-        if mowas_telegram_enabled:
-            logger.info(
-                msg=f"Sending mowas-pwb test message to Telegram account {mowas_telegram_destination_id}"
-            )
-            success = generate_telegram_messages(
-                mowas_messages_to_send=mowas_messages_to_send,
-                warncell_data=warncell_data,
-                mowas_telegram_bot_token=mowas_telegram_bot_token,
-                telegram_target_id=mowas_telegram_destination_id,
-            )
-            logger.info(msg=f"Telegram message success: {success}")
 
         # Send to mail account if enabled
         if mowas_email_enabled:
@@ -368,7 +328,7 @@ if __name__ == "__main__":
                 coordinates=mowas_watch_areas,
                 mowas_cache=mowas_message_cache,
                 minimal_mowas_severity=mowas_warning_level,
-                mowas_dapnet_high_prio_level=mowas_dapnet_high_prio_level,
+                mowas_high_prio_level=mowas_high_prio_level,
                 mowas_active_categories=mowas_active_categories,
                 enable_covid_messaging=mowas_enable_covid_content,
                 local_file_name=mowas_localfile,
@@ -383,32 +343,9 @@ if __name__ == "__main__":
                 if got_alert_or_update:
                     mowas_run_interval = mowas_emergency_run_interval
 
-                # Check if we need to send something to DAPNET
-                if mowas_dapnet_enabled:
-                    logger.info(msg="Generating DAPNET notifications")
-                    success = generate_dapnet_messages(
-                        mowas_messages_to_send=mowas_messages_to_send,
-                        warncell_data=warncell_data,
-                        mowas_dapnet_destination_callsign=mowas_dapnet_destination_callsign,
-                        mowas_dapnet_login_callsign=mowas_dapnet_login_callsign,
-                        mowas_dapnet_login_passcode=mowas_dapnet_login_passcode,
-                    )
-                    logger.info(msg=f"Telegram message success: {success}")
-
-                # Check if we need to send something to Telegram
-                if mowas_telegram_enabled:
-                    logger.info(msg="Generating Telegram notifications")
-                    success = generate_telegram_messages(
-                        mowas_messages_to_send=mowas_messages_to_send,
-                        warncell_data=warncell_data,
-                        mowas_telegram_bot_token=mowas_telegram_bot_token,
-                        telegram_target_id=mowas_telegram_destination_id,
-                    )
-                    logger.info(msg=f"Telegram message success: {success}")
-
-                # Finally, check if we need to send something via Email
+                # Check if we need to send something via Email
                 if mowas_email_enabled:
-                    logger.info(msg="Generating Email notifications")
+                    logger.debug(msg="Generating Email notifications")
                     success = generate_email_messages(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
@@ -418,7 +355,27 @@ if __name__ == "__main__":
                         smtp_server_address=mowas_smtp_server_address,
                         smtp_server_port=mowas_smtp_server_port,
                     )
-                    logger.info(msg=f"Email message success: {success}")
+                    logger.debug(msg=f"Email message success: {success}")
+
+                # Check if we need to send something via Apprise 'full msg' config
+                if mowas_full_msg_configfile:
+                    logger.debug(msg="Generating Apprise 'full msg' notifications")
+                    success = generate_generic_apprise_message(
+                        mowas_messages_to_send=mowas_messages_to_send,
+                        warncell_data=warncell_data,
+                        apprise_config_file=mowas_full_msg_configfile,
+                    )
+                    logger.info(msg=f"Apprise 'full msg' success: {success}")
+
+                # Check if we need to send something via Apprise 'short msg' config
+                if mowas_short_msg_configfile:
+                    logger.debug(msg="Generating Apprise 'full msg' notifications")
+                    success = generate_generic_apprise_message(
+                        mowas_messages_to_send=mowas_messages_to_send,
+                        warncell_data=warncell_data,
+                        apprise_config_file=mowas_short_msg_configfile,
+                    )
+                    logger.info(msg=f"Apprise 'full msg' success: {success}")
             else:
                 logger.debug(msg="No new messages found")
 

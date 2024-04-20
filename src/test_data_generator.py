@@ -36,7 +36,7 @@ meinjson = """
 		"areas": ["Kreis Holzminden"],
 		"areas_matching_latlon_abbrev": ["Kreis Holzminden"],
 		"geocodes": ["103255000"],
-		"dapnet_high_prio": false,
+		"high_prio": false,
 		"latlon_polygon": [
 			[52.038744328437716, 9.57555944842884],
 			[51.99559190725656, 9.607361808813355],

@@ -88,8 +88,9 @@ def render_png_map(
             )
         )
 
-    # Create a temporary file name
-    file_name = tempfile.NamedTemporaryFile().name
+    # Create a temporary file name. Attach the file type as
+    # extension; otherwise, Apprise will not render the image
+    file_name = tempfile.NamedTemporaryFile().name + ".png"
 
     try:
         # Try to render via pycairo - looks nicer

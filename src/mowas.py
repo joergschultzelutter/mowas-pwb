@@ -90,7 +90,7 @@ def process_mowas_data(
     coordinates: list,
     mowas_cache: ExpiringDict,
     minimal_mowas_severity: str = "Minor",
-    mowas_dapnet_high_prio_level: str = "Minor",
+    mowas_high_prio_level: str = "Minor",
     mowas_active_categories: list = None,
     enable_covid_messaging: bool = False,
     target_language: str = None,
@@ -111,9 +111,9 @@ def process_mowas_data(
     minimal_mowas_severity : 'str'
         Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
         Program uses a ranking mechanism for its ">=" evaluation
-    mowas_dapnet_high_prio_level: 'str"
+    mowas_high_prio_level: 'str"
         message category which is deemed of higher priority. If that category threshold is breached,
-        DAPNET messages will be sent with a higher priority and the program may switch to emergency
+        messages will be sent with a higher priority and the program may switch to emergency
         mode, thus causing faster interval checks for the MOWAS data
     mowas_active_categories: 'list'
         List of active categories (from the program's config file)
@@ -184,7 +184,7 @@ def process_mowas_data(
 
     # Check if we have received something whose value we already know
     assert minimal_mowas_severity in typedef_mowas_severity
-    assert mowas_dapnet_high_prio_level in typedef_mowas_severity
+    assert mowas_high_prio_level in typedef_mowas_severity
 
     # message marker which tells us that we have received at least one
     # Alert or Update message
@@ -327,13 +327,13 @@ def process_mowas_data(
                                 continue
                             #fmt: on
 
-                            # Check the priority level of the future message to DAPNET and bump it up if necessary
+                            # Check the priority level of the future message and bump it up if necessary
                             # but lower its priority if we deal with a "Cancel" message
                             # fmt: off
                             if mowas_msgtype != "Cancel":
-                                dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+                                high_prio_msg = True if typedef_mowas_severity.index(mowas_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
                             else:
-                                dapnet_high_prio_msg = False
+                                high_prio_msg = False
                             #fmt: on
 
                             # Now let's extract the remaining information before we take a look at the message's geometric structure
@@ -588,7 +588,7 @@ def process_mowas_data(
                                     "areas": areas_matching_latlon,
                                     "areas_matching_latlon_abbrev": areas_matching_latlon_abbrev,
                                     "geocodes": geocodes_matching_latlon,
-                                    "dapnet_high_prio": dapnet_high_prio_msg,
+                                    "high_prio": high_prio_msg,
                                     "latlon_polygon": latlon_array,
                                     "coords_matching_latlon": coords_matching_latlon,
                                     "contact": mowas_contact,
