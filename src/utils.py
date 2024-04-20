@@ -378,17 +378,17 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--generic-full-msg-config-file",
+        "--messenger-config-file",
         default=None,
         type=str,
-        help="Config file name for generic full-content messages",
+        help="Config file name for regular messenger full-content messages",
     )
 
     parser.add_argument(
-        "--generic-short-msg-config-file",
+        "--sms-messenger-config-file",
         default=None,
         type=str,
-        help="Config file name for generic short content messages",
+        help="Config file name for sms-like messengers",
     )
 
     parser.add_argument(
@@ -489,8 +489,8 @@ def get_command_line_params():
     args = parser.parse_args()
 
     mowas_configfile = args.configfile.name
-    mowas_full_msg_configfile = args.generic_full_msg_config_file
-    mowas_short_msg_configfile = args.generic_short_msg_config_file
+    mowas_messenger_configfile = args.messenger_config_file
+    mowas_sms_messenger_configfile = args.sms_messenger_configfile
     mowas_localfile = args.localfile
     mowas_standard_run_interval = args.standard_run_interval
     mowas_emergency_run_interval = args.emergency_run_interval
@@ -514,18 +514,18 @@ def get_command_line_params():
 
     # Did the user specify an optional generic full message file?
     # if yes, check if that file exists
-    if mowas_full_msg_configfile:
-        if not does_file_exist(mowas_full_msg_configfile):
+    if mowas_messenger_configfile:
+        if not does_file_exist(mowas_messenger_configfile):
             raise ValueError(
-                f"Provided MOWAS full message config file '{mowas_full_msg_configfile}' does not exist"
+                f"Provided MOWAS messenger config file '{mowas_messenger_configfile}' does not exist"
             )
 
-    # Did the user specify an optional generic short message file?
+    # Did the user specify an optional generic message file for SMS messengers?
     # if yes, check if that file exists
-    if mowas_short_msg_configfile:
-        if not does_file_exist(mowas_short_msg_configfile):
+    if mowas_sms_messenger_configfile:
+        if not does_file_exist(mowas_sms_messenger_configfile):
             raise ValueError(
-                f"Provided MOWAS short message config file '{mowas_short_msg_configfile}' does not exist"
+                f"Provided MOWAS short message config file '{mowas_sms_messenger_configfile}' does not exist"
             )
 
     # Convert requested call sign to upper case whereas present
@@ -552,8 +552,8 @@ def get_command_line_params():
         mowas_enable_covid_content,
         mowas_target_language,
         mowas_localfile,
-        mowas_full_msg_configfile,
-        mowas_short_msg_configfile,
+        mowas_messenger_configfile,
+        mowas_sms_messenger_configfile,
         mowas_text_summarizer,
     )
 
