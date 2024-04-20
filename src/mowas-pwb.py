@@ -240,6 +240,9 @@ if __name__ == "__main__":
             )
             logger.info(msg=f"Short message success: {success}")
 
+        # Remove all local image files
+        image_garbage_collector(mowas_messages_to_send=mowas_messages_to_send)
+
         logger.info(msg="Configuration test cycle complete; exiting")
         exit(0)
 
@@ -369,13 +372,16 @@ if __name__ == "__main__":
 
                 # Check if we need to send something via Apprise 'short msg' config
                 if mowas_short_msg_configfile:
-                    logger.debug(msg="Generating Apprise 'full msg' notifications")
+                    logger.debug(msg="Generating Apprise 'short msg' notifications")
                     success = generate_generic_apprise_message(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         apprise_config_file=mowas_short_msg_configfile,
                     )
                     logger.info(msg=f"Apprise 'full msg' success: {success}")
+
+                # Remove all local image files
+                image_garbage_collector(mowas_messages_to_send=mowas_messages_to_send)
             else:
                 logger.debug(msg="No new messages found")
 
