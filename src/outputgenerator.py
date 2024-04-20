@@ -213,7 +213,18 @@ REPLACE_HTML_ADDRESSES
         # fmt: on
 
         # get the rendered image (output value will be 'None' in case it cannot be rendered)
-        html_image = mowas_messages_to_send[mowas_message_id]["static_image"]
+        file_name = mowas_messages_to_send[mowas_message_id]["static_image"]
+        html_image = None
+
+        try:
+            with open(file_name, "rb") as file:
+                html_image = file.read()
+        except FileNotFoundError:
+            logger.debug(msg=f"File '{file_name}' not found")
+            html_image = None
+        except Exception as e:
+            logger.debug(msg=f"Exception occurred: '{e}'")
+            html_image = None
 
         # try to build the HTML section which contains our addresses.
         # There should be at least one - otherwise, we should never have
