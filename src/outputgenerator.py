@@ -529,24 +529,26 @@ def generate_generic_apprise_message(
             utc_create_time = datetime.utcnow()
             msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
-            # Generate the message as HTML content
-            apprise_header = (
-                f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
-            )
+        # We are done with preparing the message body
+        # Create the message header
+        apprise_header = (
+            f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
+        )
 
-            # Set Apprise's notify icon based on the message's priority
-            notify_type = (
-                apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
-            )
+        # Set Apprise's notify icon based on the message's priority
+        # (might not be supported by every messenger type)
+        notify_type = (
+            apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
+        )
 
-            # Send the notification
-            apobj.notify(
-                body=apprise_message,
-                title=apprise_header,
-                tag="all",
-                attach=html_image,
-                notify_type=notify_type,
-            )
+        # Send the notification
+        apobj.notify(
+            body=apprise_message,
+            title=apprise_header,
+            tag="all",
+            attach=html_image,
+            notify_type=notify_type,
+        )
 
     logger.debug(msg="Finished Apprise message processing")
     return success
