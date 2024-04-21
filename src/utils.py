@@ -392,6 +392,22 @@ def get_command_line_params():
     )
 
     parser.add_argument(
+        "--sms-message-length",
+        dest="sms_message_length",
+        default=67,
+        type=int,
+        help="Default message length for SMS messages",
+    )
+
+    parser.add_argument(
+        "--sms_message_split",
+        dest="sms_message_split",
+        action="store_true",
+        default=False,
+        help="If enabled, all SMS messages will be split into multiple messages which ",
+    )
+
+    parser.add_argument(
         "--generate-test-message",
         dest="generate_test_message",
         action="store_true",
@@ -503,6 +519,8 @@ def get_command_line_params():
     mowas_enable_covid_content = args.enable_covid_content
     mowas_target_language = args.target_language
     mowas_text_summarizer = args.text_summarizer
+    mowas_sms_message_length = args.sms_message_length
+    mowas_sms_message_split = args.sms_message_split
 
     # Did the user specify an optional JSON file for testing?
     # if yes, check if that file exists
@@ -539,6 +557,12 @@ def get_command_line_params():
     mowas_warning_level = string.capwords(mowas_warning_level)
     mowas_high_prio_level = string.capwords(mowas_high_prio_level)
 
+    # check if message limit for SMS messages is smaller than 67
+    # (67 = APRS) which -among all SMS messengers- is the smallest
+    # message length that is known to me
+    if mowas_sms_message_length < 67:
+        raise ValueError("SMS message minimum length must be 67 or greater")
+
     return (
         mowas_configfile,
         mowas_standard_run_interval,
@@ -555,6 +579,8 @@ def get_command_line_params():
         mowas_messenger_configfile,
         mowas_sms_messenger_configfile,
         mowas_text_summarizer,
+        mowas_sms_message_length,
+        mowas_sms_message_split,
     )
 
 

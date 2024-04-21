@@ -81,6 +81,8 @@ if __name__ == "__main__":
         mowas_messenger_configfile,
         mowas_sms_messenger_configfile,
         mowas_text_summarizer,
+        mowas_sms_message_length,
+        mowas_sms_message_split,
     ) = get_command_line_params()
 
     # Check if the user has specified ANY messaging configuration
