@@ -51,6 +51,18 @@ logger = logging.getLogger(__name__)
 
 
 def image_garbage_collector(mowas_messages_to_send: dict):
+    """
+    Garbage collector; deletes all images which we may have created
+    on the user's hard drive.
+
+    Parameters
+    ==========
+    mowas_messages_to_send: 'dict'
+                    Our MOWAS messages dictionary
+
+    Returns
+    =======
+    """
     logger.debug(msg="Starting image files garbage collector")
 
     for mowas_message_id in mowas_messages_to_send:
