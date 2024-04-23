@@ -207,7 +207,7 @@ meinjson = """
 		"lang_description": "With receipt of this message mowas-pwb is properly configured",
 		"lang_instruction": "Thank you for using this software",
 		"lang_contact": "https://www.github.com/joergschultzelutter/mowas-pwb",
-		"lang_sms_message": "mowas-pwb configuration test: ok",
+		"lang_sms_message": "mowas-pwb configuration test: ok"
 	}
 }"""
 

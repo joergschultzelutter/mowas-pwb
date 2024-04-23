@@ -22,6 +22,7 @@ from utils import (
     convert_text_to_plain_ascii,
     get_program_config_from_file,
     does_file_exist,
+    make_pretty_sms_messages,
 )
 from warncell import read_warncell_info
 from mail import send_email_message
@@ -391,6 +392,8 @@ def generate_apprise_message(
     warncell_data: dict,
     apprise_config_file: str,
     abbreviated_message_format: bool = False,
+    sms_message_length: int = 67,
+    sms_message_split: bool = False,
 ):
     """
     Generates Apprise messages and triggers transmission to the user
@@ -476,14 +479,38 @@ def generate_apprise_message(
                 contact = f"{lang_contact} (<i>{contact}</i>)"
             else:
                 headline = instruction = contact = ""
-                description = f"{lang_sms_message} (<i>{sms_message}</i>)"
+                description = f"{lang_sms_message}"
 
         # Create the message timestamp
         utc_create_time = datetime.utcnow()
         msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
         if abbreviated_message_format:
-            apprise_message = description
+            # Set Apprise's notify icon based on the message's priority
+            # (might not be supported by every messenger type)
+            notify_type = (
+                apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
+            )
+
+            # We are not supposed to split the messages?
+            # then use what we have and truncate
+
+            if not sms_message_split:
+                target_messages = [description[:sms_message_length]]
+            else:
+                target_messages = make_pretty_sms_messages(
+                    message_to_add=description, max_len=sms_message_length
+                )
+
+            # Finally, send the messages
+            for target_message in target_messages:
+                # Send the notification. We go full SMS mode, so no titles/images/...
+                apobj.notify(
+                    body=target_message,
+                    tag="all",
+                    notify_type=notify_type,
+                )
+            success = True
         else:
             # Generate the message as HTML content
             apprise_message = f"<b>Message headline:</b> {headline}" + newline + newline
@@ -545,26 +572,28 @@ def generate_apprise_message(
                 utc_create_time = datetime.utcnow()
                 msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
-        # We are done with preparing the message body
-        # Create the message header
-        apprise_header = (
-            f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
-        )
+            # We are done with preparing the message body
+            # Create the message header
+            apprise_header = (
+                f"<u><i>mowas-pwb Notification</i> (generated at {msg_string})</u>\n\n"
+            )
 
-        # Set Apprise's notify icon based on the message's priority
-        # (might not be supported by every messenger type)
-        notify_type = (
-            apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
-        )
+            # Set Apprise's notify icon based on the message's priority
+            # (might not be supported by every messenger type)
+            notify_type = (
+                apprise.NotifyType.FAILURE if high_prio else apprise.NotifyType.WARNING
+            )
 
-        # Send the notification
-        apobj.notify(
-            body=apprise_message,
-            title=apprise_header,
-            tag="all",
-            attach=html_image,
-            notify_type=notify_type,
-        )
+            # Send the notification
+            apobj.notify(
+                body=apprise_message,
+                title=apprise_header,
+                tag="all",
+                attach=html_image,
+                notify_type=notify_type,
+            )
+
+            success = True
 
     logger.debug(msg="Finished Apprise message processing")
     return success

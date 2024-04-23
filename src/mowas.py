@@ -101,7 +101,7 @@ def process_mowas_data(
     local_file_name: str = None,
     text_summarizer: str = None,
     text_summarizer_api_key: str = None,
-    generate_sms_messages: boot = False,
+    generate_sms_messages: bool = False,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user

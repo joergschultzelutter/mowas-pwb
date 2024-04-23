@@ -400,7 +400,7 @@ def get_command_line_params():
     )
 
     parser.add_argument(
-        "--sms_message_split",
+        "--sms-message-split",
         dest="sms_message_split",
         action="store_true",
         default=False,
