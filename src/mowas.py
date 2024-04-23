@@ -33,6 +33,7 @@ import requests
 import sys
 from pprint import pformat
 import json
+from text_post_processor import create_text_summary
 
 # Set up the global logger variable
 logging.basicConfig(
@@ -90,7 +91,7 @@ def process_mowas_data(
     coordinates: list,
     mowas_cache: ExpiringDict,
     minimal_mowas_severity: str = "Minor",
-    mowas_dapnet_high_prio_level: str = "Minor",
+    mowas_high_prio_level: str = "Minor",
     mowas_active_categories: list = None,
     enable_covid_messaging: bool = False,
     target_language: str = None,
@@ -98,6 +99,9 @@ def process_mowas_data(
     aprs_latitude: float = None,
     aprs_longitude: float = None,
     local_file_name: str = None,
+    text_summarizer: str = None,
+    text_summarizer_api_key: str = None,
+    generate_sms_messages: bool = False,
 ):
     """
     Process our MOWAS data and return a dictionary with messages that are to be sent to the user
@@ -111,9 +115,9 @@ def process_mowas_data(
     minimal_mowas_severity : 'str'
         Needs to contain a valid severity level (see definition of 'typedef_mowas_severity')
         Program uses a ranking mechanism for its ">=" evaluation
-    mowas_dapnet_high_prio_level: 'str"
+    mowas_high_prio_level: 'str"
         message category which is deemed of higher priority. If that category threshold is breached,
-        DAPNET messages will be sent with a higher priority and the program may switch to emergency
+        messages will be sent with a higher priority and the program may switch to emergency
         mode, thus causing faster interval checks for the MOWAS data
     mowas_active_categories: 'list'
         List of active categories (from the program's config file)
@@ -130,6 +134,12 @@ def process_mowas_data(
         optional APRS latitude
     aprs_longitude: 'float'
         optional aprs_longitude
+    text_summarizer: 'str'
+        One of the supported text summarizer identifiers, see text_post_processor.py (or None)
+    text_summarizer_api_key: 'str'
+        Associated API key (or None)
+    generate_sms_messages: 'bool'
+        if True, text summarizer needs to be defined
 
     Returns
     =======
@@ -184,7 +194,7 @@ def process_mowas_data(
 
     # Check if we have received something whose value we already know
     assert minimal_mowas_severity in typedef_mowas_severity
-    assert mowas_dapnet_high_prio_level in typedef_mowas_severity
+    assert mowas_high_prio_level in typedef_mowas_severity
 
     # message marker which tells us that we have received at least one
     # Alert or Update message
@@ -314,7 +324,6 @@ def process_mowas_data(
                         # Future program versions may also need to process elements 2..n
                         # in case they are present.
                         if len(element["info"]) > 0:
-
                             # Get the Severity
                             mowas_severity = element["info"][0]["severity"]
 
@@ -328,13 +337,13 @@ def process_mowas_data(
                                 continue
                             #fmt: on
 
-                            # Check the priority level of the future message to DAPNET and bump it up if necessary
+                            # Check the priority level of the future message and bump it up if necessary
                             # but lower its priority if we deal with a "Cancel" message
                             # fmt: off
                             if mowas_msgtype != "Cancel":
-                                dapnet_high_prio_msg = True if typedef_mowas_severity.index(mowas_dapnet_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
+                                high_prio_msg = True if typedef_mowas_severity.index(mowas_high_prio_level) >= typedef_mowas_severity.index(mowas_severity) else False
                             else:
-                                dapnet_high_prio_msg = False
+                                high_prio_msg = False
                             #fmt: on
 
                             # Now let's extract the remaining information before we take a look at the message's geometric structure
@@ -364,9 +373,6 @@ def process_mowas_data(
                             # If we find a match then this list will contain all areas for
                             # which we found a match related to our lat/lon coordinates
                             areas_matching_latlon = []
-                            areas_matching_latlon_abbrev = (
-                                []
-                            )  # Abbreviated version for DAPNET as we only have 80 chars
                             geocodes_matching_latlon = []
                             coords_matching_latlon = []
                             latlon_array = []
@@ -437,32 +443,7 @@ def process_mowas_data(
                                         # We have a match? Then let's remember what we have
                                         # Try to shorten the area names as this string is rather lengthy
                                         if area_desc not in areas_matching_latlon:
-
-                                            area_desc_abbrev = area_desc.replace(
-                                                "Gemeinde/Stadt: ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Landkreis/Stadt: ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Bundesland: ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Freistaat ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Freie Hansestadt ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Land: ", "", 1
-                                            )
-                                            area_desc_abbrev = area_desc_abbrev.replace(
-                                                "Land ", "", 1
-                                            )
                                             areas_matching_latlon.append(area_desc)
-                                            areas_matching_latlon_abbrev.append(
-                                                area_desc_abbrev
-                                            )
 
                                         # Save the geocodes, too. This is our primary mean of identification
                                         # area_desc will only be used of the geocode cannot be found
@@ -578,6 +559,18 @@ def process_mowas_data(
                                             mowas_identifier
                                         ] = mowas_cache_payload
 
+                                ### create appreviated version but only if we need it
+                                if generate_sms_messages:
+                                    mowas_sms_message = f"{mowas_headline} {mowas_description} {mowas_instruction}"
+
+                                    mowas_sms_message = create_text_summary(
+                                        input_text=mowas_sms_message,
+                                        post_processor=text_summarizer,
+                                        api_key=text_summarizer_api_key,
+                                    )
+                                else:
+                                    mowas_sms_message = ""
+
                                 # Create the outgoing message's payload ...
                                 mowas_messages_to_send_payload = {
                                     "headline": mowas_headline,
@@ -585,12 +578,12 @@ def process_mowas_data(
                                     "severity": mowas_severity,
                                     "description": mowas_description,
                                     "instruction": mowas_instruction,
+                                    "sms_message": mowas_sms_message,
                                     "sent": mowas_sent,
                                     "msgtype": mowas_msgtype,
                                     "areas": areas_matching_latlon,
-                                    "areas_matching_latlon_abbrev": areas_matching_latlon_abbrev,
                                     "geocodes": geocodes_matching_latlon,
-                                    "dapnet_high_prio": dapnet_high_prio_msg,
+                                    "high_prio": high_prio_msg,
                                     "latlon_polygon": latlon_array,
                                     "coords_matching_latlon": coords_matching_latlon,
                                     "contact": mowas_contact,
@@ -609,14 +602,15 @@ def process_mowas_data(
                                         mowas_description,
                                         mowas_instruction,
                                         mowas_contact,
+                                        mowas_sms_message,
                                     ]
-
                                     # translate the content
                                     (
                                         mowas_headline,
                                         mowas_description,
                                         mowas_instruction,
                                         mowas_contact,
+                                        mowas_sms_message,
                                     ) = translate_text_list(
                                         deepl_api_key=deepl_api_key,
                                         target_language=target_language,
@@ -636,12 +630,14 @@ def process_mowas_data(
                                     mowas_messages_to_send_payload[
                                         "lang_contact"
                                     ] = mowas_contact
+                                    mowas_messages_to_send_payload[
+                                        "lang_sms_message"
+                                    ] = mowas_sms_message
 
                                 # ... and add it to our dictionary (or update an existing element)
                                 # This code assumes that MOWAS uses unique message identifiers across
                                 # its various categories
                                 if add_data:
-
                                     # Check if we have already received this message
                                     if mowas_identifier not in mowas_messages_to_send:
                                         # No - then let's add it
@@ -686,15 +682,15 @@ def process_mowas_data(
         coords_matching_latlon = existing_message["coords_matching_latlon"]
 
         # render the image
-        image = render_png_map(
+        image_file_name = render_png_map(
             polygon_area=latlon_polygon,
             monitoring_positions=coords_matching_latlon,
             aprs_latitude=aprs_latitude,
             aprs_longitude=aprs_longitude,
         )
 
-        # and write it back to our dictionary
-        existing_message["static_image"] = image
+        # and write the local file name back to our dictionary
+        existing_message["static_image"] = image_file_name
         mowas_messages_to_send[mowas_identifier] = existing_message
 
     # Return the expiring cache and our messages to the user

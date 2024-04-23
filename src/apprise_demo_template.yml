@@ -1,0 +1,8 @@
+# Format description: see https://github.com/caronc/apprise/wiki/config_yaml
+
+version: 1
+
+urls:
+  # One-liner (no colon at the end); just the url as you'd expect it:
+  - tgram://123456789:abcdefg_hijklmnop/12315544/
+

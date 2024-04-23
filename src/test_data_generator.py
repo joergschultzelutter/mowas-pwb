@@ -31,12 +31,12 @@ meinjson = """
 		"severity": "Minor",
 		"description": "Bei Empfang dieser Nachricht ist mowas-pwb ordnungsgemäß konfiguriert",
 		"instruction": "Vielen Dank für die Benutzung dieser Software",
+		"sms_message": "mowas-pwb Konfigurationstest ok",
 		"sent": "2020-08-28T11:00:08+02:00",
 		"msgtype": "Alert",
 		"areas": ["Kreis Holzminden"],
-		"areas_matching_latlon_abbrev": ["Kreis Holzminden"],
 		"geocodes": ["103255000"],
-		"dapnet_high_prio": false,
+		"high_prio": false,
 		"latlon_polygon": [
 			[52.038744328437716, 9.57555944842884],
 			[51.99559190725656, 9.607361808813355],
@@ -206,7 +206,8 @@ meinjson = """
 		"lang_headline": "mowas-pwb configuration test",
 		"lang_description": "With receipt of this message mowas-pwb is properly configured",
 		"lang_instruction": "Thank you for using this software",
-		"lang_contact": "https://www.github.com/joergschultzelutter/mowas-pwb"
+		"lang_contact": "https://www.github.com/joergschultzelutter/mowas-pwb",
+		"lang_sms_message": "mowas-pwb configuration test: ok"
 	}
 }"""
 
@@ -231,13 +232,13 @@ def generate_test_data():
     ]
 
     # render the image
-    image = render_png_map(
+    image_file_name = render_png_map(
         polygon_area=latlon_polygon,
         monitoring_positions=coords_matching_latlon,
         aprs_latitude=51.81901,
         aprs_longitude=9.5139941,
     )
-    target_dict["MOWAS-BEISPIEL-MELDUNG"]["static_image"] = image
+    target_dict["MOWAS-BEISPIEL-MELDUNG"]["static_image"] = image_file_name
     return target_dict
 
 

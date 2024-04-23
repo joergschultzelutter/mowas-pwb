@@ -20,8 +20,8 @@
 #
 
 import staticmaps
-import io
 import logging
+import tempfile
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(module)s -%(levelname)s- %(message)s"
@@ -52,9 +52,9 @@ def render_png_map(
 
     Returns
     =======
-    iobuffer : 'bytes'
-            'None' if not successful, otherwise binary representation
-            of the image
+    file_name : 'str'
+            'None' if not successful, otherwise name of the file that
+            contains our rendered image
     """
 
     # Create the object
@@ -88,28 +88,23 @@ def render_png_map(
             )
         )
 
-    # create a buffer as we need to write to write to memory
-    iobuffer = io.BytesIO()
+    # Create a temporary file name. Attach the file type as
+    # extension; otherwise, Apprise will not render the image
+    file_name = tempfile.NamedTemporaryFile().name + ".png"
 
     try:
         # Try to render via pycairo - looks nicer
         if staticmaps.cairo_is_supported():
             image = context.render_cairo(800, 500)
-            image.write_to_png(iobuffer)
+            image.write_to_png(file_name)
         else:
             # if pycairo is not present, render via pillow
             image = context.render_pillow(800, 500)
-            image.save(iobuffer, format="png")
-
-        # reset the buffer position
-        iobuffer.seek(0)
-
-        # get the buffer value and return it
-        view = iobuffer.getvalue()
+            image.save(file_name, format="png")
     except Exception as ex:
-        view = None
+        file_name = None
 
-    return view
+    return file_name
 
 
 if __name__ == "__main__":
