@@ -27,7 +27,6 @@ from warncell import read_warncell_info
 from mail import send_email_message
 from datetime import datetime
 
-# from mowas import process_mowas_data
 from expiringdict import ExpiringDict
 from test_data_generator import generate_test_data
 import apprise
@@ -387,10 +386,11 @@ REPLACE_HTML_ADDRESSES
     return success
 
 
-def generate_generic_apprise_message(
+def generate_apprise_message(
     mowas_messages_to_send: dict,
     warncell_data: dict,
     apprise_config_file: str,
+    abbreviated_message_format: bool = False,
 ):
     """
     Generates Apprise messages and triggers transmission to the user
@@ -451,6 +451,7 @@ def generate_generic_apprise_message(
         coords_matching_latlon = mowas_messages_to_send[mowas_message_id][
             "coords_matching_latlon"
         ]
+        sms_message = mowas_messages_to_send[mowas_message_id]["sms_message"]
 
         # get the rendered image's file name (will be 'None' in case it cannot be rendered)
         html_image = mowas_messages_to_send[mowas_message_id]["static_image"]
@@ -463,71 +464,86 @@ def generate_generic_apprise_message(
             lang_description = mowas_messages_to_send[mowas_message_id]["lang_description"]
             lang_instruction = mowas_messages_to_send[mowas_message_id]["lang_instruction"]
             lang_contact = mowas_messages_to_send[mowas_message_id]["lang_contact"]
+            lang_sms_message = mowas_messages_to_send[mowas_message_id]["lang_sms_message"]
             # fmt: on
 
-            # and amend out target fields
-            headline = f"{lang_headline} (<i>{headline}</i>)"
-            description = f"{lang_description} (<i>{description}</i>)"
-            instruction = f"{lang_instruction} (<i>{instruction}</i>)"
-            contact = f"{lang_contact} (<i>{contact}</i>)"
+            # if we send regular messages, then let's prepare the target fields
+            if not abbreviated_message_format:
+                # and amend out target fields
+                headline = f"{lang_headline} (<i>{headline}</i>)"
+                description = f"{lang_description} (<i>{description}</i>)"
+                instruction = f"{lang_instruction} (<i>{instruction}</i>)"
+                contact = f"{lang_contact} (<i>{contact}</i>)"
+            else:
+                headline = instruction = contact = ""
+                description = f"{lang_sms_message} (<i>{sms_message}</i>)"
 
         # Create the message timestamp
         utc_create_time = datetime.utcnow()
         msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
-        # Generate the message as HTML content
-        apprise_message = f"<b>Message headline:</b> {headline}" + newline + newline
-
-        apprise_message = apprise_message + "<u><i>Message details</i></u>" + newline
-
-        apprise_message = (
-            apprise_message + f"<b>Description:</b> {description}" + newline
-        )
-        apprise_message = (
-            apprise_message + f"<b>Instructions:</b> {instruction}" + newline
-        )
-        apprise_message = apprise_message + f"<b>Contact:</b> {contact}" + newline
-
-        apprise_message = apprise_message + f"<b>Message Type:</b> {msgtype}" + newline
-        apprise_message = apprise_message + f"<b>Urgency:</b> {urgency}" + newline
-        apprise_message = apprise_message + f"<b>Severity:</b> {severity}" + newline
-        apprise_message = (
-            apprise_message + f"<b>Timestamp:</b> {sent}" + newline + newline
-        )
-
-        apprise_message = apprise_message + "<u><i>Address details</i></u>" + newline
-
-        for coords in coords_matching_latlon:
-            latitude = coords["latitude"]
-            longitude = coords["longitude"]
-            address = coords["address"]
-            utm = coords["utm"]
-            maidenhead = coords["maidenhead"]
-            aprs = coords["aprs_coordinates"]
+        if abbreviated_message_format:
+            apprise_message = description
+        else:
+            # Generate the message as HTML content
+            apprise_message = f"<b>Message headline:</b> {headline}" + newline + newline
 
             apprise_message = (
-                apprise_message
-                + f"<b>Lat / Lon:</b> <pre>{latitude}</pre> / <pre>{longitude}</pre>"
+                apprise_message + "<u><i>Message details</i></u>" + newline
             )
-            if aprs:
+
+            apprise_message = (
+                apprise_message + f"<b>Description:</b> {description}" + newline
+            )
+            apprise_message = (
+                apprise_message + f"<b>Instructions:</b> {instruction}" + newline
+            )
+            apprise_message = apprise_message + f"<b>Contact:</b> {contact}" + newline
+
+            apprise_message = (
+                apprise_message + f"<b>Message Type:</b> {msgtype}" + newline
+            )
+            apprise_message = apprise_message + f"<b>Urgency:</b> {urgency}" + newline
+            apprise_message = apprise_message + f"<b>Severity:</b> {severity}" + newline
+            apprise_message = (
+                apprise_message + f"<b>Timestamp:</b> {sent}" + newline + newline
+            )
+
+            apprise_message = (
+                apprise_message + "<u><i>Address details</i></u>" + newline
+            )
+
+            for coords in coords_matching_latlon:
+                latitude = coords["latitude"]
+                longitude = coords["longitude"]
+                address = coords["address"]
+                utm = coords["utm"]
+                maidenhead = coords["maidenhead"]
+                aprs = coords["aprs_coordinates"]
+
                 apprise_message = (
                     apprise_message
-                    + f" (<i>This is the user's latest APRS position; see green pin on map</i>)"
+                    + f"<b>Lat / Lon:</b> <pre>{latitude}</pre> / <pre>{longitude}</pre>"
                 )
-            apprise_message = apprise_message + newline
-            apprise_message = (
-                apprise_message + f"<b>UTM:</b> <pre>{utm}</pre>" + newline
-            )
-            apprise_message = (
-                apprise_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
-            )
-            apprise_message = (
-                apprise_message + f"<b>Address:</b> {address}" + newline + newline
-            )
+                if aprs:
+                    apprise_message = (
+                        apprise_message
+                        + f" (<i>This is the user's latest APRS position; see green pin on map</i>)"
+                    )
+                apprise_message = apprise_message + newline
+                apprise_message = (
+                    apprise_message + f"<b>UTM:</b> <pre>{utm}</pre>" + newline
+                )
+                apprise_message = (
+                    apprise_message + f"<b>Grid:</b> <pre>{maidenhead}</pre>" + newline
+                )
+                apprise_message = (
+                    apprise_message + f"<b>Address:</b> {address}" + newline + newline
+                )
 
-            # Create the message timestamp
-            utc_create_time = datetime.utcnow()
-            msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
+                # Create the message timestamp
+                utc_create_time = datetime.utcnow()
+                msg_string = f"{utc_create_time.strftime('%d-%b-%Y %H:%M:%S')} UTC"
 
         # We are done with preparing the message body
         # Create the message header

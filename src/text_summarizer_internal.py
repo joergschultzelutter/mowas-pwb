@@ -35,6 +35,13 @@ def text_summarizer_internal(input_text: str, **kwargs):
     response: 'str'
         Our abbreviated text
     """
+    input_text = input_text.replace("Gemeinde/Stadt: ", "", 1)
+    input_text = input_text.replace("Landkreis/Stadt: ", "", 1)
+    input_text = input_text.replace("Bundesland: ", "", 1)
+    input_text = input_text.replace("Freistaat ", "", 1)
+    input_text = input_text.replace("Freie Hansestadt ", "", 1)
+    input_text = input_text.replace("Land: ", "", 1)
+    input_text = input_text.replace("Land ", "", 1)
 
     return input_text
 

@@ -28,7 +28,7 @@ from utils import (
 )
 from outputgenerator import (
     generate_email_messages,
-    generate_generic_apprise_message,
+    generate_apprise_message,
 )
 from aprsdotfi import get_position_on_aprsfi
 from mail import send_email_message
@@ -105,6 +105,9 @@ if __name__ == "__main__":
     ):
         logger.info(msg="User has disabled all output options; exiting...")
         exit(0)
+
+    # Check if we are supposed to generate SMS messages in the process
+    generate_sms_messages = True if mowas_sms_messenger_configfile else False
 
     # get our configuration data from the external configuration file
     (
@@ -205,6 +208,14 @@ if __name__ == "__main__":
         )
         exit(0)
 
+    # assign the proper api_key. For our internal text abbreviation, we don't
+    # need an API key, thus allowing 'None' as valid value
+    mowas_text_summarizer_api_key = None
+    if mowas_text_summarizer == "openai":
+        mowas_text_summarizer_api_key = mowas_openai_api_key
+    if mowas_text_summarizer == "palm":
+        mowas_text_summarizer_api_key = mowas_palm_api_key
+
     #
     # We've checked all parameters - let's start with setting up our environment
     #
@@ -236,10 +247,11 @@ if __name__ == "__main__":
             logger.info(
                 msg=f"Sending mowas-pwb test message to MOWAS 'regular' config file {mowas_messenger_configfile}"
             )
-            success = generate_generic_apprise_message(
+            success = generate_apprise_message(
                 mowas_messages_to_send=mowas_messages_to_send,
                 warncell_data=warncell_data,
                 apprise_config_file=mowas_messenger_configfile,
+                abbreviated_message_format=False,
             )
             logger.info(msg=f"Full message success: {success}")
 
@@ -247,10 +259,11 @@ if __name__ == "__main__":
             logger.info(
                 msg=f"Sending mowas-pwb test message to MOWAS 'SMS' config file {mowas_sms_messenger_configfile}"
             )
-            success = generate_generic_apprise_message(
+            success = generate_apprise_message(
                 mowas_messages_to_send=mowas_messages_to_send,
                 warncell_data=warncell_data,
                 apprise_config_file=mowas_sms_messenger_configfile,
+                abbreviated_message_format=True,
             )
             logger.info(msg=f"SMS message success: {success}")
 
@@ -349,6 +362,9 @@ if __name__ == "__main__":
                 mowas_active_categories=mowas_active_categories,
                 enable_covid_messaging=mowas_enable_covid_content,
                 local_file_name=mowas_localfile,
+                generate_sms_messages=generate_sms_messages,
+                text_summarizer=mowas_text_summarizer,
+                text_summarizer_api_key=mowas_text_summarizer_api_key,
             )
 
             # Did we find some new message updates that we need to send to the user?
@@ -377,20 +393,22 @@ if __name__ == "__main__":
                 # Check if we need to send something via Apprise 'full msg' config
                 if mowas_messenger_configfile:
                     logger.debug(msg="Generating Apprise 'full msg' notifications")
-                    success = generate_generic_apprise_message(
+                    success = generate_apprise_message(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         apprise_config_file=mowas_messenger_configfile,
+                        abbreviated_message_format=False,
                     )
                     logger.info(msg=f"Apprise 'full msg' success: {success}")
 
                 # Check if we need to send something via Apprise 'SMS msg' config
                 if mowas_sms_messenger_configfile:
                     logger.debug(msg="Generating Apprise 'SMS msg' notifications")
-                    success = generate_generic_apprise_message(
+                    success = generate_apprise_message(
                         mowas_messages_to_send=mowas_messages_to_send,
                         warncell_data=warncell_data,
                         apprise_config_file=mowas_sms_messenger_configfile,
+                        abbreviated_message_format=True,
                     )
                     logger.info(msg=f"Apprise 'SMS msg' success: {success}")
 

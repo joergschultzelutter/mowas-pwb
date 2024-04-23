@@ -31,10 +31,10 @@ meinjson = """
 		"severity": "Minor",
 		"description": "Bei Empfang dieser Nachricht ist mowas-pwb ordnungsgemäß konfiguriert",
 		"instruction": "Vielen Dank für die Benutzung dieser Software",
+		"sms_message": "mowas-pwb Konfigurationstest ok",
 		"sent": "2020-08-28T11:00:08+02:00",
 		"msgtype": "Alert",
 		"areas": ["Kreis Holzminden"],
-		"areas_matching_latlon_abbrev": ["Kreis Holzminden"],
 		"geocodes": ["103255000"],
 		"high_prio": false,
 		"latlon_polygon": [
@@ -206,7 +206,8 @@ meinjson = """
 		"lang_headline": "mowas-pwb configuration test",
 		"lang_description": "With receipt of this message mowas-pwb is properly configured",
 		"lang_instruction": "Thank you for using this software",
-		"lang_contact": "https://www.github.com/joergschultzelutter/mowas-pwb"
+		"lang_contact": "https://www.github.com/joergschultzelutter/mowas-pwb",
+		"lang_sms_message": "mowas-pwb configuration test: ok",
 	}
 }"""
 

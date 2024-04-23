@@ -39,17 +39,15 @@ available_processors = {
 
 
 def create_text_summary(input_text: str, post_processor: str, api_key: str):
-    if post_processor in available_processors:
-        return available_processors[post_processor](
-            input_text=input_text, api_key=api_key
-        )
+    assert post_processor in available_processors
+    return available_processors[post_processor](input_text=input_text, api_key=api_key)
 
 
 if __name__ == "__main__":
     print(
         create_text_summary(
             input_text="This is a very long text",
-            post_processor="generic",
+            post_processor="internal",
             api_key="MUSS_ICH_NOCH_REINSTELLEN",
         )
     )
