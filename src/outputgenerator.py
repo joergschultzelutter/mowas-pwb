@@ -406,6 +406,16 @@ def generate_apprise_message(
         warncell data; these are references to German municipal areas, cities etc
     apprise_config_file: 'str'
         Apprise Yaml configuration file
+    abbreviated_message_format: 'bool'
+        False: Generate a full-text message
+        True: generate 1..n SMS-like messages without image, title et al
+    sms_message_length: 'int'
+        length of an SMS message, if 'abbreviated_message_format' == True
+    sms_message_split: 'bool'
+        False: Truncate after 'sms_message_length' characters if
+               'abbreviated_message_format' = True
+        True: Build 1..n messages of 'sms_message_length' length if
+               'abbreviated_message_format' = True
     Returns
     =======
     success: 'bool'
@@ -479,7 +489,17 @@ def generate_apprise_message(
                 contact = f"{lang_contact} (<i>{contact}</i>)"
             else:
                 headline = instruction = contact = ""
-                description = f"{lang_sms_message}"
+                try:
+                    description = f"{areas[0]}:{lang_description}"
+                except IndexError:
+                    description = f"{description}"
+        else:
+            # no translated content, but regular German one
+            if abbreviated_message_format:
+                try:
+                    description = f"{areas[0]}:{description}"
+                except IndexError:
+                    description = f"{description}"
 
         # Create the message timestamp
         utc_create_time = datetime.utcnow()
@@ -498,6 +518,7 @@ def generate_apprise_message(
             if not sms_message_split:
                 target_messages = [description[:sms_message_length]]
             else:
+                # split up the message and create 1..n sub messages
                 target_messages = make_pretty_sms_messages(
                     message_to_add=description, max_len=sms_message_length
                 )

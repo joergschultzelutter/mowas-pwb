@@ -467,7 +467,7 @@ def get_command_line_params():
         choices={"generic", "internal", "openai", "palm"},
         default="internal",
         type=str.lower,
-        help="Text summarizer post processor - shortens the text for mobile devices. Choose from these options: internal, generic, openai, palm",
+        help="Text summarizer post processor - shortens the text for mobile devices. Choose from these options: internal, generic, openai, palm. Default: internal.",
     )
 
     parser.add_argument(

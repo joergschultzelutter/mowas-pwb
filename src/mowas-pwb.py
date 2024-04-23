@@ -411,6 +411,8 @@ if __name__ == "__main__":
                         warncell_data=warncell_data,
                         apprise_config_file=mowas_sms_messenger_configfile,
                         abbreviated_message_format=True,
+                        sms_message_split=mowas_sms_message_split,
+                        sms_message_length=mowas_sms_message_length,
                     )
                     logger.info(msg=f"Apprise 'SMS msg' success: {success}")
 
