@@ -8,18 +8,19 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_
 
 ![Demo](docs/img/map.jpg)
 
-``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) <b>P</b>ersonal <b>W</b>arning <b>B</b>eacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to [DAPNET](https://www.hampager.de), [Telegram](https://www.telegram.org/) and email accounts. You can install this program on platforms such as the Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
+``mowas-pwb`` is a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) <b>P</b>ersonal <b>W</b>arning <b>B</b>eacon service which sends emergency broadcasts from Germany's 'Modulares Warnsystem' to email accounts as well as every messenger supported by [Apprise](https://github.com/caronc/apprise). You can install this program on platforms such as the Raspberry Pi and have it send you an alert in case an official warning message has been issued for your location(s).
 
-``mowas-pwb`` has been created to complement the existing programs [KATWARN](https://de.wikipedia.org/wiki/Katwarn), [Nina](https://de.wikipedia.org/wiki/NINA_(App)) and [BIWAPP](https://de.wikipedia.org/wiki/BIWAPP) in order to enable additional communication channels such as mail, pager or Telegram messenger.
+``mowas-pwb`` has been created to complement the existing programs [KATWARN](https://de.wikipedia.org/wiki/Katwarn), [Nina](https://de.wikipedia.org/wiki/NINA_(App)) and [BIWAPP](https://de.wikipedia.org/wiki/BIWAPP) in order to enable additional communication channels such as mail, SMS/pager or messengers such as Telegram, Signal, ...
 
 ## Feature set
 
-- Provides messaging to Email and all messenger accounts supported by [Apprise](https://www.github.com/caronc/apprise)
+- Provides messaging to Email and every messenger supported by [Apprise](https://www.github.com/caronc/apprise)
 - Monitors 1..n static lat/lon coordinates for [MOWAS](https://de.wikipedia.org/wiki/MoWaS) events
 - Licensed ham radio amateurs can track their current [APRS](http://www.aprs.org/) position, too (_dynamic_ position monitoring)
 - Users can specify a minimal warning level which needs to be met by a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) event for triggering alerts.
 - Emergency alerts can be sent to specific Apprise clients (e.g. DAPNET) with high priority settings.
 - In case of an emergency, ``mowas-pwb`` automatically switches to shorter 'emergency' run intervals. See [processing logic](docs/ADDITIONAL_INFO.md) for further details
+- Distinguishes between messenger accounts with full message length capability and SMS/pager-based accounts. In order to digest the rather talkative input from the [Bundesamt für Bevölkerungsschutz und Katastrophenhilfe](https://www.bbk.bund.de/), the user can have OpenAI or Google PaLM digest and summarize the message text.
 
 :de: International users: ``mowas-pwb`` supports automatic translation of German [MOWAS](https://de.wikipedia.org/wiki/MoWaS) content into your native language.
 
@@ -32,8 +33,10 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_
 ## Output examples
 
 - [mowas-pwb Telegram message](docs/img/telegram.jpg)
-- [mowas-pwb Mail message](docs/img/mail.jpg)
 - [mowas-pwb DAPNET message](docs/img/pager.jpg)
+- [mowas-pwb Mail message](docs/img/mail.jpg)
+
+Note: Apart from the two Apprise-base messenger channels, ``mowas-pwb`` provides a native email output which grants the program more precise control over the message's content. The example screenshot for a Mail message used this output module. If you use Apprise's native 'Mail' plugin, your output will look different.
 
 ## Program details
 
