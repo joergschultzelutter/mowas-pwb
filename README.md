@@ -14,11 +14,11 @@ _Meet [KATWARN's](https://de.wikipedia.org/wiki/Katwarn) Open Source sibling_
 
 ## Feature set
 
-- Supports messaging to [Telegram](https://www.telegram.org/), Email and [DAPNET](https://www.hampager.de) accounts
+- Provides messaging to Email and all messenger accounts supported by [Apprise](https://www.github.com/caronc/apprise)
 - Monitors 1..n static lat/lon coordinates for [MOWAS](https://de.wikipedia.org/wiki/MoWaS) events
 - Licensed ham radio amateurs can track their current [APRS](http://www.aprs.org/) position, too (_dynamic_ position monitoring)
 - Users can specify a minimal warning level which needs to be met by a [MOWAS](https://de.wikipedia.org/wiki/MoWaS) event for triggering alerts.
-- Emergency alerts can be sent to [DAPNET](https://www.hampager.de) users with high priority settings.
+- Emergency alerts can be sent to specific Apprise clients (e.g. DAPNET) with high priority settings.
 - In case of an emergency, ``mowas-pwb`` automatically switches to shorter 'emergency' run intervals. See [processing logic](docs/ADDITIONAL_INFO.md) for further details
 
 :de: International users: ``mowas-pwb`` supports automatic translation of German [MOWAS](https://de.wikipedia.org/wiki/MoWaS) content into your native language.
