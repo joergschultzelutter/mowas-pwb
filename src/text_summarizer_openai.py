@@ -56,7 +56,7 @@ def text_summarizer_openai(input_text: str, api_key: str, **kwargs):
     Texteingaben des Nutzers werden dabei Wetter- und Unwetter-Warnmeldungen sein. Diese beinhalten 
     in der Regel eine Menge überflüssige Informationen und ggf. HTML-Links und Formatierungen. 
     Deine Aufgabe ist es, den Text soweit eingehenden Text soweit wie möglich idealerweise bis 
-    auf Stichpunktebene zu verkürzen, HTLML-Tags sowie -Links zu entfernen und nur diese Stichpunkte 
+    auf Stichpunktebene zu verkürzen, HTML-Tags sowie -Links zu entfernen und nur diese Stichpunkte 
     zurückzugeben. Der ausgehende Text wird später an Pager und Mobiltelefone übertragen; es ist somit 
     von großer Wichtigkeit, daß der Text einerseits so kurz wie irgend möglich zusammengefaßt wird 
     und andererseits alle für den Empfänger relevanten Daten beinhaltet."""
